@@ -1,0 +1,49 @@
+{
+  "index_patterns": [
+    "ransomware-window-scores-*"
+  ],
+  "priority": 200,
+  "composed_of": [
+    "logsentinel-window-score"
+  ],
+  "template": {
+    "settings": {
+      "index": {
+        "lifecycle": {
+          "name": "ransomware-window-scores"
+        }
+      }
+    },
+    "mappings": {
+      "dynamic_templates": [
+        {
+          "features_as_float": {
+            "path_match": "logsentinel.window.features.*",
+            "mapping": {
+              "type": "float"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "logsentinel": {
+          "properties": {
+            "window": {
+              "properties": {
+                "features": {
+                  "type": "object",
+                  "dynamic": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "_meta": {
+    "managed_by": "logsentinel",
+    "schema_version": 2,
+    "description": "One record per scored window, with the model input"
+  }
+}

@@ -1,0 +1,515 @@
+{
+  "generated_at": "2026-10-11T20:31:22+00:00",
+  "captures": "..\\sentinelcap\\captures",
+  "holdout": [
+    "20261009T033557Z",
+    "20261009T120629Z"
+  ],
+  "window": {
+    "size_sec": 60,
+    "slide_sec": 10,
+    "idle_flush_sec": 3.0,
+    "host_evict_sec": 3600.0,
+    "max_events_per_host": 200000,
+    "late_reset_events": 20
+  },
+  "scoring": {
+    "weight_indicator": 0.5,
+    "weight_global_model": 0.3,
+    "threshold": null,
+    "reemit_after_sec": 60.0
+  },
+  "coverage": {
+    "ransomware": {
+      "sessions": 50,
+      "families": 11,
+      "indicators": {
+        "mass_note_drop": {
+          "sessions": 46,
+          "families": 11
+        },
+        "mass_file_replace": {
+          "sessions": 1,
+          "families": 1
+        },
+        "shadow_copy_deletion": {
+          "sessions": 24,
+          "families": 7
+        },
+        "recovery_disable": {
+          "sessions": 13,
+          "families": 6
+        },
+        "service_stop_burst": {
+          "sessions": 9,
+          "families": 5
+        },
+        "event_log_tamper": {
+          "sessions": 7,
+          "families": 4
+        },
+        "ransom_note_keyword": {
+          "sessions": 45,
+          "families": 11
+        },
+        "cmd_burst": {
+          "sessions": 10,
+          "families": 4
+        },
+        "run_key_persistence": {
+          "sessions": 12,
+          "families": 4
+        },
+        "lolbins_execution": {
+          "sessions": 13,
+          "families": 5
+        },
+        "security_policy_tamper": {
+          "sessions": 1,
+          "families": 1
+        },
+        "remote_thread_injection": {
+          "sessions": 0,
+          "families": 0
+        },
+        "process_tampering": {
+          "sessions": 0,
+          "families": 0
+        },
+        "gate": {
+          "sessions": 48,
+          "families": 11
+        }
+      }
+    },
+    "goodware": {
+      "sessions": 70,
+      "families": 1,
+      "indicators": {
+        "mass_note_drop": {
+          "sessions": 3,
+          "families": 1
+        },
+        "mass_file_replace": {
+          "sessions": 0,
+          "families": 0
+        },
+        "shadow_copy_deletion": {
+          "sessions": 1,
+          "families": 1
+        },
+        "recovery_disable": {
+          "sessions": 1,
+          "families": 1
+        },
+        "service_stop_burst": {
+          "sessions": 1,
+          "families": 1
+        },
+        "event_log_tamper": {
+          "sessions": 1,
+          "families": 1
+        },
+        "ransom_note_keyword": {
+          "sessions": 26,
+          "families": 1
+        },
+        "cmd_burst": {
+          "sessions": 4,
+          "families": 1
+        },
+        "run_key_persistence": {
+          "sessions": 12,
+          "families": 1
+        },
+        "lolbins_execution": {
+          "sessions": 17,
+          "families": 1
+        },
+        "security_policy_tamper": {
+          "sessions": 0,
+          "families": 0
+        },
+        "remote_thread_injection": {
+          "sessions": 2,
+          "families": 1
+        },
+        "process_tampering": {
+          "sessions": 0,
+          "families": 0
+        },
+        "gate": {
+          "sessions": 7,
+          "families": 1
+        }
+      }
+    }
+  },
+  "threshold": 0.58,
+  "threshold_selection": "tuned on the same out-of-fold outcomes reported below",
+  "cross_validation": {
+    "model_auc": 0.9373,
+    "gate_only": {
+      "window": {
+        "tp": 666,
+        "fp": 94,
+        "tn": 3009,
+        "fn": 158,
+        "recall": 0.8083,
+        "precision": 0.8763,
+        "f2": 0.821,
+        "mcc": 0.8018
+      },
+      "session": {
+        "tp": 48,
+        "fp": 7,
+        "tn": 63,
+        "fn": 2,
+        "recall": 0.96,
+        "precision": 0.8727,
+        "f2": 0.9412,
+        "mcc": 0.8509
+      }
+    },
+    "at_threshold": {
+      "window": {
+        "tp": 446,
+        "fp": 29,
+        "tn": 3074,
+        "fn": 378,
+        "recall": 0.5413,
+        "precision": 0.9389,
+        "f2": 0.5914,
+        "mcc": 0.6642
+      },
+      "session": {
+        "tp": 48,
+        "fp": 3,
+        "tn": 67,
+        "fn": 2,
+        "recall": 0.96,
+        "precision": 0.9412,
+        "f2": 0.9562,
+        "mcc": 0.9147
+      }
+    },
+    "missed_ransomware": [
+      "20261001T011932Z/blackbasta/17205c43189c22dfcb278f5cc45c2562f622b0b6280dcd43cc1d3c274095eb90",
+      "20261001T011932Z/lockbit/032690f113289d50b672fb3e95b64c801454e8e07fe3cdcb072efeaabcc7a374"
+    ],
+    "flagged_goodware": [
+      "20261001T011932Z/goodware/3a60f6dd9e25ef0318a8d216c14238f733aeb14bf387c96b7a68f3b9a6b74c3b",
+      "20261001T011932Z/goodware/12e818ce5aec79fe646606df3a80b35da865ec0213646ad7c92044dcfcec7535",
+      "20261008T013340Z/goodware/deploy-config-files"
+    ],
+    "goodware_alerts": {
+      "goodware_hours": 20.38,
+      "flagged_windows": 29,
+      "flagged_windows_per_hour": 1.42,
+      "detections_after_suppression": 25,
+      "detections_per_hour": 1.23,
+      "suspicious_detections": 8,
+      "suspicious_detections_per_hour": 0.39
+    },
+    "time_to_first_detection": {
+      "sessions": 48,
+      "median_sec": 2.6,
+      "p90_sec": 39.1,
+      "max_sec": 186.7
+    },
+    "concurrent_goodware": {
+      "sessions": 50,
+      "alone": {
+        "gated_sessions": 48,
+        "detected_sessions": 48,
+        "detected_windows": "446/824",
+        "mean_model_score": 0.6139
+      },
+      "with_goodware": {
+        "gated_sessions": 48,
+        "detected_sessions": 47,
+        "detected_windows": "528/966",
+        "mean_model_score": 0.5571
+      },
+      "pairs": [
+        "20261001T011932Z/akira/0ab9e88f2135f7fbd439435f0ff4da887bbfb1cae67ccc8209aac22e75e3486f+goodware/0118955b",
+        "20261001T011932Z/akira/1b6af2fbbc636180dd7bae825486ccc45e42aefbb304d5f83fafca4d637c13cc+goodware/28e11b81",
+        "20261001T011932Z/akira/2e2ad6392e75d5a5155498c2a76cb373d17ca3ad4ba57c6d33c623fca5e29342+goodware/65103dad",
+        "20261001T011932Z/akira/865930cd680f5196672ec552ee19693a9e2868709b0cdb71674ded1f04c85922+goodware/a3b4a735",
+        "20261001T011932Z/akira/c974d8c6a1ce2eb12f0eca40e8782dea046d707f04ad65aae98af3c1b4ca6ce6+goodware/bulk-rep",
+        "20261001T011932Z/blackbasta/11129aad3b5baa1d118ec0ee3922278c194e43f6e2f0fcef221c65e5f4490d3b+goodware/029a261a",
+        "20261001T011932Z/blackbasta/17205c43189c22dfcb278f5cc45c2562f622b0b6280dcd43cc1d3c274095eb90+goodware/29682fcf",
+        "20261001T011932Z/blackbasta/1e7c0f7091e8ed3687b06556cbbda638af99e35d372ba257cedb8ada4b2c43fe+goodware/6d17bee7",
+        "20261001T011932Z/blackbasta/2558d0817586306d0ddf7beadd371785cd0a0b7ed860ac62760dbbc92866008a+goodware/a6688fd6",
+        "20261001T011932Z/blackbasta/a120203700369c2bb7ca8abd7d49a89070d73b4c0625203539c4fd47dc2231b9+goodware/ca8dc702",
+        "20261001T011932Z/blackbasta/a9503a3d998e705c37d3bec7fea0ff188bcf7e753833c8b4b195e590c4ed9625+goodware/eae459f9",
+        "20261001T011932Z/blackmatter/7f6dd0ca03f04b64024e86a72a6d7cfab6abccc2173b85896fc4b431990a5984+goodware/0b3731c5",
+        "20261001T011932Z/blackmatter/8c047ba01ef0db2b2057190d6c35a7c0e6965f465b0015d17b8c59c3767b2cf1+goodware/3a60f6dd",
+        "20261001T011932Z/blackmatter/9bae897c19f237c22b6bdc024df27455e739be24bed07ef0d409f2df87eeda58+goodware/71bcfda9",
+        "20261001T011932Z/conti/002dd9b7cbf8ca2a09434f8c4abd85631efe922ab8daa1219d86d83a0228aeda+goodware/0bde7ef0",
+        "20261001T011932Z/conti/1814a6a6749684cdacd792374e0ba31b7be4ff6f9675f3fd15d543afbb540367+goodware/3b97a89a",
+        "20261001T011932Z/conti/1ef1ff8b1e81815d13bdd293554ddf8b3e57490dd3ef4add7c2837ddc67f9c24+goodware/820df7a6",
+        "20261001T011932Z/conti/24ac73821de77cc9644d2ac40e97067ff63f625b5f20e085ad10535e47d7db59+goodware/a9807495",
+        "20261001T011932Z/conti/2ee6dfbfb2afd7442c9f2212eb142876698851c3ffb552ee420c0281e35a836e+goodware/compress",
+        "20261001T011932Z/conti/5d4b4d5adb2cd3fefd95b15725a77c4bf48e14e89a23b94733a9ec7b86e09ea2+goodware/fc3af531",
+        "20261001T011932Z/conti/b14cde376a8a7a9d7ad34cdfd07108c132ad8be7f60c5c0a0f17b6b63eb28b49+goodware/windows-",
+        "20261001T011932Z/conti/b524ed1cc22253f09d56f54d8ded4566b63352ff739f58de961f8a5bebb0fad9+goodware/0bde7ef0",
+        "20261001T011932Z/conti/e16fea1b8874cc6b26e7e2df9697f03f86efa82247bb3b2922f1d05052dbcbb4+goodware/3b97a89a",
+        "20261001T011932Z/conti/ff95e6d148e53e60b113f05bb54557315ec9b8af82adfaa276a21fbc561a9b77+goodware/820df7a6",
+        "20261001T011932Z/embargo/5b2988629166055e31f783637d272bfa8f74b836621db30e16b7fb9440f979eb+goodware/0cbcb7ec",
+        "20261001T011932Z/embargo/ebffc9ced2dba66db9aae02c7ccd2759a36c5167df5cd4adb151b20e7eab173c+goodware/46b2890c",
+        "20261001T011932Z/hellokitty/10887d13dba1f83ef34e047455a04416d25a83079a7f3798ce3483e0526e3768+goodware/0ea8f1e6",
+        "20261001T011932Z/hellokitty/4b082cfa36133e66c3ed8918ed775bd656890c3c7373606d67e0ee9edd6aa3b4+goodware/4bde9337",
+        "20261001T011932Z/lockbit/00260c390ffab5734208a7199df0e4229a76261c3f5b7264c4515acb8eb9c2f8+goodware/12c19ac8",
+        "20261001T011932Z/lockbit/032690f113289d50b672fb3e95b64c801454e8e07fe3cdcb072efeaabcc7a374+goodware/50f6936e",
+        "20261001T011932Z/lockbit/0dcbc979c995eeec6e76fa87dfc301228d230101b9acecba53289c1c085eadb1+goodware/870c3230",
+        "20261001T011932Z/lockbit/0ec61a80e61f56f460fc42e5d4f0accec2b04c8db98c28ed4534946214076f2a+goodware/b3560b4a",
+        "20261001T011932Z/lockbit/13849c0c923bfed5ab37224d59e2d12e3e72f97dc7f539136ae09484cbe8e5e0+goodware/d711e1e1",
+        "20261001T011932Z/lockbit/15a7d528587ffc860f038bb5be5e90b79060fbba5948766d9f8aa46381ccde8a+goodware/provisio",
+        "20261001T011932Z/lockbit/2b8117925b4b5b39192aaaea130426bda39ebb5f363102641003f2c2cb33b785+goodware/12c19ac8",
+        "20261001T011932Z/lockbit/3c4fb5a1a8cdc44675df9d61c55a83b6f017a84cb01b06053b8f3953f9794d90+goodware/50f6936e",
+        "20261001T011932Z/lockbit/48e2033a286775c3419bea8702a717de0b2aaf1e737ef0e6b3bf31ef6ae00eb5+goodware/870c3230",
+        "20261001T011932Z/lockbit/5c5c5b25b51450a050f4b91cd2705c8242b0cfc1a0eaeb4149354dbb07979b83+goodware/b3560b4a",
+        "20261001T011932Z/lockbit/f6fbfa9fe38f69f8806d60072b7e8a9aceacf4a2b27095f7297f529ba986eab4+goodware/d711e1e1",
+        "20261001T011932Z/lynx/4e5b9ab271a1409be300e5f3fd90f934f317116f30b40eddc82a4dfd18366412+goodware/12e818ce",
+        "20261001T011932Z/lynx/eaa0e773eb593b0046452f420b6db8a47178c09e6db0fa68f6a2d42c3f48e3bc+goodware/5642d891",
+        "20261001T011932Z/medusa/49c9b3ddbce1f77a7f01a660c56f48c0d733a7e807f95caca2dee12a204974ef+goodware/22bb3c30",
+        "20261001T011932Z/medusa/51b8a283f87a95edb5e98125e5730bcf843fc7ec8fcdc175c8dc0ba3032e8a51+goodware/5b2168c9",
+        "20261001T011932Z/medusa/736de79e0a2d08156bae608b2a3e63336829d59d38d61907642149a566ebd270+goodware/9500d88d",
+        "20261001T011932Z/medusa/c966ace15bece19a119231dfaa2494f14200647fc7cb225667fb22cbb41436fd+goodware/backup",
+        "20261001T011932Z/nitrogen/04e768174636f0a5be42e9cee5974a8b9db2832d4e79cc973ad617185ab80595+goodware/234899de",
+        "20261001T011932Z/nitrogen/ab366a7c4a343a798490c4451d1d8e42aea2b894cb3162b5c59e08d8507ffe2c+goodware/5d96bbc4",
+        "20261001T011932Z/trigona/0c23eff79c5d333e00b45e224656b6bf8f9e659dbd6761d926c09a0f301cdcc4+goodware/2818a2f0",
+        "20261001T011932Z/trigona/1c18ce93ce0c1ea0b0838da892dd33af031db3caf49e215dc3beb2c398c09508+goodware/5ef6b13f",
+        "20261001T011932Z/trigona/df9ef29e8789a798981a783fafbb85395a84e8733929b2c2290bcde263c2f3f8+goodware/99ebc629"
+      ]
+    }
+  },
+  "held_out": {
+    "model_version": "20261011T202925Z",
+    "threshold": 0.58,
+    "ransomware": {
+      "sessions": 30,
+      "detected": 30,
+      "time_to_first_detection": {
+        "sessions": 30,
+        "median_sec": 2.7,
+        "p90_sec": 42.8,
+        "max_sec": 52.6
+      }
+    },
+    "goodware": null,
+    "sessions": [
+      {
+        "name": "20261009T033557Z/akira/369336e9f7b6e5d68a34ca420ba8a2076b8c232d9fff3f52c340fa664fc6b5e2",
+        "label": 1,
+        "max_confidence": 0.9582,
+        "detected": true,
+        "first_detection_sec": 2.1
+      },
+      {
+        "name": "20261009T033557Z/blackbasta/2413841b2f5f656e269f61644d3957847b199107bb6b141c3208a03df59f0759",
+        "label": 1,
+        "max_confidence": 0.9221,
+        "detected": true,
+        "first_detection_sec": 3.7
+      },
+      {
+        "name": "20261009T033557Z/blackmatter/46a9f920cb9049c9be7bf3afba7ec13b0d0d170029363a115f429996822d4871",
+        "label": 1,
+        "max_confidence": 0.9575,
+        "detected": true,
+        "first_detection_sec": 41.7
+      },
+      {
+        "name": "20261009T033557Z/bqtlock/425b2f283b71237276f84d941d9c2982c7f61a9aff12ece10e15065b73b7165e",
+        "label": 1,
+        "max_confidence": 0.9493,
+        "detected": true,
+        "first_detection_sec": 52.6
+      },
+      {
+        "name": "20261009T033557Z/conti/248cf7de2303284958c6a3931d3f0b24e4e90c09f934f85f2cf6962a8de96209",
+        "label": 1,
+        "max_confidence": 0.8055,
+        "detected": true,
+        "first_detection_sec": 5.1
+      },
+      {
+        "name": "20261009T033557Z/hellokitty/af179b093adef005f85ed0c5e9a920381bf0993bd5fd2af393fe6551e3b934b4",
+        "label": 1,
+        "max_confidence": 0.8018,
+        "detected": true,
+        "first_detection_sec": 2.1
+      },
+      {
+        "name": "20261009T033557Z/lockbit/105912c9995a1d718c5442349d2cc4bb99426f75ff34554cdfd9a7272eeca398",
+        "label": 1,
+        "max_confidence": 0.9873,
+        "detected": true,
+        "first_detection_sec": 1.3
+      },
+      {
+        "name": "20261009T033557Z/lynx/b378b7ef0f906358eec595777a50f9bb5cc7bb6635e0f031d65b818a26bdc4ee",
+        "label": 1,
+        "max_confidence": 0.8027,
+        "detected": true,
+        "first_detection_sec": 2.2
+      },
+      {
+        "name": "20261009T033557Z/makop/f0a17efd62272b2bb2dfe0d57ca547044da75a558e32b2d94aa5788c18d9168c",
+        "label": 1,
+        "max_confidence": 0.9922,
+        "detected": true,
+        "first_detection_sec": 15.6
+      },
+      {
+        "name": "20261009T033557Z/medusa/6d000a159fe10af1b29ddf4e4015931a9e9d0a020aeef0c602d8c5419b5966e6",
+        "label": 1,
+        "max_confidence": 0.9198,
+        "detected": true,
+        "first_detection_sec": 3.6
+      },
+      {
+        "name": "20261009T033557Z/nebula/112a40f154ad5de7f8fffa34e50751ab8b893f5285f96e7179177374127fcb6c",
+        "label": 1,
+        "max_confidence": 0.9695,
+        "detected": true,
+        "first_detection_sec": 1.9
+      },
+      {
+        "name": "20261009T033557Z/nitrogen/b5189876dfdbe889bba43f7702d1e61e61d48803c78ff78eab3f43b4fb0b3a22",
+        "label": 1,
+        "max_confidence": 0.8047,
+        "detected": true,
+        "first_detection_sec": 0.6
+      },
+      {
+        "name": "20261009T033557Z/trigona/48877a3a4c72c1daf3a80e3c034b56a04cec7ce3856887fed73e645e53c76b96",
+        "label": 1,
+        "max_confidence": 0.9508,
+        "detected": true,
+        "first_detection_sec": 15.2
+      },
+      {
+        "name": "20261009T033557Z/whitelock/a501583bca532c4ea11b56780a13a865b609d6a0fcd92b9c9b522f1edcc49c29",
+        "label": 1,
+        "max_confidence": 0.5803,
+        "detected": true,
+        "first_detection_sec": 48.6
+      },
+      {
+        "name": "20261009T033557Z/yurei/0303f89829763e734b1f9d4f46671e59bfaa1be5d8ec84d35a203efbfcb9bb15",
+        "label": 1,
+        "max_confidence": 0.9523,
+        "detected": true,
+        "first_detection_sec": 1.3
+      },
+      {
+        "name": "20261009T120629Z/akira/369336e9f7b6e5d68a34ca420ba8a2076b8c232d9fff3f52c340fa664fc6b5e2",
+        "label": 1,
+        "max_confidence": 0.9582,
+        "detected": true,
+        "first_detection_sec": 2.1
+      },
+      {
+        "name": "20261009T120629Z/blackbasta/2413841b2f5f656e269f61644d3957847b199107bb6b141c3208a03df59f0759",
+        "label": 1,
+        "max_confidence": 0.9221,
+        "detected": true,
+        "first_detection_sec": 2.7
+      },
+      {
+        "name": "20261009T120629Z/blackmatter/46a9f920cb9049c9be7bf3afba7ec13b0d0d170029363a115f429996822d4871",
+        "label": 1,
+        "max_confidence": 0.9548,
+        "detected": true,
+        "first_detection_sec": 42.8
+      },
+      {
+        "name": "20261009T120629Z/bqtlock/425b2f283b71237276f84d941d9c2982c7f61a9aff12ece10e15065b73b7165e",
+        "label": 1,
+        "max_confidence": 0.9737,
+        "detected": true,
+        "first_detection_sec": 39.4
+      },
+      {
+        "name": "20261009T120629Z/conti/248cf7de2303284958c6a3931d3f0b24e4e90c09f934f85f2cf6962a8de96209",
+        "label": 1,
+        "max_confidence": 0.8055,
+        "detected": true,
+        "first_detection_sec": 5.1
+      },
+      {
+        "name": "20261009T120629Z/hellokitty/af179b093adef005f85ed0c5e9a920381bf0993bd5fd2af393fe6551e3b934b4",
+        "label": 1,
+        "max_confidence": 0.8018,
+        "detected": true,
+        "first_detection_sec": 2.1
+      },
+      {
+        "name": "20261009T120629Z/lockbit/105912c9995a1d718c5442349d2cc4bb99426f75ff34554cdfd9a7272eeca398",
+        "label": 1,
+        "max_confidence": 0.9575,
+        "detected": true,
+        "first_detection_sec": 1.6
+      },
+      {
+        "name": "20261009T120629Z/lynx/b378b7ef0f906358eec595777a50f9bb5cc7bb6635e0f031d65b818a26bdc4ee",
+        "label": 1,
+        "max_confidence": 0.8027,
+        "detected": true,
+        "first_detection_sec": 2.0
+      },
+      {
+        "name": "20261009T120629Z/makop/f0a17efd62272b2bb2dfe0d57ca547044da75a558e32b2d94aa5788c18d9168c",
+        "label": 1,
+        "max_confidence": 0.9924,
+        "detected": true,
+        "first_detection_sec": 14.1
+      },
+      {
+        "name": "20261009T120629Z/medusa/6d000a159fe10af1b29ddf4e4015931a9e9d0a020aeef0c602d8c5419b5966e6",
+        "label": 1,
+        "max_confidence": 0.9069,
+        "detected": true,
+        "first_detection_sec": 2.4
+      },
+      {
+        "name": "20261009T120629Z/nebula/112a40f154ad5de7f8fffa34e50751ab8b893f5285f96e7179177374127fcb6c",
+        "label": 1,
+        "max_confidence": 0.972,
+        "detected": true,
+        "first_detection_sec": 2.0
+      },
+      {
+        "name": "20261009T120629Z/nitrogen/b5189876dfdbe889bba43f7702d1e61e61d48803c78ff78eab3f43b4fb0b3a22",
+        "label": 1,
+        "max_confidence": 0.8047,
+        "detected": true,
+        "first_detection_sec": 0.6
+      },
+      {
+        "name": "20261009T120629Z/trigona/48877a3a4c72c1daf3a80e3c034b56a04cec7ce3856887fed73e645e53c76b96",
+        "label": 1,
+        "max_confidence": 0.9508,
+        "detected": true,
+        "first_detection_sec": 15.4
+      },
+      {
+        "name": "20261009T120629Z/whitelock/a501583bca532c4ea11b56780a13a865b609d6a0fcd92b9c9b522f1edcc49c29",
+        "label": 1,
+        "max_confidence": 0.6539,
+        "detected": true,
+        "first_detection_sec": 16.8
+      },
+      {
+        "name": "20261009T120629Z/yurei/0303f89829763e734b1f9d4f46671e59bfaa1be5d8ec84d35a203efbfcb9bb15",
+        "label": 1,
+        "max_confidence": 0.9872,
+        "detected": true,
+        "first_detection_sec": 0.9
+      }
+    ]
+  }
+}

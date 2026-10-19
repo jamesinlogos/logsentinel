@@ -1,0 +1,42 @@
+{
+  "format": "logsentinel.normalized-sysmon.jsonl/v1",
+  "session_id": "64f604e9-d3ec-45fa-96be-24d35316424c",
+  "source": {
+    "kafka_topic": "telemetry.windows.normalized",
+    "host_id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+    "processing": "none; original normalized Kafka payloads"
+  },
+  "label": {
+    "target_class_name": "lockbit-032690f113289d50b672fb3e95b64c801454e8e07fe3cdcb072efeaabcc7a374",
+    "target_class": 1
+  },
+  "mode": "execute",
+  "t_start": "2026-10-01T07:32:05.542Z",
+  "t_end": "2026-10-01T07:36:36.185Z",
+  "clock_offset_sec": 0.0,
+  "event_count": 597,
+  "pipeline_lag_max_sec": 1.729,
+  "pipeline_lag_p50_sec": 0.71,
+  "skipped_other_hosts": 0,
+  "skipped_invalid": 0,
+  "skipped_outside_session": 276,
+  "environment": {
+    "sentinelcap_version": "1.0.0",
+    "snapshot": "baseline",
+    "windows_build": "20348.587",
+    "winlogbeat_version": "9.5.4"
+  },
+  "process_entity_id": "{8A1A7C51-0C75-6ABE-AF01-000000001100}",
+  "sample_entity_ids": [
+    "{8A1A7C51-0C75-6ABE-AF01-000000001100}",
+    "{8A1A7C51-0C75-6ABE-B001-000000001100}",
+    "{8A1A7C51-0C75-6ABE-B101-000000001100}",
+    "{8A1A7C51-0C75-6ABE-B201-000000001100}",
+    "{8A1A7C51-0C75-6ABE-B301-000000001100}",
+    "{8A1A7C51-0C75-6ABE-B401-000000001100}",
+    "{8A1A7C51-0C76-6ABE-BA01-000000001100}",
+    "{8A1A7C51-0C76-6ABE-BB01-000000001100}",
+    "{8A1A7C51-0C76-6ABE-BD01-000000001100}",
+    "{8A1A7C51-0C77-6ABE-BE01-000000001100}"
+  ]
+}

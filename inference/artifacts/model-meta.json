@@ -1,0 +1,86 @@
+{
+  "version": "20261011T202925Z",
+  "trained_at": "2026-10-11T20:29:25+00:00",
+  "captures": "..\\sentinelcap\\captures",
+  "holdout": [
+    "20261009T033557Z",
+    "20261009T120629Z"
+  ],
+  "seed": 42,
+  "max_windows_per_session": 30,
+  "window": {
+    "size_sec": 60,
+    "slide_sec": 10,
+    "max_events_per_host": 200000,
+    "late_reset_events": 20
+  },
+  "sessions": {
+    "ransomware": 50,
+    "goodware": 70,
+    "events_dropped": [
+      "hellokitty/10887d13",
+      "goodware/windows-"
+    ]
+  },
+  "training_windows": {
+    "ransomware": 513,
+    "goodware": 1458,
+    "unlabelled_skipped": 200
+  },
+  "threshold": 0.58,
+  "model_name": "adaptive_random_forest",
+  "feature_names": [
+    "events",
+    "code_1",
+    "code_2",
+    "code_3",
+    "code_11",
+    "code_12",
+    "code_13",
+    "code_17",
+    "code_26",
+    "max_name_dirs",
+    "max_name_branches",
+    "distinct_extensions",
+    "max_same_extension",
+    "max_deletes",
+    "file_name_entropy",
+    "suspicious_path_ratio",
+    "non_system_executable_ratio",
+    "command_line_length",
+    "lolbin_runs",
+    "stop_commands",
+    "max_cmd_children",
+    "run_key_writes",
+    "connections",
+    "destination_ips",
+    "ind_mass_note_drop",
+    "ind_mass_file_replace",
+    "ind_shadow_copy_deletion",
+    "ind_recovery_disable",
+    "ind_service_stop_burst",
+    "ind_event_log_tamper",
+    "ind_ransom_note_keyword",
+    "ind_cmd_burst",
+    "ind_run_key_persistence",
+    "ind_lolbins_execution",
+    "ind_security_policy_tamper",
+    "ind_remote_thread_injection",
+    "ind_process_tampering"
+  ],
+  "river_version": "0.26.1",
+  "python_version": "3.14.6",
+  "threshold_basis": {
+    "scoring": {
+      "weight_indicator": 0.5,
+      "weight_global_model": 0.3
+    },
+    "window": {
+      "size_sec": 60,
+      "slide_sec": 10
+    },
+    "evaluated_at": "2026-10-11T20:31:22+00:00",
+    "seed": 42,
+    "max_windows_per_session": 30
+  }
+}

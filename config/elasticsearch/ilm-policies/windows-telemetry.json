@@ -1,0 +1,17 @@
+{
+  "policy": {
+    "phases": {
+      "delete": {
+        "min_age": "30d",
+        "actions": {
+          "delete": {}
+        }
+      }
+    },
+    "_meta": {
+      "managed_by": "logsentinel",
+      "schema_version": 2,
+      "description": "Telemetry is kept 30 days after index creation (daily indices)"
+    }
+  }
+}

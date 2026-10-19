@@ -1,0 +1,32 @@
+{
+  "name": "Ransomware detections",
+  "rule_type_id": ".es-query",
+  "consumer": "stackAlerts",
+  "enabled": true,
+  "schedule": {
+    "interval": "1m"
+  },
+  "tags": [
+    "logsentinel",
+    "ransomware"
+  ],
+  "actions": [],
+  "params": {
+    "searchType": "esQuery",
+    "index": [
+      "ransomware-detections-*"
+    ],
+    "timeField": "event.ingested",
+    "esQuery": "{\"query\":{\"bool\":{\"filter\":[{\"term\":{\"event.dataset\":\"logsentinel.detection\"}},{\"term\":{\"logsentinel.verdict.reported\":true}},{\"term\":{\"logsentinel.verdict.gated\":true}}]}}}",
+    "aggType": "count",
+    "groupBy": "all",
+    "thresholdComparator": ">",
+    "threshold": [
+      0
+    ],
+    "timeWindowSize": 5,
+    "timeWindowUnit": "m",
+    "size": 10,
+    "excludeHitsFromPreviousRun": true
+  }
+}

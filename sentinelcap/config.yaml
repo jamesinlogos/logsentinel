@@ -1,0 +1,46 @@
+vmware:
+  vmrun_path: 'C:\Program Files\VMware\VMware Workstation\vmrun.exe'
+  vmx_path: 'D:\VMs\winsrv\winsrv.vmx'
+  # original: clean Windows + decoy folders, no samples.
+  # baseline: created by `sentinelcap build baseline` from original.
+  original_snapshot: original
+  baseline_snapshot: baseline
+  guest_user: sysmaint
+  guest_password: 'CHANGE_ME'
+  # SentinelCap opens this application at the sample directory. Click samples
+  # manually in the VMware console after SentinelCap records t0.
+  explorer_path: 'C:\Windows\explorer.exe'
+  start_boot_wait_sec: 30
+  tools_ready_timeout_sec: 300
+
+kafka:
+  # Must resolve to the address advertised by the Kafka broker to this host.
+  bootstrap_servers: '192.168.110.1:9092'
+  topic: 'telemetry.windows.normalized'
+  # Read host.id from one normalized event for this victim VM before running.
+  host_id: '8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02'
+  consumer_group_prefix: 'sentinelcap-capture'
+  assignment_timeout_sec: 30
+  # Wait after t_end for late events; keep it above the Winlogbeat read lag
+  # (metadata pipeline_lag_max_sec; up to 29.8 s measured on this lab).
+  post_capture_drain_sec: 45
+
+capture:
+  out_dir: captures
+  quiet_window_sec: 90
+  settle_sec: 180
+  max_wait_sec: 1800
+  exec_detect_timeout_sec: 1200000000
+  clock_offset_median_events: 5
+
+baseline:
+  samples_dir: samples
+  sample_target_roots:
+    - 'C:\Users\Administrator'
+    - 'C:\Users\Public'
+    - 'C:\Users\sysmaint'
+    - 'D:\Backup'
+    - 'D:\Shares'
+  sample_zip_password: infected
+  sevenzip_guest_path: 'C:\Program Files\7-Zip\7z.exe'
+  seed: null

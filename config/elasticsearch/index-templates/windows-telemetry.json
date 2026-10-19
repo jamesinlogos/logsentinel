@@ -1,0 +1,186 @@
+{
+  "index_patterns": [
+    "windows-telemetry-*"
+  ],
+  "template": {
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "event": {
+          "properties": {
+            "code": {
+              "type": "keyword"
+            },
+            "category": {
+              "type": "keyword"
+            },
+            "action": {
+              "type": "keyword"
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "user": {
+          "properties": {
+            "domain": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "process": {
+          "properties": {
+            "executable": {
+              "type": "keyword"
+            },
+            "working_directory": {
+              "type": "keyword"
+            },
+            "hash": {
+              "properties": {
+                "md5": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "parent": {
+              "properties": {
+                "pid": {
+                  "type": "long"
+                },
+                "executable": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "file": {
+          "properties": {
+            "path": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "pe": {
+              "properties": {
+                "original_file_name": {
+                  "type": "keyword"
+                },
+                "file_version": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "registry": {
+          "properties": {
+            "path": {
+              "type": "keyword"
+            }
+          }
+        },
+        "source": {
+          "properties": {
+            "ip": {
+              "type": "ip"
+            },
+            "port": {
+              "type": "long"
+            }
+          }
+        },
+        "destination": {
+          "properties": {
+            "ip": {
+              "type": "ip"
+            },
+            "port": {
+              "type": "long"
+            }
+          }
+        },
+        "network": {
+          "properties": {
+            "transport": {
+              "type": "keyword"
+            },
+            "direction": {
+              "type": "keyword"
+            }
+          }
+        },
+        "dns": {
+          "properties": {
+            "question": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "rule": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "threat": {
+          "properties": {
+            "framework": {
+              "type": "keyword"
+            },
+            "technique": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "subtechnique": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": 0,
+        "lifecycle": {
+          "name": "windows-telemetry"
+        }
+      }
+    }
+  },
+  "_meta": {
+    "managed_by": "logsentinel",
+    "schema_version": 2,
+    "description": "Normalized Sysmon telemetry (daily indices)"
+  }
+}

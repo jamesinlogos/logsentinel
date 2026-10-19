@@ -1,0 +1,23 @@
+{
+  "index_patterns": [
+    "ransomware-detections-*"
+  ],
+  "priority": 200,
+  "composed_of": [
+    "logsentinel-window-score"
+  ],
+  "template": {
+    "settings": {
+      "index": {
+        "lifecycle": {
+          "name": "ransomware-detections"
+        }
+      }
+    }
+  },
+  "_meta": {
+    "managed_by": "logsentinel",
+    "schema_version": 2,
+    "description": "Detections: windows that passed the gate and were reported"
+  }
+}

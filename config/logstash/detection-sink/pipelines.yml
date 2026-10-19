@@ -1,0 +1,9 @@
+# One pipeline per topic that inference writes. Each has its own consumer group
+# (detections: logstash-detection-sink, window-scores: logstash-detection-sink-window-scores),
+# so a slow Elasticsearch on one index never holds back the other.
+# Pipeline ids are the topic names without the "security.ransomware." prefix.
+- pipeline.id: detections
+  path.config: "/usr/share/logstash/pipeline/detections.conf"
+
+- pipeline.id: window-scores
+  path.config: "/usr/share/logstash/pipeline/window-scores.conf"

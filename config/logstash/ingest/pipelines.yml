@@ -1,0 +1,16 @@
+# ingest and sink-inference sit on the path that feeds the inference service's per-host
+# sliding window, so they run with a single worker to keep event order.
+# sink-es is an audit index and stays parallel.
+- pipeline.id: ingest
+  path.config: "/usr/share/logstash/pipeline/ingest.conf"
+  pipeline.workers: 1
+  pipeline.ordered: true
+
+- pipeline.id: sink-es
+  path.config: "/usr/share/logstash/pipeline/sink-es.conf"
+  queue.type: persisted
+
+- pipeline.id: sink-inference
+  path.config: "/usr/share/logstash/pipeline/sink-inference.conf"
+  pipeline.workers: 1
+  pipeline.ordered: true

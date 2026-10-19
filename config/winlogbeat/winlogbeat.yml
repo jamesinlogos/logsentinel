@@ -1,0 +1,27 @@
+# Winlogbeat configuration — runs NATIVELY on the monitored Windows Server
+# (not containerized, see README.md section 10.1 for rationale).
+#
+# Replace <LOGSENTINEL_HOST> with the IP address of the Linux host running
+# the LogSentinel Docker Compose stack.
+
+winlogbeat.event_logs:
+  - name: Microsoft-Windows-Sysmon/Operational
+    ignore_older: 72h
+
+output.kafka:
+  hosts: ["192.168.110.1:9092"]
+  topic: "telemetry.windows.sysmon.raw"
+  key: '%{[host.name]}'
+  codec.json:
+    pretty: false
+
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: C:\ProgramData\winlogbeat\logs
+  name: winlogbeat
+  keepfiles: 7

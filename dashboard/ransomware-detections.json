@@ -1,0 +1,1510 @@
+{
+  "title": "Ransomware Detections",
+  "description": "Visual triage of reported windows: verdict mix, risk, indicators, ATT&CK, early-window process context and raw activity peaks.",
+  "options": {
+    "auto_apply_filters": true,
+    "hide_panel_borders": false,
+    "hide_panel_titles": false,
+    "sync_colors": false,
+    "sync_cursor": true,
+    "sync_tooltips": true,
+    "use_margins": true
+  },
+  "query": {
+    "language": "kql",
+    "expression": ""
+  },
+  "filters": [],
+  "tags": [],
+  "time_range": {
+    "from": "now-1y",
+    "to": "now"
+  },
+  "refresh_interval": {
+    "pause": true,
+    "value": 0
+  },
+  "panels": [
+    {
+      "id": "6d1a377f-ba2b-543a-a170-bf3b0128a088",
+      "type": "markdown",
+      "grid": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 6
+      },
+      "config": {
+        "title": "Detection triage",
+        "content": "**Reported windows** · Filter `host.id`, then correlate window ID and `event.start` / `event.end` with Sysmon. Suspicious meets the stored threshold; indicator match is below it. Neither verdict confirms infection.\n\n**Navigate:** [Overview](/app/dashboards#/view/logsentinel-overview) | [Detections](/app/dashboards#/view/ransomware-detections) | [Window Scores](/app/dashboards#/view/window-scores) | [Windows Telemetry](/app/dashboards#/view/windows-telemetry) | [Telemetry Quality](/app/dashboards#/view/telemetry-quality)"
+      }
+    },
+    {
+      "id": "004ed253-f6f0-5bee-b078-968c9e636545",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 6,
+        "w": 16,
+        "h": 5
+      },
+      "config": {
+        "type": "metric",
+        "title": "Reported windows",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "ransomware-detections-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metrics": [
+          {
+            "type": "primary",
+            "operation": "count",
+            "label": "Detections",
+            "empty_as_null": false,
+            "color": {
+              "type": "auto"
+            }
+          }
+        ],
+        "styling": {
+          "density": "default"
+        }
+      }
+    },
+    {
+      "id": "b8c14951-b4bc-50c2-a0d9-c82040d5f755",
+      "type": "vis",
+      "grid": {
+        "x": 16,
+        "y": 6,
+        "w": 16,
+        "h": 5
+      },
+      "config": {
+        "type": "metric",
+        "title": "Hosts with detections",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "ransomware-detections-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metrics": [
+          {
+            "type": "primary",
+            "operation": "unique_count",
+            "label": "Host IDs (approx.)",
+            "field": "host.id",
+            "color": {
+              "type": "auto"
+            }
+          }
+        ],
+        "styling": {
+          "density": "default"
+        }
+      }
+    },
+    {
+      "id": "af81cf21-689c-57b0-9644-d7ca5cfb0669",
+      "type": "vis",
+      "grid": {
+        "x": 32,
+        "y": 6,
+        "w": 16,
+        "h": 5
+      },
+      "config": {
+        "type": "metric",
+        "title": "Maximum normalized risk",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "ransomware-detections-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metrics": [
+          {
+            "type": "primary",
+            "operation": "max",
+            "label": "Confidence × 100",
+            "field": "event.risk_score_norm",
+            "color": {
+              "type": "auto"
+            }
+          }
+        ],
+        "styling": {
+          "density": "default"
+        }
+      }
+    },
+    {
+      "id": "a2c16531-edfb-57a2-9b9a-a03dc8e0c22e",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 11,
+        "w": 24,
+        "h": 15
+      },
+      "config": {
+        "type": "xy",
+        "title": "Detection timeline by verdict",
+        "layers": [
+          {
+            "type": "area_stacked",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-detections-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "date_histogram",
+              "field": "@timestamp",
+              "label": "Event time",
+              "suggested_interval": "auto",
+              "use_original_time_range": false,
+              "include_empty_rows": true,
+              "drop_partial_intervals": false
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Reported windows",
+                "empty_as_null": false
+              }
+            ],
+            "breakdown_by": {
+              "operation": "terms",
+              "fields": [
+                "logsentinel.verdict.label"
+              ],
+              "label": "Verdict",
+              "limit": 5,
+              "other_bucket": {
+                "include_documents_without_field": false
+              },
+              "rank_by": {
+                "type": "metric",
+                "metric_index": 0,
+                "direction": "desc"
+              },
+              "color": {
+                "mode": "categorical",
+                "palette": "elastic_line_optimized",
+                "mapping": [
+                  {
+                    "values": [
+                      "Suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "suspicious_ransomware_behavior"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Indicator match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "indicator_match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Ungated"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#6092C0"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Passed gate"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#54B399"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Suppressed, below threshold"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Suppressed, suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#AA6556"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Reported, indicator match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#54B399"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Reported, suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "slide"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#6092C0"
+                    }
+                  },
+                  {
+                    "values": [
+                      "indicator"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  }
+                ]
+              },
+              "aggregate_first": true
+            }
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "styling": {
+          "fitting": {
+            "type": "zero",
+            "extend": "none"
+          },
+          "areas": {
+            "fill_opacity": 0.65
+          },
+          "interpolation": "stepped"
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "id": "7986de4d-57b9-58b4-9acd-67c8360a5bcc",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 11,
+        "w": 24,
+        "h": 15
+      },
+      "config": {
+        "type": "pie",
+        "title": "Reported verdict mix",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "ransomware-detections-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metrics": [
+          {
+            "operation": "count",
+            "label": "Documents",
+            "empty_as_null": false
+          }
+        ],
+        "group_by": [
+          {
+            "operation": "filters",
+            "filters": [
+              {
+                "label": "Suspicious",
+                "filter": {
+                  "language": "kql",
+                  "expression": "logsentinel.verdict.suspicious: true"
+                }
+              },
+              {
+                "label": "Indicator match",
+                "filter": {
+                  "language": "kql",
+                  "expression": "logsentinel.verdict.suspicious: false"
+                }
+              }
+            ],
+            "color": {
+              "mode": "categorical",
+              "palette": "elastic_line_optimized",
+              "mapping": [
+                {
+                  "values": [
+                    "Suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "suspicious_ransomware_behavior"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "Indicator match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "indicator_match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "Ungated"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#6092C0"
+                  }
+                },
+                {
+                  "values": [
+                    "Passed gate"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#54B399"
+                  }
+                },
+                {
+                  "values": [
+                    "Suppressed, below threshold"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "Suppressed, suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#AA6556"
+                  }
+                },
+                {
+                  "values": [
+                    "Reported, indicator match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#54B399"
+                  }
+                },
+                {
+                  "values": [
+                    "Reported, suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "slide"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#6092C0"
+                  }
+                },
+                {
+                  "values": [
+                    "indicator"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "styling": {
+          "donut_hole": "m",
+          "labels": {
+            "visible": true,
+            "position": "outside"
+          },
+          "values": {
+            "visible": true,
+            "mode": "percentage",
+            "percent_decimals": 1
+          }
+        },
+        "legend": {
+          "visibility": "visible",
+          "position": "right",
+          "size": "m"
+        }
+      }
+    },
+    {
+      "id": "cc344aee-a703-5d69-ab17-d7473282b342",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 26,
+        "w": 24,
+        "h": 15
+      },
+      "config": {
+        "type": "xy",
+        "title": "Normalized risk distribution | 0–100",
+        "layers": [
+          {
+            "type": "bar_stacked",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-detections-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "filters",
+              "filters": [
+                {
+                  "label": "[0, 10]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.risk_score_norm >= 0 and event.risk_score_norm <= 10"
+                  }
+                },
+                {
+                  "label": "(10, 20]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.risk_score_norm > 10 and event.risk_score_norm <= 20"
+                  }
+                },
+                {
+                  "label": "(20, 30]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.risk_score_norm > 20 and event.risk_score_norm <= 30"
+                  }
+                },
+                {
+                  "label": "(30, 40]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.risk_score_norm > 30 and event.risk_score_norm <= 40"
+                  }
+                },
+                {
+                  "label": "(40, 50]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.risk_score_norm > 40 and event.risk_score_norm <= 50"
+                  }
+                },
+                {
+                  "label": "(50, 60]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.risk_score_norm > 50 and event.risk_score_norm <= 60"
+                  }
+                },
+                {
+                  "label": "(60, 70]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.risk_score_norm > 60 and event.risk_score_norm <= 70"
+                  }
+                },
+                {
+                  "label": "(70, 80]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.risk_score_norm > 70 and event.risk_score_norm <= 80"
+                  }
+                },
+                {
+                  "label": "(80, 90]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.risk_score_norm > 80 and event.risk_score_norm <= 90"
+                  }
+                },
+                {
+                  "label": "(90, 100]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.risk_score_norm > 90 and event.risk_score_norm <= 100"
+                  }
+                }
+              ]
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Windows",
+                "empty_as_null": false
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "hidden"
+        }
+      }
+    },
+    {
+      "id": "92766791-c896-5ae2-b577-26c2fcd86460",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 26,
+        "w": 24,
+        "h": 15
+      },
+      "config": {
+        "type": "pie",
+        "title": "Scheduled vs early reported windows",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "ransomware-detections-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metrics": [
+          {
+            "operation": "count",
+            "label": "Documents",
+            "empty_as_null": false
+          }
+        ],
+        "group_by": [
+          {
+            "operation": "terms",
+            "fields": [
+              "logsentinel.window.trigger"
+            ],
+            "label": "Trigger",
+            "limit": 5,
+            "other_bucket": {
+              "include_documents_without_field": false
+            },
+            "rank_by": {
+              "type": "metric",
+              "metric_index": 0,
+              "direction": "desc"
+            },
+            "color": {
+              "mode": "categorical",
+              "palette": "elastic_line_optimized",
+              "mapping": [
+                {
+                  "values": [
+                    "Suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "suspicious_ransomware_behavior"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "Indicator match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "indicator_match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "Ungated"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#6092C0"
+                  }
+                },
+                {
+                  "values": [
+                    "Passed gate"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#54B399"
+                  }
+                },
+                {
+                  "values": [
+                    "Suppressed, below threshold"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "Suppressed, suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#AA6556"
+                  }
+                },
+                {
+                  "values": [
+                    "Reported, indicator match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#54B399"
+                  }
+                },
+                {
+                  "values": [
+                    "Reported, suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "slide"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#6092C0"
+                  }
+                },
+                {
+                  "values": [
+                    "indicator"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "styling": {
+          "donut_hole": "m",
+          "labels": {
+            "visible": true,
+            "position": "outside"
+          },
+          "values": {
+            "visible": true,
+            "mode": "percentage",
+            "percent_decimals": 1
+          }
+        },
+        "legend": {
+          "visibility": "visible",
+          "position": "right",
+          "size": "m"
+        }
+      }
+    },
+    {
+      "id": "ddb09405-e805-5564-80b3-eb249ce743e0",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 41,
+        "w": 48,
+        "h": 17
+      },
+      "config": {
+        "type": "heatmap",
+        "title": "Indicator activity | overlapping windows × time",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "ransomware-detections-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metric": {
+          "operation": "count",
+          "label": "Documents",
+          "empty_as_null": false,
+          "color": {
+            "type": "distributed_palette",
+            "palette": "cool"
+          }
+        },
+        "x": {
+          "operation": "date_histogram",
+          "field": "@timestamp",
+          "label": "Event time",
+          "suggested_interval": "auto",
+          "use_original_time_range": false,
+          "include_empty_rows": true,
+          "drop_partial_intervals": false
+        },
+        "y": {
+          "operation": "terms",
+          "fields": [
+            "logsentinel.verdict.indicators"
+          ],
+          "label": "Indicator",
+          "limit": 15,
+          "other_bucket": {
+            "include_documents_without_field": false
+          },
+          "rank_by": {
+            "type": "metric",
+            "metric_index": 0,
+            "direction": "desc"
+          }
+        },
+        "axis": {
+          "x": {
+            "scale": "ordinal",
+            "labels": {
+              "visible": true
+            },
+            "title": {
+              "visible": true
+            }
+          },
+          "y": {
+            "labels": {
+              "visible": true
+            },
+            "title": {
+              "visible": true
+            }
+          }
+        },
+        "styling": {
+          "cells": {
+            "labels": {
+              "visible": false
+            }
+          }
+        },
+        "legend": {
+          "visibility": "visible",
+          "position": "right"
+        }
+      }
+    },
+    {
+      "id": "6f46871f-9775-5e9e-a391-eec9666ad3c0",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 58,
+        "w": 24,
+        "h": 16
+      },
+      "config": {
+        "type": "xy",
+        "title": "Indicator prevalence | overlapping counts",
+        "layers": [
+          {
+            "type": "bar_horizontal",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-detections-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "terms",
+              "fields": [
+                "logsentinel.verdict.indicators"
+              ],
+              "label": "Indicator",
+              "limit": 15,
+              "other_bucket": {
+                "include_documents_without_field": false
+              },
+              "rank_by": {
+                "type": "metric",
+                "metric_index": 0,
+                "direction": "desc"
+              }
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Reported windows",
+                "empty_as_null": false
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "styling": {
+          "bars": {
+            "data_labels": {
+              "visible": true
+            }
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "hidden"
+        }
+      }
+    },
+    {
+      "id": "0c3c75bd-1646-5e83-97e7-694a6cfa6d6c",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 58,
+        "w": 24,
+        "h": 16
+      },
+      "config": {
+        "type": "xy",
+        "title": "ATT&CK technique prevalence | overlapping counts",
+        "layers": [
+          {
+            "type": "bar_horizontal",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-detections-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "terms",
+              "fields": [
+                "threat.technique.id"
+              ],
+              "label": "Parent technique",
+              "limit": 15,
+              "other_bucket": {
+                "include_documents_without_field": false
+              },
+              "rank_by": {
+                "type": "metric",
+                "metric_index": 0,
+                "direction": "desc"
+              }
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Reported windows",
+                "empty_as_null": false
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "styling": {
+          "bars": {
+            "data_labels": {
+              "visible": true
+            }
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "hidden"
+        }
+      }
+    },
+    {
+      "id": "528566b2-86e1-5030-a890-8adb67fba2ff",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 74,
+        "w": 24,
+        "h": 16
+      },
+      "config": {
+        "type": "xy",
+        "title": "ATT&CK tactics | overlapping counts",
+        "layers": [
+          {
+            "type": "bar_horizontal",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-detections-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "terms",
+              "fields": [
+                "threat.tactic.name"
+              ],
+              "label": "Tactic",
+              "limit": 10,
+              "other_bucket": {
+                "include_documents_without_field": false
+              },
+              "rank_by": {
+                "type": "metric",
+                "metric_index": 0,
+                "direction": "desc"
+              }
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Reported windows",
+                "empty_as_null": false
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "styling": {
+          "bars": {
+            "data_labels": {
+              "visible": true
+            }
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "hidden"
+        }
+      }
+    },
+    {
+      "id": "0f6d6758-5ddb-5945-9404-a6bc64a974f4",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 74,
+        "w": 24,
+        "h": 16
+      },
+      "config": {
+        "type": "xy",
+        "title": "Early-window closing executable | top 10",
+        "layers": [
+          {
+            "type": "bar_horizontal",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-detections-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "terms",
+              "fields": [
+                "process.executable"
+              ],
+              "label": "Closing event executable",
+              "limit": 10,
+              "other_bucket": {
+                "include_documents_without_field": false
+              },
+              "rank_by": {
+                "type": "metric",
+                "metric_index": 0,
+                "direction": "desc"
+              }
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Early reported windows",
+                "empty_as_null": false
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": "logsentinel.window.trigger: \"indicator\""
+        },
+        "styling": {
+          "bars": {
+            "data_labels": {
+              "visible": true
+            }
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "hidden"
+        }
+      }
+    },
+    {
+      "id": "87f940b8-b1c0-5d2a-baa5-0dbb24f2a2e6",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 90,
+        "w": 24,
+        "h": 15
+      },
+      "config": {
+        "type": "xy",
+        "title": "Peak raw file activity per reported window",
+        "layers": [
+          {
+            "type": "line",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-detections-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "date_histogram",
+              "field": "@timestamp",
+              "label": "Event time",
+              "suggested_interval": "auto",
+              "use_original_time_range": false,
+              "include_empty_rows": true,
+              "drop_partial_intervals": false
+            },
+            "y": [
+              {
+                "operation": "max",
+                "label": "Max created files / window",
+                "field": "logsentinel.window.activity.created_files"
+              },
+              {
+                "operation": "max",
+                "label": "Max per-process deletes / window",
+                "field": "logsentinel.window.activity.max_deletes"
+              },
+              {
+                "operation": "max",
+                "label": "Max per-process replacements / window",
+                "field": "logsentinel.window.activity.max_replaced_files"
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "styling": {
+          "fitting": {
+            "type": "none",
+            "extend": "none"
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "id": "8872b400-249f-539b-a376-0bbb5d74f906",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 90,
+        "w": 24,
+        "h": 15
+      },
+      "config": {
+        "type": "xy",
+        "title": "Peak raw command activity per reported window",
+        "layers": [
+          {
+            "type": "line",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-detections-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "date_histogram",
+              "field": "@timestamp",
+              "label": "Event time",
+              "suggested_interval": "auto",
+              "use_original_time_range": false,
+              "include_empty_rows": true,
+              "drop_partial_intervals": false
+            },
+            "y": [
+              {
+                "operation": "max",
+                "label": "Max shadow commands / window",
+                "field": "logsentinel.window.activity.shadow_commands"
+              },
+              {
+                "operation": "max",
+                "label": "Max recovery commands / window",
+                "field": "logsentinel.window.activity.recovery_commands"
+              },
+              {
+                "operation": "max",
+                "label": "Max stop commands / window",
+                "field": "logsentinel.window.activity.stop_commands"
+              },
+              {
+                "operation": "max",
+                "label": "Max log tamper / window",
+                "field": "logsentinel.window.activity.log_tamper"
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "styling": {
+          "fitting": {
+            "type": "none",
+            "extend": "none"
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "id": "c066012c-b1db-5f48-bf30-49c2547c3cf3",
+      "type": "markdown",
+      "grid": {
+        "x": 0,
+        "y": 105,
+        "w": 48,
+        "h": 5
+      },
+      "config": {
+        "title": "Evidence context",
+        "content": "Indicator/ATT&CK categories overlap. `process.*` identifies only the event closing an early window; it does not attribute all window activity to that process. Activity lines show independent maxima from overlapping windows, not additive event totals. Expand a row for commands, model version, threshold and the complete document."
+      }
+    },
+    {
+      "id": "b639a337-e60b-5eea-ac4f-ee9d0f527c08",
+      "type": "discover_session",
+      "grid": {
+        "x": 0,
+        "y": 110,
+        "w": 48,
+        "h": 18
+      },
+      "config": {
+        "title": "Detection evidence | newest window first",
+        "tabs": [
+          {
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-detections-*",
+              "time_field": "@timestamp"
+            },
+            "query": {
+              "language": "kql",
+              "expression": ""
+            },
+            "column_order": [
+              "@timestamp",
+              "host.name",
+              "logsentinel.window.trigger",
+              "logsentinel.verdict.label",
+              "logsentinel.verdict.confidence_score",
+              "logsentinel.verdict.threshold",
+              "logsentinel.verdict.indicators",
+              "process.executable",
+              "logsentinel.window.id"
+            ],
+            "sort": [
+              {
+                "name": "@timestamp",
+                "direction": "desc"
+              }
+            ],
+            "rows_per_page": 25,
+            "view_mode": "documents"
+          }
+        ]
+      }
+    }
+  ],
+  "pinned_panels": []
+}

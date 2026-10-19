@@ -1,0 +1,54 @@
+[project]
+name = "inference"
+version = "0.1.0"
+description = "LogSentinel ransomware detection service: telemetry.windows.normalized in, security.ransomware.detections out"
+requires-python = ">=3.12"
+readme = "README.md"
+dependencies = [
+    "confluent-kafka>=2.5",
+    # Pinned exactly: the trained model is a pickle of River objects and the service
+    # refuses a model saved with another River version (artifacts.py).
+    "river==0.26.1",
+    "pydantic>=2.8",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "types-PyYAML",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# N: PEP 8 names (AGENTS.md section 11.4)
+select = ["E", "F", "I", "UP", "B", "N"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# ../scripts: the repository scripts are tested here (tests/test_repository_*.py)
+pythonpath = ["src", ".", "../scripts"]
+
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src:../scripts"
+files = ["src", "training", "tests"]
+explicit_package_bases = true
+check_untyped_defs = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = ["river.*", "confluent_kafka.*"]
+ignore_missing_imports = true

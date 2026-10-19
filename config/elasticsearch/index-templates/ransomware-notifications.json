@@ -1,0 +1,44 @@
+{
+  "index_patterns": ["ransomware-notifications-*"],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "index": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0,
+        "default_pipeline": "logsentinel-event-ingested",
+        "lifecycle": {"name": "ransomware-notifications"}
+      }
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": {"type": "date"},
+        "ecs": {"properties": {"version": {"type": "keyword"}}},
+        "event": {
+          "properties": {
+            "kind": {"type": "keyword"},
+            "module": {"type": "keyword"},
+            "dataset": {"type": "keyword"},
+            "id": {"type": "keyword"},
+            "created": {"type": "date"},
+            "ingested": {"type": "date"}
+          }
+        },
+        "rule": {"properties": {"id": {"type": "keyword"}, "name": {"type": "keyword"}}},
+        "message": {"type": "text", "index": false},
+        "logsentinel": {
+          "properties": {
+            "schema_version": {"type": "integer"},
+            "notification": {"properties": {"count": {"type": "long"}}}
+          }
+        }
+      }
+    }
+  },
+  "_meta": {
+    "managed_by": "logsentinel",
+    "schema_version": 2,
+    "description": "Kibana action envelopes for the Telegram and Gmail notifications service"
+  }
+}

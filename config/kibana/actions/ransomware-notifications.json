@@ -1,0 +1,36 @@
+{
+  "id": "ransomware-notifications",
+  "group": "query matched",
+  "frequency": {
+    "summary": false,
+    "notify_when": "onActiveAlert",
+    "throttle": null
+  },
+  "params": {
+    "documents": [
+      {
+        "ecs": {
+          "version": "8.0.0"
+        },
+        "event": {
+          "kind": "alert",
+          "module": "logsentinel",
+          "dataset": "logsentinel.notification",
+          "id": "{{rule.id}}:{{alert.uuid}}:{{context.date}}",
+          "created": "{{context.date}}"
+        },
+        "rule": {
+          "id": "{{rule.id}}",
+          "name": "{{rule.name}}"
+        },
+        "logsentinel": {
+          "schema_version": 2,
+          "notification": {
+            "count": "{{context.value}}"
+          }
+        },
+        "message": "LogSentinel: reported ransomware detection windows\nRule: {{rule.name}}\nChecked at (UTC): {{context.date}}\nMatching windows: {{context.value}}\n\nExamples (up to 10 windows; detections do not confirm infection):\n{{#context.hits}}\nHost: {{_source.host.name}}\nVerdict: {{_source.logsentinel.verdict.label}}\nConfidence: {{_source.logsentinel.verdict.confidence_score}}\nIndicators: {{_source.logsentinel.verdict.indicators}}\nWindow ID: {{_source.logsentinel.window.id}}\nWindow end (UTC): {{_source.event.end}}\n{{/context.hits}}"
+      }
+    ]
+  }
+}

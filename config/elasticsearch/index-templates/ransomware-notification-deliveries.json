@@ -1,0 +1,51 @@
+{
+  "index_patterns": ["ransomware-notification-deliveries-*"],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "index": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0,
+        "default_pipeline": "logsentinel-event-ingested",
+        "lifecycle": {"name": "ransomware-notification-deliveries"}
+      }
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": {"type": "date"},
+        "ecs": {"properties": {"version": {"type": "keyword"}}},
+        "event": {
+          "properties": {
+            "kind": {"type": "keyword"},
+            "module": {"type": "keyword"},
+            "dataset": {"type": "keyword"},
+            "id": {"type": "keyword"},
+            "created": {"type": "date"},
+            "ingested": {"type": "date"}
+          }
+        },
+        "logsentinel": {
+          "properties": {
+            "schema_version": {"type": "integer"},
+            "notification": {
+              "properties": {
+                "id": {"type": "keyword"},
+                "channel": {"type": "keyword"},
+                "sent": {"type": "boolean"},
+                "attempts": {"type": "integer"},
+                "retry_at": {"type": "date"},
+                "sent_at": {"type": "date"}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "_meta": {
+    "managed_by": "logsentinel",
+    "schema_version": 2,
+    "description": "Per-channel notification receipts with retry state and deterministic ids"
+  }
+}

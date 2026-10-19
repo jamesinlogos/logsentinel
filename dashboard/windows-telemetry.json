@@ -1,0 +1,1639 @@
+{
+  "title": "Windows Telemetry",
+  "description": "Historical Sysmon investigation: event composition, time density, process starts, file and registry activity, network destinations and configured ATT&CK tags.",
+  "options": {
+    "auto_apply_filters": true,
+    "hide_panel_borders": false,
+    "hide_panel_titles": false,
+    "sync_colors": false,
+    "sync_cursor": true,
+    "sync_tooltips": true,
+    "use_margins": true
+  },
+  "query": {
+    "language": "kql",
+    "expression": ""
+  },
+  "filters": [],
+  "tags": [],
+  "time_range": {
+    "from": "now-1y",
+    "to": "now"
+  },
+  "refresh_interval": {
+    "pause": true,
+    "value": 0
+  },
+  "panels": [
+    {
+      "id": "17f33c67-f9be-55eb-9b4c-71bbe4fc94bd",
+      "type": "markdown",
+      "grid": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 6
+      },
+      "config": {
+        "title": "Sysmon investigation",
+        "content": "Indexed Sysmon events in the selected period; filter `host.name`, then narrow event time around a detection window. Counts describe events, not unique files or attacks. Expand evidence rows for the complete source document.\n\n**Navigate:** [Overview](/app/dashboards#/view/logsentinel-overview) | [Detections](/app/dashboards#/view/ransomware-detections) | [Window Scores](/app/dashboards#/view/window-scores) | [Windows Telemetry](/app/dashboards#/view/windows-telemetry) | [Telemetry Quality](/app/dashboards#/view/telemetry-quality)"
+      }
+    },
+    {
+      "id": "c6c29a49-6b9d-5446-86df-1e2e2fafa88f",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 6,
+        "w": 16,
+        "h": 5
+      },
+      "config": {
+        "type": "metric",
+        "title": "Indexed Sysmon events",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "windows-telemetry-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metrics": [
+          {
+            "type": "primary",
+            "operation": "count",
+            "label": "Events",
+            "empty_as_null": false,
+            "color": {
+              "type": "auto"
+            }
+          }
+        ],
+        "styling": {
+          "density": "default"
+        }
+      }
+    },
+    {
+      "id": "523d8bc8-b1e6-5052-b0b2-29a0e3377594",
+      "type": "vis",
+      "grid": {
+        "x": 16,
+        "y": 6,
+        "w": 16,
+        "h": 5
+      },
+      "config": {
+        "type": "metric",
+        "title": "Observed host names",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "windows-telemetry-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metrics": [
+          {
+            "type": "primary",
+            "operation": "unique_count",
+            "label": "Distinct names (approx.)",
+            "field": "host.name",
+            "color": {
+              "type": "auto"
+            }
+          }
+        ],
+        "styling": {
+          "density": "default"
+        }
+      }
+    },
+    {
+      "id": "ca7cf005-96dc-55fd-aa39-d89aa9d07def",
+      "type": "vis",
+      "grid": {
+        "x": 32,
+        "y": 6,
+        "w": 16,
+        "h": 5
+      },
+      "config": {
+        "type": "metric",
+        "title": "Latest telemetry in selected range",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "windows-telemetry-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metrics": [
+          {
+            "type": "primary",
+            "operation": "last_value",
+            "label": "Latest event time",
+            "field": "@timestamp",
+            "time_field": "@timestamp",
+            "multi_value": true,
+            "filter": {
+              "language": "kql",
+              "expression": "\"@timestamp\": *"
+            },
+            "color": {
+              "type": "auto"
+            }
+          }
+        ],
+        "styling": {
+          "density": "default"
+        }
+      }
+    },
+    {
+      "id": "38af2eb1-d278-558d-88d3-82cc0f0d3bd8",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 11,
+        "w": 24,
+        "h": 13
+      },
+      "config": {
+        "type": "xy",
+        "title": "Event volume by Sysmon ID | top 20 IDs",
+        "layers": [
+          {
+            "type": "area_stacked",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "windows-telemetry-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "date_histogram",
+              "field": "@timestamp",
+              "label": "Event time",
+              "suggested_interval": "auto",
+              "use_original_time_range": false,
+              "include_empty_rows": true,
+              "drop_partial_intervals": false
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Events",
+                "empty_as_null": false
+              }
+            ],
+            "breakdown_by": {
+              "operation": "terms",
+              "fields": [
+                "event.code"
+              ],
+              "label": "Sysmon event ID",
+              "limit": 20,
+              "other_bucket": {
+                "include_documents_without_field": false
+              },
+              "rank_by": {
+                "type": "metric",
+                "metric_index": 0,
+                "direction": "desc"
+              },
+              "color": {
+                "mode": "categorical",
+                "palette": "elastic_line_optimized",
+                "mapping": [
+                  {
+                    "values": [
+                      "Suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "suspicious_ransomware_behavior"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Indicator match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "indicator_match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Ungated"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#6092C0"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Passed gate"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#54B399"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Suppressed, below threshold"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Suppressed, suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#AA6556"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Reported, indicator match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#54B399"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Reported, suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "slide"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#6092C0"
+                    }
+                  },
+                  {
+                    "values": [
+                      "indicator"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  }
+                ]
+              },
+              "aggregate_first": true
+            }
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "styling": {
+          "fitting": {
+            "type": "zero",
+            "extend": "none"
+          },
+          "areas": {
+            "fill_opacity": 0.65
+          },
+          "interpolation": "stepped"
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "id": "7952e4a9-b30c-57fa-9807-66a443a2115a",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 11,
+        "w": 24,
+        "h": 13
+      },
+      "config": {
+        "type": "pie",
+        "title": "Sysmon event composition",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "windows-telemetry-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metrics": [
+          {
+            "operation": "count",
+            "label": "Documents",
+            "empty_as_null": false
+          }
+        ],
+        "group_by": [
+          {
+            "operation": "filters",
+            "filters": [
+              {
+                "label": "Process creation (1)",
+                "filter": {
+                  "language": "kql",
+                  "expression": "event.code: \"1\""
+                }
+              },
+              {
+                "label": "File creation (11)",
+                "filter": {
+                  "language": "kql",
+                  "expression": "event.code: \"11\""
+                }
+              },
+              {
+                "label": "File deletion (26)",
+                "filter": {
+                  "language": "kql",
+                  "expression": "event.code: \"26\""
+                }
+              },
+              {
+                "label": "Registry (12/13/14)",
+                "filter": {
+                  "language": "kql",
+                  "expression": "event.code: (\"12\" or \"13\" or \"14\")"
+                }
+              },
+              {
+                "label": "Network connections (3)",
+                "filter": {
+                  "language": "kql",
+                  "expression": "event.code: \"3\""
+                }
+              },
+              {
+                "label": "Other events",
+                "filter": {
+                  "language": "kql",
+                  "expression": "NOT event.code: (\"1\" or \"3\" or \"11\" or \"12\" or \"13\" or \"14\" or \"26\")"
+                }
+              }
+            ],
+            "color": {
+              "mode": "categorical",
+              "palette": "elastic_line_optimized",
+              "mapping": [
+                {
+                  "values": [
+                    "Suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "suspicious_ransomware_behavior"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "Indicator match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "indicator_match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "Ungated"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#6092C0"
+                  }
+                },
+                {
+                  "values": [
+                    "Passed gate"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#54B399"
+                  }
+                },
+                {
+                  "values": [
+                    "Suppressed, below threshold"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "Suppressed, suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#AA6556"
+                  }
+                },
+                {
+                  "values": [
+                    "Reported, indicator match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#54B399"
+                  }
+                },
+                {
+                  "values": [
+                    "Reported, suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "slide"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#6092C0"
+                  }
+                },
+                {
+                  "values": [
+                    "indicator"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "styling": {
+          "donut_hole": "m",
+          "labels": {
+            "visible": true,
+            "position": "outside"
+          },
+          "values": {
+            "visible": true,
+            "mode": "percentage",
+            "percent_decimals": 1
+          }
+        },
+        "legend": {
+          "visibility": "visible",
+          "position": "right",
+          "size": "m"
+        }
+      }
+    },
+    {
+      "id": "223405a3-f390-55e1-a183-ebfcd869f7cd",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 24,
+        "w": 24,
+        "h": 13
+      },
+      "config": {
+        "type": "heatmap",
+        "title": "Event-time density by Sysmon ID | top 20 IDs",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "windows-telemetry-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metric": {
+          "operation": "count",
+          "label": "Documents",
+          "empty_as_null": false,
+          "color": {
+            "type": "distributed_palette",
+            "palette": "cool"
+          }
+        },
+        "x": {
+          "operation": "date_histogram",
+          "field": "@timestamp",
+          "label": "Event time",
+          "suggested_interval": "auto",
+          "use_original_time_range": false,
+          "include_empty_rows": true,
+          "drop_partial_intervals": false
+        },
+        "y": {
+          "operation": "terms",
+          "fields": [
+            "event.code"
+          ],
+          "label": "Sysmon event ID",
+          "limit": 20,
+          "other_bucket": {
+            "include_documents_without_field": false
+          },
+          "rank_by": {
+            "type": "metric",
+            "metric_index": 0,
+            "direction": "desc"
+          }
+        },
+        "axis": {
+          "x": {
+            "scale": "ordinal",
+            "labels": {
+              "visible": true
+            },
+            "title": {
+              "visible": true
+            }
+          },
+          "y": {
+            "labels": {
+              "visible": true
+            },
+            "title": {
+              "visible": true
+            }
+          }
+        },
+        "styling": {
+          "cells": {
+            "labels": {
+              "visible": false
+            }
+          }
+        },
+        "legend": {
+          "visibility": "visible",
+          "position": "right"
+        }
+      }
+    },
+    {
+      "id": "22449977-3864-5240-96e3-5994b591f149",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 24,
+        "w": 24,
+        "h": 13
+      },
+      "config": {
+        "type": "xy",
+        "title": "Process starts by executable | event ID 1",
+        "layers": [
+          {
+            "type": "bar_horizontal",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "windows-telemetry-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "terms",
+              "fields": [
+                "process.executable"
+              ],
+              "label": "Executable",
+              "limit": 12,
+              "other_bucket": {
+                "include_documents_without_field": false
+              },
+              "rank_by": {
+                "type": "metric",
+                "metric_index": 0,
+                "direction": "desc"
+              }
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Process creation events",
+                "empty_as_null": false
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": "event.code: \"1\""
+        },
+        "styling": {
+          "bars": {
+            "data_labels": {
+              "visible": true
+            }
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "hidden"
+        }
+      }
+    },
+    {
+      "id": "58b9fc51-561c-56a2-8e8e-69c6357fdf47",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 37,
+        "w": 24,
+        "h": 13
+      },
+      "config": {
+        "type": "xy",
+        "title": "Created file names | event ID 11",
+        "layers": [
+          {
+            "type": "bar_horizontal",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "windows-telemetry-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "terms",
+              "fields": [
+                "file.name"
+              ],
+              "label": "File name",
+              "limit": 12,
+              "other_bucket": {
+                "include_documents_without_field": false
+              },
+              "rank_by": {
+                "type": "metric",
+                "metric_index": 0,
+                "direction": "desc"
+              }
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "File creation events",
+                "empty_as_null": false
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": "event.code: \"11\""
+        },
+        "styling": {
+          "bars": {
+            "data_labels": {
+              "visible": true
+            }
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "hidden"
+        }
+      }
+    },
+    {
+      "id": "f045e6ee-efb9-5e96-9075-78a24ecc7884",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 37,
+        "w": 24,
+        "h": 13
+      },
+      "config": {
+        "type": "xy",
+        "title": "Registry paths | event IDs 12, 13, 14",
+        "layers": [
+          {
+            "type": "bar_horizontal",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "windows-telemetry-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "terms",
+              "fields": [
+                "registry.path"
+              ],
+              "label": "Registry path",
+              "limit": 12,
+              "other_bucket": {
+                "include_documents_without_field": false
+              },
+              "rank_by": {
+                "type": "metric",
+                "metric_index": 0,
+                "direction": "desc"
+              }
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Registry change events",
+                "empty_as_null": false
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": "event.code: (\"12\" or \"13\" or \"14\")"
+        },
+        "styling": {
+          "bars": {
+            "data_labels": {
+              "visible": true
+            }
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "hidden"
+        }
+      }
+    },
+    {
+      "id": "d678a546-471b-5466-8fd0-8f723601ce54",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 50,
+        "w": 24,
+        "h": 13
+      },
+      "config": {
+        "type": "heatmap",
+        "title": "Connection events by destination IP and port | top destinations",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "windows-telemetry-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "query": {
+          "language": "kql",
+          "expression": "event.code: \"3\""
+        },
+        "metric": {
+          "operation": "count",
+          "label": "Documents",
+          "empty_as_null": false,
+          "color": {
+            "type": "distributed_palette",
+            "palette": "cool"
+          }
+        },
+        "x": {
+          "operation": "terms",
+          "fields": [
+            "destination.port"
+          ],
+          "label": "Destination port",
+          "limit": 10,
+          "other_bucket": {
+            "include_documents_without_field": false
+          },
+          "rank_by": {
+            "type": "metric",
+            "metric_index": 0,
+            "direction": "desc"
+          }
+        },
+        "y": {
+          "operation": "terms",
+          "fields": [
+            "destination.ip"
+          ],
+          "label": "Destination IP",
+          "limit": 12,
+          "other_bucket": {
+            "include_documents_without_field": false
+          },
+          "rank_by": {
+            "type": "metric",
+            "metric_index": 0,
+            "direction": "desc"
+          }
+        },
+        "axis": {
+          "x": {
+            "scale": "ordinal",
+            "labels": {
+              "visible": true
+            },
+            "title": {
+              "visible": true
+            }
+          },
+          "y": {
+            "labels": {
+              "visible": true
+            },
+            "title": {
+              "visible": true
+            }
+          }
+        },
+        "styling": {
+          "cells": {
+            "labels": {
+              "visible": true
+            }
+          }
+        },
+        "legend": {
+          "visibility": "visible",
+          "position": "right"
+        }
+      }
+    },
+    {
+      "id": "a8cac92e-b375-5bfd-b805-d46221fd12e4",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 50,
+        "w": 24,
+        "h": 13
+      },
+      "config": {
+        "type": "xy",
+        "title": "Configured ATT&CK tags | overlapping event counts",
+        "layers": [
+          {
+            "type": "bar_horizontal",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "windows-telemetry-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "terms",
+              "fields": [
+                "threat.technique.id"
+              ],
+              "label": "Parent technique",
+              "limit": 15,
+              "other_bucket": {
+                "include_documents_without_field": false
+              },
+              "rank_by": {
+                "type": "metric",
+                "metric_index": 0,
+                "direction": "desc"
+              }
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Events containing technique tag",
+                "empty_as_null": false
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "styling": {
+          "bars": {
+            "data_labels": {
+              "visible": true
+            }
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "hidden"
+        }
+      }
+    },
+    {
+      "id": "2030275a-d24f-5ea4-8702-a4f7475f0152",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 63,
+        "w": 24,
+        "h": 13
+      },
+      "config": {
+        "type": "xy",
+        "title": "File activity over event time",
+        "layers": [
+          {
+            "type": "line",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "windows-telemetry-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "date_histogram",
+              "field": "@timestamp",
+              "label": "Event time",
+              "suggested_interval": "auto",
+              "use_original_time_range": false,
+              "include_empty_rows": true,
+              "drop_partial_intervals": false
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Events",
+                "empty_as_null": false
+              }
+            ],
+            "breakdown_by": {
+              "operation": "filters",
+              "filters": [
+                {
+                  "label": "Timestamp change (2)",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.code: \"2\""
+                  }
+                },
+                {
+                  "label": "File creation (11)",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.code: \"11\""
+                  }
+                },
+                {
+                  "label": "Delete detected (26)",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.code: \"26\""
+                  }
+                }
+              ],
+              "color": {
+                "mode": "categorical",
+                "palette": "elastic_line_optimized",
+                "mapping": [
+                  {
+                    "values": [
+                      "Suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "suspicious_ransomware_behavior"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Indicator match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "indicator_match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Ungated"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#6092C0"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Passed gate"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#54B399"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Suppressed, below threshold"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Suppressed, suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#AA6556"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Reported, indicator match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#54B399"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Reported, suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "slide"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#6092C0"
+                    }
+                  },
+                  {
+                    "values": [
+                      "indicator"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  }
+                ]
+              },
+              "aggregate_first": true
+            }
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "styling": {
+          "fitting": {
+            "type": "none",
+            "extend": "none"
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "id": "76f6fb37-5e1b-5289-a4c9-0ac3c092c0a2",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 63,
+        "w": 24,
+        "h": 13
+      },
+      "config": {
+        "type": "xy",
+        "title": "Registry activity over event time",
+        "layers": [
+          {
+            "type": "line",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "windows-telemetry-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "date_histogram",
+              "field": "@timestamp",
+              "label": "Event time",
+              "suggested_interval": "auto",
+              "use_original_time_range": false,
+              "include_empty_rows": true,
+              "drop_partial_intervals": false
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Events",
+                "empty_as_null": false
+              }
+            ],
+            "breakdown_by": {
+              "operation": "filters",
+              "filters": [
+                {
+                  "label": "Object create/delete (12)",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.code: \"12\""
+                  }
+                },
+                {
+                  "label": "Value set (13)",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.code: \"13\""
+                  }
+                },
+                {
+                  "label": "Object rename (14)",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "event.code: \"14\""
+                  }
+                }
+              ],
+              "color": {
+                "mode": "categorical",
+                "palette": "elastic_line_optimized",
+                "mapping": [
+                  {
+                    "values": [
+                      "Suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "suspicious_ransomware_behavior"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Indicator match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "indicator_match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Ungated"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#6092C0"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Passed gate"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#54B399"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Suppressed, below threshold"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Suppressed, suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#AA6556"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Reported, indicator match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#54B399"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Reported, suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "slide"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#6092C0"
+                    }
+                  },
+                  {
+                    "values": [
+                      "indicator"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  }
+                ]
+              },
+              "aggregate_first": true
+            }
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "styling": {
+          "fitting": {
+            "type": "none",
+            "extend": "none"
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "id": "7b67d401-3774-5264-a54c-688f35210851",
+      "type": "markdown",
+      "grid": {
+        "x": 0,
+        "y": 76,
+        "w": 48,
+        "h": 6
+      },
+      "config": {
+        "title": "Evidence context",
+        "content": "Charts showing top values can omit less frequent values; event-ID slices form disjoint categories, including Other events. ATT&CK tags come from named Sysmon rules, can overlap, and do not confirm an attack. Event 23 archival deletion is disabled; event 26 records deletion without archival. Missing DNS, process-access or tags can follow collection rules. Historical activity does not establish current connectivity. Expand evidence rows for complete commands, ancestry and raw Sysmon fields."
+      }
+    },
+    {
+      "id": "92e00a89-b905-5d6c-8f9f-ee90b2fe3c3f",
+      "type": "discover_session",
+      "grid": {
+        "x": 0,
+        "y": 82,
+        "w": 48,
+        "h": 18
+      },
+      "config": {
+        "title": "Process creation evidence | commands, ancestry and identity",
+        "tabs": [
+          {
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "windows-telemetry-*",
+              "time_field": "@timestamp"
+            },
+            "query": {
+              "language": "kql",
+              "expression": "event.code: \"1\""
+            },
+            "column_order": [
+              "@timestamp",
+              "host.name",
+              "host.id",
+              "user.name",
+              "process.entity_id",
+              "process.executable",
+              "process.command_line",
+              "process.parent.entity_id",
+              "process.parent.executable",
+              "process.parent.command_line",
+              "rule.name",
+              "threat.technique.id"
+            ],
+            "sort": [
+              {
+                "name": "@timestamp",
+                "direction": "desc"
+              }
+            ],
+            "rows_per_page": 25,
+            "view_mode": "documents"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e98e24ec-3c64-5a8a-a98c-168425a5de7a",
+      "type": "discover_session",
+      "grid": {
+        "x": 0,
+        "y": 100,
+        "w": 48,
+        "h": 18
+      },
+      "config": {
+        "title": "File, registry and network evidence | expand rows for full context",
+        "tabs": [
+          {
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "windows-telemetry-*",
+              "time_field": "@timestamp"
+            },
+            "query": {
+              "language": "kql",
+              "expression": "event.code: (\"2\" or \"3\" or \"11\" or \"12\" or \"13\" or \"14\" or \"22\" or \"26\")"
+            },
+            "column_order": [
+              "@timestamp",
+              "host.name",
+              "event.code",
+              "process.entity_id",
+              "process.executable",
+              "file.path",
+              "file.extension",
+              "registry.path",
+              "source.ip",
+              "source.port",
+              "destination.ip",
+              "destination.port",
+              "network.transport",
+              "dns.question.name",
+              "rule.name",
+              "threat.technique.id"
+            ],
+            "sort": [
+              {
+                "name": "@timestamp",
+                "direction": "desc"
+              }
+            ],
+            "rows_per_page": 25,
+            "view_mode": "documents"
+          }
+        ]
+      }
+    }
+  ],
+  "pinned_panels": []
+}

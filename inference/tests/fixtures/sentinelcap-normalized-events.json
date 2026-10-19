@@ -1,0 +1,506 @@
+[
+ {
+  "process": {
+   "name": "rundll32.exe",
+   "working_directory": "C:\\Windows\\system32\\",
+   "parent": {
+    "entity_id": "{8A1A7C51-970D-6AB4-0D00-000000000800}",
+    "name": "svchost.exe",
+    "pid": 904,
+    "command_line": "C:\\Windows\\system32\\svchost.exe -k DcomLaunch -p",
+    "executable": "C:\\Windows\\System32\\svchost.exe"
+   },
+   "command_line": "C:\\Windows\\System32\\rundll32.exe C:\\Windows\\System32\\shell32.dll,SHCreateLocalServerRunDll {9aa46009-3ce0-458a-a354-715610a075e6} -Embedding",
+   "executable": "C:\\Windows\\System32\\rundll32.exe",
+   "hash": {
+    "md5": "f5b2d37bed0d2b15957736c23b9f547f",
+    "sha1": "e9c6f353ced18e3136dc3fe7ec3993b3c8bee5a1",
+    "sha256": "0bb68e54629555fb9f70fb8d7b95fe1a5f987eeeef57de0a2671eeb14063ced1"
+   },
+   "entity_id": "{8A1A7C51-B32C-6AB4-E400-000000000800}",
+   "pid": 6120,
+   "pe": {
+    "description": "Windows host process (Rundll32)",
+    "company": "Microsoft Corporation",
+    "original_file_name": "RUNDLL32.EXE",
+    "file_version": "10.0.20348.1 (WinBuild.160101.0800)",
+    "imphash": "5c68de198b5d2dd5c1129782ad19676c",
+    "product": "Microsoft\u00ae Windows\u00ae Operating System"
+   }
+  },
+  "event": {
+   "category": [
+    "process"
+   ],
+   "provider": "Microsoft-Windows-Sysmon",
+   "action": "Process Create (rule: ProcessCreate)",
+   "created": "2026-09-24T05:20:45.679Z",
+   "code": "1",
+   "kind": "event",
+   "type": [
+    "start"
+   ]
+  },
+  "host": {
+   "architecture": "x86_64",
+   "name": "win-en194vl6r3u",
+   "hostname": "WIN-EN194VL6R3U",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.100.248"
+   ],
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "os": {
+    "name": "Windows Server 2022 Standard Evaluation",
+    "version": "10.0",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "family": "windows",
+    "platform": "windows",
+    "type": "windows",
+    "build": "20348.587"
+   }
+  },
+  "winlog": {
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "process": {
+    "pid": 2928,
+    "thread": {
+     "id": 4456
+    }
+   },
+   "version": 5,
+   "computer_name": "WIN-EN194VL6R3U",
+   "provider_name": "Microsoft-Windows-Sysmon",
+   "opcode": "Info",
+   "event_id": "1",
+   "event_data": {
+    "ParentCommandLine": "C:\\Windows\\system32\\svchost.exe -k DcomLaunch -p",
+    "CurrentDirectory": "C:\\Windows\\system32\\",
+    "ParentUser": "NT AUTHORITY\\SYSTEM",
+    "Image": "C:\\Windows\\System32\\rundll32.exe",
+    "ParentProcessGuid": "{8A1A7C51-970D-6AB4-0D00-000000000800}",
+    "UtcTime": "2026-09-24 05:20:44.630",
+    "ProcessId": "6120",
+    "OriginalFileName": "RUNDLL32.EXE",
+    "ProcessGuid": "{8A1A7C51-B32C-6AB4-E400-000000000800}",
+    "IntegrityLevel": "Medium",
+    "LogonId": "0x149ad4",
+    "RuleName": "technique_id=T1083,technique_name=File and Directory Discovery",
+    "TerminalSessionId": "2",
+    "FileVersion": "10.0.20348.1 (WinBuild.160101.0800)",
+    "Hashes": "SHA1=E9C6F353CED18E3136DC3FE7EC3993B3C8BEE5A1,MD5=F5B2D37BED0D2B15957736C23B9F547F,SHA256=0BB68E54629555FB9F70FB8D7B95FE1A5F987EEEEF57DE0A2671EEB14063CED1,IMPHASH=5C68DE198B5D2DD5C1129782AD19676C",
+    "CommandLine": "C:\\Windows\\System32\\rundll32.exe C:\\Windows\\System32\\shell32.dll,SHCreateLocalServerRunDll {9aa46009-3ce0-458a-a354-715610a075e6} -Embedding",
+    "ParentImage": "C:\\Windows\\System32\\svchost.exe",
+    "Description": "Windows host process (Rundll32)",
+    "User": "WIN-EN194VL6R3U\\sysmaint",
+    "Product": "Microsoft\u00ae Windows\u00ae Operating System",
+    "ParentProcessId": "904",
+    "LogonGuid": "{8A1A7C51-9830-6AB4-D49A-140000000000}",
+    "Company": "Microsoft Corporation"
+   },
+   "record_id": 34738,
+   "user": {
+    "identifier": "S-1-5-18",
+    "name": "SYSTEM",
+    "domain": "NT AUTHORITY",
+    "type": "User"
+   },
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "task": "Process Create (rule: ProcessCreate)"
+  },
+  "threat": {
+   "framework": "MITRE ATT&CK",
+   "technique": {
+    "id": "T1083",
+    "name": "File and Directory Discovery"
+   }
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "agent": {
+   "name": "WIN-EN194VL6R3U",
+   "id": "79f0e3c5-4978-41b3-9cb0-6887073110a6",
+   "version": "9.5.4",
+   "ephemeral_id": "e6de7044-92e1-4acf-aa57-e5eb3ca8f3f7",
+   "type": "winlogbeat"
+  },
+  "log": {
+   "level": "information"
+  },
+  "user": {
+   "domain": "WIN-EN194VL6R3U",
+   "name": "sysmaint"
+  },
+  "rule": {
+   "name": "technique_id=T1083,technique_name=File and Directory Discovery"
+  },
+  "@timestamp": "2026-09-24T05:20:44.630Z"
+ },
+ {
+  "process": {
+   "name": "4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0.exe",
+   "working_directory": "C:\\Users\\sysmaint\\Downloads\\Akira\\",
+   "parent": {
+    "entity_id": "{8A1A7C51-B32C-6AB4-E300-000000000800}",
+    "name": "explorer.exe",
+    "pid": 1620,
+    "command_line": "C:\\Windows\\explorer.exe /factory,{75dff2b7-6936-4c06-a8bb-676a7b00b24b} -Embedding",
+    "executable": "C:\\Windows\\explorer.exe"
+   },
+   "command_line": "\"C:\\Users\\sysmaint\\Downloads\\Akira\\4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0.exe\" ",
+   "executable": "C:\\Users\\sysmaint\\Downloads\\Akira\\4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0.exe",
+   "hash": {
+    "md5": "f1bda525dcb1803b8fb88efd22eda2f2",
+    "sha1": "e7537de3c73a107a5ea6b59f0e4a938f4017c828",
+    "sha256": "4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0"
+   },
+   "entity_id": "{8A1A7C51-B330-6AB4-E600-000000000800}",
+   "pid": 4308,
+   "pe": {
+    "imphash": "f89d971f855e5743dd4d1e73a5da5699"
+   }
+  },
+  "event": {
+   "category": [
+    "process"
+   ],
+   "provider": "Microsoft-Windows-Sysmon",
+   "action": "Process Create (rule: ProcessCreate)",
+   "created": "2026-09-24T05:20:49.687Z",
+   "code": "1",
+   "kind": "event",
+   "type": [
+    "start"
+   ]
+  },
+  "host": {
+   "architecture": "x86_64",
+   "name": "win-en194vl6r3u",
+   "hostname": "WIN-EN194VL6R3U",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.100.248"
+   ],
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "os": {
+    "name": "Windows Server 2022 Standard Evaluation",
+    "version": "10.0",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "family": "windows",
+    "platform": "windows",
+    "type": "windows",
+    "build": "20348.587"
+   }
+  },
+  "winlog": {
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "process": {
+    "pid": 2928,
+    "thread": {
+     "id": 4456
+    }
+   },
+   "version": 5,
+   "computer_name": "WIN-EN194VL6R3U",
+   "provider_name": "Microsoft-Windows-Sysmon",
+   "opcode": "Info",
+   "event_id": "1",
+   "event_data": {
+    "ParentCommandLine": "C:\\Windows\\explorer.exe /factory,{75dff2b7-6936-4c06-a8bb-676a7b00b24b} -Embedding",
+    "CurrentDirectory": "C:\\Users\\sysmaint\\Downloads\\Akira\\",
+    "ParentUser": "WIN-EN194VL6R3U\\sysmaint",
+    "Image": "C:\\Users\\sysmaint\\Downloads\\Akira\\4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0.exe",
+    "ParentProcessGuid": "{8A1A7C51-B32C-6AB4-E300-000000000800}",
+    "UtcTime": "2026-09-24 05:20:48.228",
+    "ProcessId": "4308",
+    "OriginalFileName": "-",
+    "ProcessGuid": "{8A1A7C51-B330-6AB4-E600-000000000800}",
+    "IntegrityLevel": "Medium",
+    "LogonId": "0x149ad4",
+    "RuleName": "technique_id=T1036,technique_name=Masquerading",
+    "TerminalSessionId": "2",
+    "FileVersion": "-",
+    "Hashes": "SHA1=E7537DE3C73A107A5EA6B59F0E4A938F4017C828,MD5=F1BDA525DCB1803B8FB88EFD22EDA2F2,SHA256=4AFDA03DDEB1C62A1F87765EA383F920621134C3F6362959CB9993C24752FCB0,IMPHASH=F89D971F855E5743DD4D1E73A5DA5699",
+    "CommandLine": "\"C:\\Users\\sysmaint\\Downloads\\Akira\\4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0.exe\" ",
+    "ParentImage": "C:\\Windows\\explorer.exe",
+    "Description": "-",
+    "User": "WIN-EN194VL6R3U\\sysmaint",
+    "Product": "-",
+    "ParentProcessId": "1620",
+    "LogonGuid": "{8A1A7C51-9830-6AB4-D49A-140000000000}",
+    "Company": "-"
+   },
+   "record_id": 34740,
+   "user": {
+    "identifier": "S-1-5-18",
+    "name": "SYSTEM",
+    "domain": "NT AUTHORITY",
+    "type": "User"
+   },
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "task": "Process Create (rule: ProcessCreate)"
+  },
+  "threat": {
+   "framework": "MITRE ATT&CK",
+   "technique": {
+    "id": "T1036",
+    "name": "Masquerading"
+   }
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "agent": {
+   "name": "WIN-EN194VL6R3U",
+   "id": "79f0e3c5-4978-41b3-9cb0-6887073110a6",
+   "version": "9.5.4",
+   "ephemeral_id": "e6de7044-92e1-4acf-aa57-e5eb3ca8f3f7",
+   "type": "winlogbeat"
+  },
+  "log": {
+   "level": "information"
+  },
+  "user": {
+   "domain": "WIN-EN194VL6R3U",
+   "name": "sysmaint"
+  },
+  "rule": {
+   "name": "technique_id=T1036,technique_name=Masquerading"
+  },
+  "@timestamp": "2026-09-24T05:20:48.239Z"
+ },
+ {
+  "process": {
+   "entity_id": "{8A1A7C51-B330-6AB4-E600-000000000800}",
+   "name": "4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0.exe",
+   "pid": 4308,
+   "executable": "C:\\Users\\sysmaint\\Downloads\\Akira\\4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0.exe"
+  },
+  "event": {
+   "category": [
+    "process"
+   ],
+   "provider": "Microsoft-Windows-Sysmon",
+   "action": "Image loaded (rule: ImageLoad)",
+   "created": "2026-09-24T05:20:49.687Z",
+   "code": "7",
+   "kind": "event",
+   "type": [
+    "change"
+   ]
+  },
+  "host": {
+   "architecture": "x86_64",
+   "name": "win-en194vl6r3u",
+   "hostname": "WIN-EN194VL6R3U",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.100.248"
+   ],
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "os": {
+    "name": "Windows Server 2022 Standard Evaluation",
+    "version": "10.0",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "family": "windows",
+    "platform": "windows",
+    "type": "windows",
+    "build": "20348.587"
+   }
+  },
+  "winlog": {
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "process": {
+    "pid": 2928,
+    "thread": {
+     "id": 4468
+    }
+   },
+   "version": 3,
+   "computer_name": "WIN-EN194VL6R3U",
+   "provider_name": "Microsoft-Windows-Sysmon",
+   "opcode": "Info",
+   "event_id": "7",
+   "event_data": {
+    "Signed": "false",
+    "ImageLoaded": "C:\\Users\\sysmaint\\Downloads\\Akira\\4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0.exe",
+    "RuleName": "technique_id=T1574.001,technique_name=DLL",
+    "Signature": "-",
+    "Image": "C:\\Users\\sysmaint\\Downloads\\Akira\\4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0.exe",
+    "FileVersion": "-",
+    "Hashes": "SHA1=E7537DE3C73A107A5EA6B59F0E4A938F4017C828,MD5=F1BDA525DCB1803B8FB88EFD22EDA2F2,SHA256=4AFDA03DDEB1C62A1F87765EA383F920621134C3F6362959CB9993C24752FCB0,IMPHASH=F89D971F855E5743DD4D1E73A5DA5699",
+    "SignatureStatus": "Unavailable",
+    "UtcTime": "2026-09-24 05:20:48.258",
+    "OriginalFileName": "-",
+    "ProcessId": "4308",
+    "Product": "-",
+    "User": "WIN-EN194VL6R3U\\sysmaint",
+    "Description": "-",
+    "ProcessGuid": "{8A1A7C51-B330-6AB4-E600-000000000800}",
+    "Company": "-"
+   },
+   "record_id": 34741,
+   "user": {
+    "identifier": "S-1-5-18",
+    "name": "SYSTEM",
+    "domain": "NT AUTHORITY",
+    "type": "User"
+   },
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "task": "Image loaded (rule: ImageLoad)"
+  },
+  "threat": {
+   "framework": "MITRE ATT&CK",
+   "technique": {
+    "id": "T1574",
+    "subtechnique": {
+     "id": "T1574.001",
+     "name": "DLL"
+    }
+   }
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "agent": {
+   "name": "WIN-EN194VL6R3U",
+   "id": "79f0e3c5-4978-41b3-9cb0-6887073110a6",
+   "version": "9.5.4",
+   "ephemeral_id": "e6de7044-92e1-4acf-aa57-e5eb3ca8f3f7",
+   "type": "winlogbeat"
+  },
+  "log": {
+   "level": "information"
+  },
+  "user": {
+   "domain": "WIN-EN194VL6R3U",
+   "name": "sysmaint"
+  },
+  "rule": {
+   "name": "technique_id=T1574.001,technique_name=DLL"
+  },
+  "@timestamp": "2026-09-24T05:20:48.272Z",
+  "file": {
+   "name": "4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0.exe",
+   "path": "C:\\Users\\sysmaint\\Downloads\\Akira\\4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0.exe",
+   "pe": {
+    "imphash": "f89d971f855e5743dd4d1e73a5da5699"
+   },
+   "extension": "exe",
+   "hash": {
+    "md5": "f1bda525dcb1803b8fb88efd22eda2f2",
+    "sha1": "e7537de3c73a107a5ea6b59f0e4a938f4017c828",
+    "sha256": "4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0"
+   }
+  }
+ },
+ {
+  "process": {
+   "entity_id": "{8A1A7C51-B330-6AB4-E600-000000000800}",
+   "name": "4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0.exe",
+   "pid": 4308,
+   "executable": "C:\\Users\\sysmaint\\Downloads\\Akira\\4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0.exe"
+  },
+  "event": {
+   "category": [
+    "file"
+   ],
+   "provider": "Microsoft-Windows-Sysmon",
+   "action": "File created (rule: FileCreate)",
+   "created": "2026-09-24T05:20:49.688Z",
+   "code": "11",
+   "kind": "event",
+   "type": [
+    "creation"
+   ]
+  },
+  "host": {
+   "architecture": "x86_64",
+   "name": "win-en194vl6r3u",
+   "hostname": "WIN-EN194VL6R3U",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.100.248"
+   ],
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "os": {
+    "name": "Windows Server 2022 Standard Evaluation",
+    "version": "10.0",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "family": "windows",
+    "platform": "windows",
+    "type": "windows",
+    "build": "20348.587"
+   }
+  },
+  "winlog": {
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "process": {
+    "pid": 2928,
+    "thread": {
+     "id": 4456
+    }
+   },
+   "version": 2,
+   "computer_name": "WIN-EN194VL6R3U",
+   "provider_name": "Microsoft-Windows-Sysmon",
+   "opcode": "Info",
+   "event_id": "11",
+   "event_data": {
+    "ProcessId": "4308",
+    "RuleName": "-",
+    "TargetFilename": "C:\\Users\\sysmaint\\Downloads\\Akira\\Log-24-09-2026-12-20-48.txt",
+    "User": "WIN-EN194VL6R3U\\sysmaint",
+    "CreationUtcTime": "2026-09-24 05:20:48.274",
+    "ProcessGuid": "{8A1A7C51-B330-6AB4-E600-000000000800}",
+    "Image": "C:\\Users\\sysmaint\\Downloads\\Akira\\4afda03ddeb1c62a1f87765ea383f920621134c3f6362959cb9993c24752fcb0.exe",
+    "UtcTime": "2026-09-24 05:20:48.274"
+   },
+   "record_id": 34743,
+   "user": {
+    "identifier": "S-1-5-18",
+    "name": "SYSTEM",
+    "domain": "NT AUTHORITY",
+    "type": "User"
+   },
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "task": "File created (rule: FileCreate)"
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "agent": {
+   "name": "WIN-EN194VL6R3U",
+   "id": "79f0e3c5-4978-41b3-9cb0-6887073110a6",
+   "version": "9.5.4",
+   "ephemeral_id": "e6de7044-92e1-4acf-aa57-e5eb3ca8f3f7",
+   "type": "winlogbeat"
+  },
+  "log": {
+   "level": "information"
+  },
+  "user": {
+   "domain": "WIN-EN194VL6R3U",
+   "name": "sysmaint"
+  },
+  "@timestamp": "2026-09-24T05:20:48.286Z",
+  "file": {
+   "name": "Log-24-09-2026-12-20-48.txt",
+   "path": "C:\\Users\\sysmaint\\Downloads\\Akira\\Log-24-09-2026-12-20-48.txt",
+   "extension": "txt"
+  }
+ }
+]

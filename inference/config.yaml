@@ -1,0 +1,60 @@
+# inference configuration (inference/README.md).
+# Any key can be overridden by an environment variable
+# INFERENCE__<SECTION>__<KEY>, for example
+# INFERENCE__KAFKA__BOOTSTRAP_SERVERS (docker-compose.yml sets them).
+# Unknown keys, inf and NaN are rejected at startup.
+# Logging is set by the environment only: INFERENCE__LOG__LEVEL (INFO) and
+# INFERENCE__LOG__FORMAT (text|json), see inference/README.md section 9.4.
+
+kafka:
+  bootstrap_servers: localhost:9092
+  input_topic: telemetry.windows.normalized
+  # Windows that passed the gate and were reported (event.kind alert).
+  detections_topic: security.ransomware.detections
+  # Every scored window, with the features the model saw (event.kind metric).
+  window_scores_topic: security.ransomware.window-scores
+  group_id: inference
+  # Only used when the consumer group has no committed offset yet.
+  auto_offset_reset: latest
+  # An output record waits at most this long for room in the producer queue; then the
+  # service stops (Docker restarts it and the replay produces the record again).
+  produce_timeout_sec: 10
+  # How long Kafka may take to acknowledge an output record (message.timeout.ms).
+  delivery_timeout_sec: 60
+  # After SIGTERM: emit pending windows and flush within this time. Together with
+  # produce_timeout_sec it must stay below stop_grace_period (30 s) in docker-compose.yml.
+  shutdown_timeout_sec: 15
+  # The healthcheck fails when no broker has been reachable for this long.
+  down_after_sec: 60
+
+window:
+  # Windows per host.id: scheduled (size, slide) and early (inference/README.md section 4.0).
+  size_sec: 60
+  slide_sec: 10
+  # Close the pending window of a host that sent nothing for this long
+  # (host monotonic clock), e.g. after a sample disabled the Sysmon channel. The same window
+  # is sent again, under the same logsentinel.window.id, when more of its events arrive
+  # (inference/README.md section 9.2).
+  idle_flush_sec: 3
+  # Forget the window state of a host that sent nothing for this long.
+  host_evict_sec: 3600
+  max_events_per_host: 200000
+  # A host that sends this many events in a row older than its window has moved
+  # its clock (or one future-dated event pushed the window ahead): follow it.
+  late_reset_events: 20
+
+scoring:
+  # Weights of inference/README.md section 5.3; check them with `make evaluate`.
+  weight_indicator: 0.5
+  weight_global_model: 0.3
+  # null: use the threshold chosen by `make evaluate` (artifacts/model-meta.json). The
+  # service refuses to start unless the weights above are the ones it was chosen for.
+  threshold: null
+  # Re-emit a host's detection without new indicators after this many seconds (0: report every
+  # gated window).
+  reemit_after_sec: 60
+
+# The service refuses to start (exit code 2) unless this directory holds a complete model
+# and a threshold that fit this file.
+artifacts_dir: artifacts
+stats_interval_sec: 60

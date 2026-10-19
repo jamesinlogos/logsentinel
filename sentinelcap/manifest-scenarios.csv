@@ -1,0 +1,8 @@
+family,sample,path,label
+goodware,server-file-workload-continuous,,0
+goodware,server-backup-verify-continuous,,0
+goodware,server-health-monitor-continuous,,0
+goodware,ad-install-operations-continuous,,0
+goodware,scheduled-task-setup,,0
+goodware,disk-cleanup,,0
+goodware,file-encryption,,0

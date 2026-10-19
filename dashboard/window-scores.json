@@ -1,0 +1,1618 @@
+{
+  "title": "Window Scores",
+  "description": "All scored windows: disjoint verdict states, trigger composition, suppression, score distributions, stored thresholds and raw activity.",
+  "options": {
+    "auto_apply_filters": true,
+    "hide_panel_borders": false,
+    "hide_panel_titles": false,
+    "sync_colors": false,
+    "sync_cursor": true,
+    "sync_tooltips": true,
+    "use_margins": true
+  },
+  "query": {
+    "language": "kql",
+    "expression": ""
+  },
+  "filters": [],
+  "tags": [],
+  "time_range": {
+    "from": "now-1y",
+    "to": "now"
+  },
+  "refresh_interval": {
+    "pause": true,
+    "value": 0
+  },
+  "panels": [
+    {
+      "id": "c0d5d3d9-6797-54bb-880c-954abfe03efa",
+      "type": "markdown",
+      "grid": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 6
+      },
+      "config": {
+        "title": "Window scoring",
+        "content": "**Every scored window** · Scheduled (`slide`) and early (`indicator`) windows share the scoring flow. Window time is its end; windows overlap. Gate needs a strong indicator. A high model score alone does not pass the gate.\n\n**Navigate:** [Overview](/app/dashboards#/view/logsentinel-overview) | [Detections](/app/dashboards#/view/ransomware-detections) | [Window Scores](/app/dashboards#/view/window-scores) | [Windows Telemetry](/app/dashboards#/view/windows-telemetry) | [Telemetry Quality](/app/dashboards#/view/telemetry-quality)"
+      }
+    },
+    {
+      "id": "53a74ec5-b310-5c9f-8dd7-d743ab6e3925",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 6,
+        "w": 16,
+        "h": 5
+      },
+      "config": {
+        "type": "metric",
+        "title": "All scored windows",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "ransomware-window-scores-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metrics": [
+          {
+            "type": "primary",
+            "operation": "count",
+            "label": "Windows",
+            "empty_as_null": false,
+            "color": {
+              "type": "auto"
+            }
+          }
+        ],
+        "styling": {
+          "density": "default"
+        }
+      }
+    },
+    {
+      "id": "8836bb04-1a10-5993-b166-4b38571d4a80",
+      "type": "vis",
+      "grid": {
+        "x": 16,
+        "y": 6,
+        "w": 16,
+        "h": 5
+      },
+      "config": {
+        "type": "metric",
+        "title": "Phase 2 gated windows",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "ransomware-window-scores-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "query": {
+          "language": "kql",
+          "expression": "logsentinel.verdict.gated: true"
+        },
+        "metrics": [
+          {
+            "type": "primary",
+            "operation": "count",
+            "label": "Gated",
+            "empty_as_null": false,
+            "color": {
+              "type": "auto"
+            }
+          }
+        ],
+        "styling": {
+          "density": "default"
+        }
+      }
+    },
+    {
+      "id": "514e34b4-2762-5815-ac23-551ec7dd39a7",
+      "type": "vis",
+      "grid": {
+        "x": 32,
+        "y": 6,
+        "w": 16,
+        "h": 5
+      },
+      "config": {
+        "type": "metric",
+        "title": "Suppressed gated windows",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "ransomware-window-scores-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "query": {
+          "language": "kql",
+          "expression": "logsentinel.verdict.gated: true and logsentinel.verdict.reported: false"
+        },
+        "metrics": [
+          {
+            "type": "primary",
+            "operation": "count",
+            "label": "Gated, not reported",
+            "empty_as_null": false,
+            "color": {
+              "type": "auto"
+            }
+          }
+        ],
+        "styling": {
+          "density": "default"
+        }
+      }
+    },
+    {
+      "id": "7fb99ff5-efa6-5729-9762-07c4907ef9f4",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 11,
+        "w": 24,
+        "h": 17
+      },
+      "config": {
+        "type": "pie",
+        "title": "Mutually exclusive window states",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "ransomware-window-scores-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metrics": [
+          {
+            "operation": "count",
+            "label": "Documents",
+            "empty_as_null": false
+          }
+        ],
+        "group_by": [
+          {
+            "operation": "filters",
+            "filters": [
+              {
+                "label": "Ungated",
+                "filter": {
+                  "language": "kql",
+                  "expression": "logsentinel.verdict.gated: false"
+                }
+              },
+              {
+                "label": "Suppressed, below threshold",
+                "filter": {
+                  "language": "kql",
+                  "expression": "logsentinel.verdict.gated: true and logsentinel.verdict.reported: false and logsentinel.verdict.suspicious: false"
+                }
+              },
+              {
+                "label": "Suppressed, suspicious",
+                "filter": {
+                  "language": "kql",
+                  "expression": "logsentinel.verdict.gated: true and logsentinel.verdict.reported: false and logsentinel.verdict.suspicious: true"
+                }
+              },
+              {
+                "label": "Reported, indicator match",
+                "filter": {
+                  "language": "kql",
+                  "expression": "logsentinel.verdict.gated: true and logsentinel.verdict.reported: true and logsentinel.verdict.suspicious: false"
+                }
+              },
+              {
+                "label": "Reported, suspicious",
+                "filter": {
+                  "language": "kql",
+                  "expression": "logsentinel.verdict.gated: true and logsentinel.verdict.reported: true and logsentinel.verdict.suspicious: true"
+                }
+              }
+            ],
+            "color": {
+              "mode": "categorical",
+              "palette": "elastic_line_optimized",
+              "mapping": [
+                {
+                  "values": [
+                    "Suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "suspicious_ransomware_behavior"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "Indicator match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "indicator_match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "Ungated"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#6092C0"
+                  }
+                },
+                {
+                  "values": [
+                    "Passed gate"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#54B399"
+                  }
+                },
+                {
+                  "values": [
+                    "Suppressed, below threshold"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "Suppressed, suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#AA6556"
+                  }
+                },
+                {
+                  "values": [
+                    "Reported, indicator match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#54B399"
+                  }
+                },
+                {
+                  "values": [
+                    "Reported, suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "slide"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#6092C0"
+                  }
+                },
+                {
+                  "values": [
+                    "indicator"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "styling": {
+          "donut_hole": "m",
+          "labels": {
+            "visible": true,
+            "position": "outside"
+          },
+          "values": {
+            "visible": true,
+            "mode": "percentage",
+            "percent_decimals": 1
+          }
+        },
+        "legend": {
+          "visibility": "visible",
+          "position": "right",
+          "size": "m"
+        }
+      }
+    },
+    {
+      "id": "942285c9-2869-56fa-86d0-719de72bc3d4",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 11,
+        "w": 24,
+        "h": 17
+      },
+      "config": {
+        "type": "xy",
+        "title": "Window outcomes over time",
+        "layers": [
+          {
+            "type": "area_stacked",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-window-scores-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "date_histogram",
+              "field": "@timestamp",
+              "label": "Event time",
+              "suggested_interval": "auto",
+              "use_original_time_range": false,
+              "include_empty_rows": true,
+              "drop_partial_intervals": false
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Windows",
+                "empty_as_null": false
+              }
+            ],
+            "breakdown_by": {
+              "operation": "filters",
+              "filters": [
+                {
+                  "label": "Ungated",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.gated: false"
+                  }
+                },
+                {
+                  "label": "Suppressed, below threshold",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.gated: true and logsentinel.verdict.reported: false and logsentinel.verdict.suspicious: false"
+                  }
+                },
+                {
+                  "label": "Suppressed, suspicious",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.gated: true and logsentinel.verdict.reported: false and logsentinel.verdict.suspicious: true"
+                  }
+                },
+                {
+                  "label": "Reported, indicator match",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.gated: true and logsentinel.verdict.reported: true and logsentinel.verdict.suspicious: false"
+                  }
+                },
+                {
+                  "label": "Reported, suspicious",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.gated: true and logsentinel.verdict.reported: true and logsentinel.verdict.suspicious: true"
+                  }
+                }
+              ],
+              "color": {
+                "mode": "categorical",
+                "palette": "elastic_line_optimized",
+                "mapping": [
+                  {
+                    "values": [
+                      "Suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "suspicious_ransomware_behavior"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Indicator match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "indicator_match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Ungated"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#6092C0"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Passed gate"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#54B399"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Suppressed, below threshold"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Suppressed, suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#AA6556"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Reported, indicator match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#54B399"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Reported, suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "slide"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#6092C0"
+                    }
+                  },
+                  {
+                    "values": [
+                      "indicator"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  }
+                ]
+              },
+              "aggregate_first": true
+            }
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "styling": {
+          "fitting": {
+            "type": "zero",
+            "extend": "none"
+          },
+          "areas": {
+            "fill_opacity": 0.65
+          },
+          "interpolation": "stepped"
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "id": "624651c9-412e-50b2-8cbb-c6277e5c7607",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 28,
+        "w": 24,
+        "h": 15
+      },
+      "config": {
+        "type": "pie",
+        "title": "Scheduled vs early windows",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "ransomware-window-scores-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metrics": [
+          {
+            "operation": "count",
+            "label": "Documents",
+            "empty_as_null": false
+          }
+        ],
+        "group_by": [
+          {
+            "operation": "terms",
+            "fields": [
+              "logsentinel.window.trigger"
+            ],
+            "label": "Trigger",
+            "limit": 5,
+            "other_bucket": {
+              "include_documents_without_field": false
+            },
+            "rank_by": {
+              "type": "metric",
+              "metric_index": 0,
+              "direction": "desc"
+            },
+            "color": {
+              "mode": "categorical",
+              "palette": "elastic_line_optimized",
+              "mapping": [
+                {
+                  "values": [
+                    "Suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "suspicious_ransomware_behavior"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "Indicator match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "indicator_match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "Ungated"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#6092C0"
+                  }
+                },
+                {
+                  "values": [
+                    "Passed gate"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#54B399"
+                  }
+                },
+                {
+                  "values": [
+                    "Suppressed, below threshold"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                },
+                {
+                  "values": [
+                    "Suppressed, suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#AA6556"
+                  }
+                },
+                {
+                  "values": [
+                    "Reported, indicator match"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#54B399"
+                  }
+                },
+                {
+                  "values": [
+                    "Reported, suspicious"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D36086"
+                  }
+                },
+                {
+                  "values": [
+                    "slide"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#6092C0"
+                  }
+                },
+                {
+                  "values": [
+                    "indicator"
+                  ],
+                  "color": {
+                    "type": "color_code",
+                    "value": "#D6BF57"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "styling": {
+          "donut_hole": "m",
+          "labels": {
+            "visible": true,
+            "position": "outside"
+          },
+          "values": {
+            "visible": true,
+            "mode": "percentage",
+            "percent_decimals": 1
+          }
+        },
+        "legend": {
+          "visibility": "visible",
+          "position": "right",
+          "size": "m"
+        }
+      }
+    },
+    {
+      "id": "b94034e9-403e-5532-8691-dd4f7397a178",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 28,
+        "w": 24,
+        "h": 15
+      },
+      "config": {
+        "type": "heatmap",
+        "title": "Trigger intensity × time",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "ransomware-window-scores-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "metric": {
+          "operation": "count",
+          "label": "Documents",
+          "empty_as_null": false,
+          "color": {
+            "type": "distributed_palette",
+            "palette": "cool"
+          }
+        },
+        "x": {
+          "operation": "date_histogram",
+          "field": "@timestamp",
+          "label": "Event time",
+          "suggested_interval": "auto",
+          "use_original_time_range": false,
+          "include_empty_rows": true,
+          "drop_partial_intervals": false
+        },
+        "y": {
+          "operation": "terms",
+          "fields": [
+            "logsentinel.window.trigger"
+          ],
+          "label": "Trigger",
+          "limit": 5,
+          "other_bucket": {
+            "include_documents_without_field": false
+          },
+          "rank_by": {
+            "type": "metric",
+            "metric_index": 0,
+            "direction": "desc"
+          }
+        },
+        "axis": {
+          "x": {
+            "scale": "ordinal",
+            "labels": {
+              "visible": true
+            },
+            "title": {
+              "visible": true
+            }
+          },
+          "y": {
+            "labels": {
+              "visible": true
+            },
+            "title": {
+              "visible": true
+            }
+          }
+        },
+        "styling": {
+          "cells": {
+            "labels": {
+              "visible": false
+            }
+          }
+        },
+        "legend": {
+          "visibility": "visible",
+          "position": "right"
+        }
+      }
+    },
+    {
+      "id": "ecdbbdb0-bc9e-5adc-8bf8-f8c36ce70715",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 43,
+        "w": 24,
+        "h": 15
+      },
+      "config": {
+        "type": "xy",
+        "title": "Model score distribution | 0–1, includes zero",
+        "layers": [
+          {
+            "type": "bar_stacked",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-window-scores-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "filters",
+              "filters": [
+                {
+                  "label": "[0, 0.1]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.scores.model >= 0 and logsentinel.verdict.scores.model <= 0.1"
+                  }
+                },
+                {
+                  "label": "(0.1, 0.2]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.scores.model > 0.1 and logsentinel.verdict.scores.model <= 0.2"
+                  }
+                },
+                {
+                  "label": "(0.2, 0.3]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.scores.model > 0.2 and logsentinel.verdict.scores.model <= 0.3"
+                  }
+                },
+                {
+                  "label": "(0.3, 0.4]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.scores.model > 0.3 and logsentinel.verdict.scores.model <= 0.4"
+                  }
+                },
+                {
+                  "label": "(0.4, 0.5]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.scores.model > 0.4 and logsentinel.verdict.scores.model <= 0.5"
+                  }
+                },
+                {
+                  "label": "(0.5, 0.6]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.scores.model > 0.5 and logsentinel.verdict.scores.model <= 0.6"
+                  }
+                },
+                {
+                  "label": "(0.6, 0.7]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.scores.model > 0.6 and logsentinel.verdict.scores.model <= 0.7"
+                  }
+                },
+                {
+                  "label": "(0.7, 0.8]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.scores.model > 0.7 and logsentinel.verdict.scores.model <= 0.8"
+                  }
+                },
+                {
+                  "label": "(0.8, 0.9]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.scores.model > 0.8 and logsentinel.verdict.scores.model <= 0.9"
+                  }
+                },
+                {
+                  "label": "(0.9, 1]",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.scores.model > 0.9 and logsentinel.verdict.scores.model <= 1"
+                  }
+                }
+              ]
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Windows",
+                "empty_as_null": false
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "hidden"
+        }
+      }
+    },
+    {
+      "id": "96e64da2-e876-5692-946b-0b158c7a731f",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 43,
+        "w": 24,
+        "h": 15
+      },
+      "config": {
+        "type": "xy",
+        "title": "Score peaks and stored threshold bounds",
+        "layers": [
+          {
+            "type": "line",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-window-scores-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "date_histogram",
+              "field": "@timestamp",
+              "label": "Event time",
+              "suggested_interval": "auto",
+              "use_original_time_range": false,
+              "include_empty_rows": true,
+              "drop_partial_intervals": false
+            },
+            "y": [
+              {
+                "operation": "max",
+                "label": "Max model score",
+                "field": "logsentinel.verdict.scores.model"
+              },
+              {
+                "operation": "max",
+                "label": "Max indicator score",
+                "field": "logsentinel.verdict.scores.indicator"
+              },
+              {
+                "operation": "max",
+                "label": "Max confidence (gated)",
+                "field": "logsentinel.verdict.confidence_score"
+              },
+              {
+                "operation": "min",
+                "label": "Min stored threshold",
+                "field": "logsentinel.verdict.threshold"
+              },
+              {
+                "operation": "max",
+                "label": "Max stored threshold",
+                "field": "logsentinel.verdict.threshold"
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "styling": {
+          "fitting": {
+            "type": "none",
+            "extend": "none"
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "id": "19a89557-3d19-575c-93a4-bb2fcd4d6447",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 58,
+        "w": 24,
+        "h": 16
+      },
+      "config": {
+        "type": "xy",
+        "title": "Indicators | reported vs suppressed (overlapping counts)",
+        "layers": [
+          {
+            "type": "bar_horizontal_stacked",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-window-scores-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "terms",
+              "fields": [
+                "logsentinel.verdict.indicators"
+              ],
+              "label": "Indicator",
+              "limit": 15,
+              "other_bucket": {
+                "include_documents_without_field": false
+              },
+              "rank_by": {
+                "type": "metric",
+                "metric_index": 0,
+                "direction": "desc"
+              }
+            },
+            "y": [
+              {
+                "operation": "count",
+                "label": "Gated windows",
+                "empty_as_null": false
+              }
+            ],
+            "breakdown_by": {
+              "operation": "filters",
+              "filters": [
+                {
+                  "label": "Reported",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.reported: true"
+                  }
+                },
+                {
+                  "label": "Suppressed",
+                  "filter": {
+                    "language": "kql",
+                    "expression": "logsentinel.verdict.reported: false"
+                  }
+                }
+              ],
+              "color": {
+                "mode": "categorical",
+                "palette": "elastic_line_optimized",
+                "mapping": [
+                  {
+                    "values": [
+                      "Suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "suspicious_ransomware_behavior"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Indicator match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "indicator_match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Ungated"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#6092C0"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Passed gate"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#54B399"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Suppressed, below threshold"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Suppressed, suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#AA6556"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Reported, indicator match"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#54B399"
+                    }
+                  },
+                  {
+                    "values": [
+                      "Reported, suspicious"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D36086"
+                    }
+                  },
+                  {
+                    "values": [
+                      "slide"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#6092C0"
+                    }
+                  },
+                  {
+                    "values": [
+                      "indicator"
+                    ],
+                    "color": {
+                      "type": "color_code",
+                      "value": "#D6BF57"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": "logsentinel.verdict.gated: true"
+        },
+        "styling": {
+          "bars": {
+            "data_labels": {
+              "visible": true
+            }
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "id": "cd67b32e-11e7-5c1c-a171-6fceb08b8a18",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 58,
+        "w": 24,
+        "h": 16
+      },
+      "config": {
+        "type": "data_table",
+        "title": "Historical model and threshold context",
+        "data_source": {
+          "type": "data_view_spec",
+          "index_pattern": "ransomware-window-scores-*",
+          "time_field": "@timestamp"
+        },
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "rows": [
+          {
+            "operation": "terms",
+            "fields": [
+              "logsentinel.model.version"
+            ],
+            "label": "Model version",
+            "limit": 10,
+            "other_bucket": {
+              "include_documents_without_field": false
+            },
+            "rank_by": {
+              "type": "metric",
+              "metric_index": 0,
+              "direction": "desc"
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "operation": "count",
+            "label": "Windows",
+            "empty_as_null": false
+          },
+          {
+            "operation": "min",
+            "label": "Min threshold",
+            "field": "logsentinel.verdict.threshold"
+          },
+          {
+            "operation": "max",
+            "label": "Max threshold",
+            "field": "logsentinel.verdict.threshold"
+          },
+          {
+            "operation": "min",
+            "label": "First window",
+            "field": "@timestamp"
+          },
+          {
+            "operation": "last_value",
+            "label": "Last window",
+            "field": "@timestamp",
+            "time_field": "@timestamp",
+            "multi_value": true,
+            "filter": {
+              "language": "kql",
+              "expression": "\"@timestamp\": *"
+            }
+          }
+        ],
+        "styling": {
+          "row_numbers": {
+            "visible": true
+          }
+        }
+      }
+    },
+    {
+      "id": "24ec15a7-97fa-583b-961d-4b59e59965b6",
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 74,
+        "w": 24,
+        "h": 15
+      },
+      "config": {
+        "type": "xy",
+        "title": "Peak raw file activity per scored window",
+        "layers": [
+          {
+            "type": "line",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-window-scores-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "date_histogram",
+              "field": "@timestamp",
+              "label": "Event time",
+              "suggested_interval": "auto",
+              "use_original_time_range": false,
+              "include_empty_rows": true,
+              "drop_partial_intervals": false
+            },
+            "y": [
+              {
+                "operation": "max",
+                "label": "Max created files / window",
+                "field": "logsentinel.window.activity.created_files"
+              },
+              {
+                "operation": "max",
+                "label": "Max per-process deletes / window",
+                "field": "logsentinel.window.activity.max_deletes"
+              },
+              {
+                "operation": "max",
+                "label": "Max per-process replacements / window",
+                "field": "logsentinel.window.activity.max_replaced_files"
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "styling": {
+          "fitting": {
+            "type": "none",
+            "extend": "none"
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "id": "7b89507f-5668-55b2-b3ab-cb2655c129ca",
+      "type": "vis",
+      "grid": {
+        "x": 24,
+        "y": 74,
+        "w": 24,
+        "h": 15
+      },
+      "config": {
+        "type": "xy",
+        "title": "Peak raw registry and command activity per window",
+        "layers": [
+          {
+            "type": "line",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-window-scores-*",
+              "time_field": "@timestamp"
+            },
+            "sampling": 1,
+            "ignore_global_filters": false,
+            "x": {
+              "operation": "date_histogram",
+              "field": "@timestamp",
+              "label": "Event time",
+              "suggested_interval": "auto",
+              "use_original_time_range": false,
+              "include_empty_rows": true,
+              "drop_partial_intervals": false
+            },
+            "y": [
+              {
+                "operation": "max",
+                "label": "Max Run-key writes / window",
+                "field": "logsentinel.window.activity.run_key_writes"
+              },
+              {
+                "operation": "max",
+                "label": "Max policy writes / window",
+                "field": "logsentinel.window.activity.policy_writes"
+              },
+              {
+                "operation": "max",
+                "label": "Max shadow commands / window",
+                "field": "logsentinel.window.activity.shadow_commands"
+              },
+              {
+                "operation": "max",
+                "label": "Max log tamper / window",
+                "field": "logsentinel.window.activity.log_tamper"
+              }
+            ]
+          }
+        ],
+        "query": {
+          "language": "kql",
+          "expression": ""
+        },
+        "styling": {
+          "fitting": {
+            "type": "none",
+            "extend": "none"
+          }
+        },
+        "axis": {
+          "x": {
+            "title": {
+              "visible": true
+            },
+            "labels": {
+              "orientation": "horizontal"
+            }
+          },
+          "y": {
+            "title": {
+              "visible": true
+            },
+            "scale": "linear"
+          }
+        },
+        "legend": {
+          "placement": "outside",
+          "position": "bottom",
+          "layout": {
+            "type": "list"
+          },
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "id": "355ca02a-78ca-5c68-b878-17851cb69321",
+      "type": "markdown",
+      "grid": {
+        "x": 0,
+        "y": 89,
+        "w": 48,
+        "h": 5
+      },
+      "config": {
+        "title": "Score interpretation",
+        "content": "Ungated windows normally omit confidence/label. Suspicious compares confidence with that document's threshold; suppression determines reporting. The five states partition valid verdicts; Telemetry Quality checks exceptions. Score peaks/threshold bounds can come from different windows. Raw activity maxima are not additive totals."
+      }
+    },
+    {
+      "id": "f93e3587-25b1-5ce8-b130-b0578c6923e6",
+      "type": "discover_session",
+      "grid": {
+        "x": 0,
+        "y": 94,
+        "w": 48,
+        "h": 18
+      },
+      "config": {
+        "title": "Window evidence | flags, confidence and threshold on one row",
+        "tabs": [
+          {
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "ransomware-window-scores-*",
+              "time_field": "@timestamp"
+            },
+            "query": {
+              "language": "kql",
+              "expression": ""
+            },
+            "column_order": [
+              "@timestamp",
+              "host.name",
+              "logsentinel.window.trigger",
+              "logsentinel.verdict.gated",
+              "logsentinel.verdict.suspicious",
+              "logsentinel.verdict.reported",
+              "logsentinel.verdict.scores.model",
+              "logsentinel.verdict.confidence_score",
+              "logsentinel.verdict.threshold",
+              "logsentinel.window.id"
+            ],
+            "sort": [
+              {
+                "name": "@timestamp",
+                "direction": "desc"
+              }
+            ],
+            "rows_per_page": 25,
+            "view_mode": "documents"
+          }
+        ]
+      }
+    }
+  ],
+  "pinned_panels": []
+}

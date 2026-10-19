@@ -1,0 +1,33 @@
+{
+  "format": "logsentinel.normalized-sysmon.jsonl/v1",
+  "session_id": "3de1013a-031b-4e91-85b6-3b31cf30bf19",
+  "source": {
+    "kafka_topic": "telemetry.windows.normalized",
+    "host_id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+    "processing": "none; original normalized Kafka payloads"
+  },
+  "label": {
+    "target_class_name": "akira-c974d8c6a1ce2eb12f0eca40e8782dea046d707f04ad65aae98af3c1b4ca6ce6",
+    "target_class": 1
+  },
+  "mode": "execute",
+  "t_start": "2026-10-01T01:50:51.696Z",
+  "t_end": "2026-10-01T01:55:22.052Z",
+  "clock_offset_sec": 0.0,
+  "event_count": 8727,
+  "pipeline_lag_max_sec": 1.893,
+  "pipeline_lag_p50_sec": 1.038,
+  "skipped_other_hosts": 0,
+  "skipped_invalid": 0,
+  "skipped_outside_session": 253,
+  "environment": {
+    "sentinelcap_version": "1.0.0",
+    "snapshot": "baseline",
+    "windows_build": "20348.587",
+    "winlogbeat_version": "9.5.4"
+  },
+  "process_entity_id": "{8A1A7C51-BC7B-6ABD-AC01-000000001100}",
+  "sample_entity_ids": [
+    "{8A1A7C51-BC7B-6ABD-AC01-000000001100}"
+  ]
+}

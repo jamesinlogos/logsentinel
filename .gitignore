@@ -1,0 +1,16 @@
+# Python and tool caches
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.venv/
+
+# Capture data and malware samples stay on the lab machine (AGENTS.md section 1)
+/sentinelcap/captures/
+/sentinelcap/samples/
+
+# Backups, transcripts and stack exports: local only, they hold data and credentials
+/archives/
+/logsentinel-migration/

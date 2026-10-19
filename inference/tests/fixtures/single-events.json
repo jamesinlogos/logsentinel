@@ -1,0 +1,1124 @@
+{
+ "wmic_shadowcopy_delete": {
+  "log": {
+   "level": "information"
+  },
+  "threat": {
+   "framework": "MITRE ATT&CK",
+   "technique": {
+    "id": "T1490",
+    "name": "Inhibit System Recovery"
+   }
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "event": {
+   "category": [
+    "process"
+   ],
+   "provider": "Microsoft-Windows-Sysmon",
+   "kind": "event",
+   "action": "Process Create (rule: ProcessCreate)",
+   "code": "1",
+   "created": "2026-10-01T02:29:44.825Z",
+   "type": [
+    "start"
+   ]
+  },
+  "agent": {
+   "name": "WIN-EN194VL6R3U",
+   "ephemeral_id": "cdc310e6-1b0d-49af-89ac-b08188b1140a",
+   "id": "b4108291-0a6d-4b73-85cd-bf5a5c004226",
+   "type": "winlogbeat",
+   "version": "9.5.4"
+  },
+  "@timestamp": "2026-10-01T02:29:43.681Z",
+  "winlog": {
+   "record_id": 226943,
+   "opcode": "Info",
+   "version": 5,
+   "computer_name": "WIN-EN194VL6R3U",
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "event_id": "1",
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "event_data": {
+    "CurrentDirectory": "D:\\Backup\\DB_Exports\\",
+    "ProcessId": "6212",
+    "User": "WIN-EN194VL6R3U\\sysmaint",
+    "ParentUser": "WIN-EN194VL6R3U\\sysmaint",
+    "UtcTime": "2026-10-01 02:29:43.653",
+    "IntegrityLevel": "Medium",
+    "Product": "Microsoft\u00ae Windows\u00ae Operating System",
+    "CommandLine": "wmic  shadowcopy delete",
+    "FileVersion": "10.0.20348.1 (WinBuild.160101.0800)",
+    "Company": "Microsoft Corporation",
+    "Description": "WMI Commandline Utility",
+    "ParentProcessId": "1016",
+    "ProcessGuid": "{8A1A7C51-C597-6ABD-AD01-000000001100}",
+    "Hashes": "SHA1=7A0B7B46963EAA0E2660EC5D890E79A4C3DDDC6A,MD5=6E7CA64D4777CACA3B0CF45325346DB7,SHA256=8ED213369A33EBC38593338C3187457885F49EAE6119FA494D930198C057A730,IMPHASH=9D9F907E7E0343A56BD66CC471DC69CF",
+    "ParentProcessGuid": "{8A1A7C51-C597-6ABD-AB01-000000001100}",
+    "Image": "C:\\Windows\\System32\\wbem\\WMIC.exe",
+    "ParentImage": "C:\\Windows\\System32\\cmd.exe",
+    "OriginalFileName": "wmic.exe",
+    "TerminalSessionId": "5",
+    "LogonId": "0x2e9e5f",
+    "LogonGuid": "{8A1A7C51-E82D-6ABC-5F9E-2E0000000000}",
+    "ParentCommandLine": "cmd.exe /C wmic shadowcopy delete",
+    "RuleName": "technique_id=T1490,technique_name=Inhibit System Recovery"
+   },
+   "task": "Process Create (rule: ProcessCreate)",
+   "user": {
+    "name": "SYSTEM",
+    "identifier": "S-1-5-18",
+    "domain": "NT AUTHORITY",
+    "type": "User"
+   },
+   "process": {
+    "pid": 1580,
+    "thread": {
+     "id": 4536
+    }
+   },
+   "provider_name": "Microsoft-Windows-Sysmon"
+  },
+  "host": {
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.0.20"
+   ],
+   "name": "win-en194vl6r3u",
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "hostname": "WIN-EN194VL6R3U",
+   "architecture": "x86_64",
+   "os": {
+    "family": "windows",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "version": "10.0",
+    "platform": "windows",
+    "build": "20348.587",
+    "type": "windows"
+   }
+  },
+  "user": {
+   "domain": "WIN-EN194VL6R3U",
+   "name": "sysmaint"
+  },
+  "process": {
+   "name": "WMIC.exe",
+   "executable": "C:\\Windows\\System32\\wbem\\WMIC.exe",
+   "parent": {
+    "name": "cmd.exe",
+    "pid": 1016,
+    "entity_id": "{8A1A7C51-C597-6ABD-AB01-000000001100}",
+    "executable": "C:\\Windows\\System32\\cmd.exe",
+    "command_line": "cmd.exe /C wmic shadowcopy delete"
+   },
+   "command_line": "wmic  shadowcopy delete",
+   "pe": {
+    "imphash": "9d9f907e7e0343a56bd66cc471dc69cf",
+    "product": "Microsoft\u00ae Windows\u00ae Operating System",
+    "company": "Microsoft Corporation",
+    "file_version": "10.0.20348.1 (WinBuild.160101.0800)",
+    "description": "WMI Commandline Utility",
+    "original_file_name": "wmic.exe"
+   },
+   "pid": 6212,
+   "entity_id": "{8A1A7C51-C597-6ABD-AD01-000000001100}",
+   "working_directory": "D:\\Backup\\DB_Exports\\",
+   "hash": {
+    "md5": "6e7ca64d4777caca3b0cf45325346db7",
+    "sha256": "8ed213369a33ebc38593338c3187457885f49eae6119fa494d930198c057a730",
+    "sha1": "7a0b7b46963eaa0e2660ec5d890e79a4c3dddc6a"
+   }
+  },
+  "rule": {
+   "name": "technique_id=T1490,technique_name=Inhibit System Recovery"
+  }
+ },
+ "wevtutil_clear_log": {
+  "log": {
+   "level": "information"
+  },
+  "threat": {
+   "framework": "MITRE ATT&CK",
+   "technique": {
+    "id": "T1685",
+    "subtechnique": {
+     "id": "T1685.005",
+     "name": "Clear Windows Event Logs"
+    }
+   }
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "event": {
+   "category": [
+    "process"
+   ],
+   "provider": "Microsoft-Windows-Sysmon",
+   "kind": "event",
+   "action": "Process Create (rule: ProcessCreate)",
+   "code": "1",
+   "created": "2026-10-01T02:29:45.926Z",
+   "type": [
+    "start"
+   ]
+  },
+  "agent": {
+   "name": "WIN-EN194VL6R3U",
+   "ephemeral_id": "cdc310e6-1b0d-49af-89ac-b08188b1140a",
+   "id": "b4108291-0a6d-4b73-85cd-bf5a5c004226",
+   "type": "winlogbeat",
+   "version": "9.5.4"
+  },
+  "@timestamp": "2026-10-01T02:29:44.997Z",
+  "winlog": {
+   "record_id": 227103,
+   "opcode": "Info",
+   "version": 5,
+   "computer_name": "WIN-EN194VL6R3U",
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "event_id": "1",
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "event_data": {
+    "CurrentDirectory": "D:\\Backup\\DB_Exports\\",
+    "ProcessId": "4300",
+    "User": "WIN-EN194VL6R3U\\sysmaint",
+    "ParentUser": "WIN-EN194VL6R3U\\sysmaint",
+    "UtcTime": "2026-10-01 02:29:44.991",
+    "IntegrityLevel": "Medium",
+    "Product": "Microsoft\u00ae Windows\u00ae Operating System",
+    "CommandLine": "wevtutil  cl Application",
+    "FileVersion": "10.0.20348.1 (WinBuild.160101.0800)",
+    "Company": "Microsoft Corporation",
+    "Description": "Eventing Command Line Utility",
+    "ParentProcessId": "1564",
+    "ProcessGuid": "{8A1A7C51-C598-6ABD-C501-000000001100}",
+    "Hashes": "SHA1=0272568B7234BFA54133740B38CEEE7D9ED51ABA,MD5=9041407BE0BDCA2858AEBAD19E63EB14,SHA256=2BFCE8F56E3270DE28E13FF0C001FD8169223AAA21E12DDF68448E72F697FC48,IMPHASH=F201BCA438D2C46D950FC1DDB0A66687",
+    "ParentProcessGuid": "{8A1A7C51-C598-6ABD-C301-000000001100}",
+    "Image": "C:\\Windows\\System32\\wevtutil.exe",
+    "ParentImage": "C:\\Windows\\System32\\cmd.exe",
+    "OriginalFileName": "wevtutil.exe",
+    "TerminalSessionId": "5",
+    "LogonId": "0x2e9e5f",
+    "LogonGuid": "{8A1A7C51-E82D-6ABC-5F9E-2E0000000000}",
+    "ParentCommandLine": "cmd.exe /C wevtutil cl Application",
+    "RuleName": "technique_id=T1685.005,technique_name=Clear Windows Event Logs"
+   },
+   "task": "Process Create (rule: ProcessCreate)",
+   "user": {
+    "name": "SYSTEM",
+    "identifier": "S-1-5-18",
+    "domain": "NT AUTHORITY",
+    "type": "User"
+   },
+   "process": {
+    "pid": 1580,
+    "thread": {
+     "id": 4536
+    }
+   },
+   "provider_name": "Microsoft-Windows-Sysmon"
+  },
+  "host": {
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.0.20"
+   ],
+   "name": "win-en194vl6r3u",
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "hostname": "WIN-EN194VL6R3U",
+   "architecture": "x86_64",
+   "os": {
+    "family": "windows",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "version": "10.0",
+    "platform": "windows",
+    "build": "20348.587",
+    "type": "windows"
+   }
+  },
+  "user": {
+   "domain": "WIN-EN194VL6R3U",
+   "name": "sysmaint"
+  },
+  "process": {
+   "name": "wevtutil.exe",
+   "executable": "C:\\Windows\\System32\\wevtutil.exe",
+   "parent": {
+    "name": "cmd.exe",
+    "pid": 1564,
+    "entity_id": "{8A1A7C51-C598-6ABD-C301-000000001100}",
+    "executable": "C:\\Windows\\System32\\cmd.exe",
+    "command_line": "cmd.exe /C wevtutil cl Application"
+   },
+   "command_line": "wevtutil  cl Application",
+   "pe": {
+    "imphash": "f201bca438d2c46d950fc1ddb0a66687",
+    "product": "Microsoft\u00ae Windows\u00ae Operating System",
+    "company": "Microsoft Corporation",
+    "file_version": "10.0.20348.1 (WinBuild.160101.0800)",
+    "description": "Eventing Command Line Utility",
+    "original_file_name": "wevtutil.exe"
+   },
+   "pid": 4300,
+   "entity_id": "{8A1A7C51-C598-6ABD-C501-000000001100}",
+   "working_directory": "D:\\Backup\\DB_Exports\\",
+   "hash": {
+    "md5": "9041407be0bdca2858aebad19e63eb14",
+    "sha256": "2bfce8f56e3270de28e13ff0c001fd8169223aaa21e12ddf68448e72f697fc48",
+    "sha1": "0272568b7234bfa54133740b38ceee7d9ed51aba"
+   }
+  },
+  "rule": {
+   "name": "technique_id=T1685.005,technique_name=Clear Windows Event Logs"
+  }
+ },
+ "sysmon_channel_disabled": {
+  "log": {
+   "level": "information"
+  },
+  "registry": {
+   "data": {
+    "strings": "DWORD (0x00000000)"
+   },
+   "path": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\Microsoft-Windows-Sysmon/Operational\\Enabled",
+   "hive": "HKLM"
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "event": {
+   "category": [
+    "configuration",
+    "registry"
+   ],
+   "provider": "Microsoft-Windows-Sysmon",
+   "kind": "event",
+   "action": "Registry value set (rule: RegistryEvent)",
+   "code": "13",
+   "created": "2026-10-01T03:23:05.358Z",
+   "type": [
+    "change"
+   ]
+  },
+  "agent": {
+   "name": "WIN-EN194VL6R3U",
+   "ephemeral_id": "cdc310e6-1b0d-49af-89ac-b08188b1140a",
+   "id": "b4108291-0a6d-4b73-85cd-bf5a5c004226",
+   "type": "winlogbeat",
+   "version": "9.5.4"
+  },
+  "@timestamp": "2026-10-01T03:23:05.259Z",
+  "winlog": {
+   "record_id": 231293,
+   "opcode": "Info",
+   "version": 2,
+   "computer_name": "WIN-EN194VL6R3U",
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "event_id": "13",
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "event_data": {
+    "Image": "D:\\Backup\\FileServer\\2026\\order_75bd.exe",
+    "ProcessId": "5248",
+    "EventType": "SetValue",
+    "User": "WIN-EN194VL6R3U\\sysmaint",
+    "RuleName": "-",
+    "UtcTime": "2026-10-01 03:23:05.258",
+    "ProcessGuid": "{8A1A7C51-D1BD-6ABD-B701-000000001100}",
+    "Details": "DWORD (0x00000000)",
+    "TargetObject": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\Microsoft-Windows-Sysmon/Operational\\Enabled"
+   },
+   "task": "Registry value set (rule: RegistryEvent)",
+   "user": {
+    "name": "SYSTEM",
+    "identifier": "S-1-5-18",
+    "domain": "NT AUTHORITY",
+    "type": "User"
+   },
+   "process": {
+    "pid": 1580,
+    "thread": {
+     "id": 4536
+    }
+   },
+   "provider_name": "Microsoft-Windows-Sysmon"
+  },
+  "host": {
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.0.20"
+   ],
+   "name": "win-en194vl6r3u",
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "hostname": "WIN-EN194VL6R3U",
+   "architecture": "x86_64",
+   "os": {
+    "family": "windows",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "version": "10.0",
+    "platform": "windows",
+    "build": "20348.587",
+    "type": "windows"
+   }
+  },
+  "user": {
+   "domain": "WIN-EN194VL6R3U",
+   "name": "sysmaint"
+  },
+  "process": {
+   "name": "order_75bd.exe",
+   "pid": 5248,
+   "entity_id": "{8A1A7C51-D1BD-6ABD-B701-000000001100}",
+   "executable": "D:\\Backup\\FileServer\\2026\\order_75bd.exe"
+  }
+ },
+ "enable_linked_connections": {
+  "log": {
+   "level": "information"
+  },
+  "threat": {
+   "framework": "MITRE ATT&CK",
+   "technique": {
+    "id": "T1548",
+    "subtechnique": {
+     "id": "T1548.002",
+     "name": "Bypass User Account Control"
+    }
+   }
+  },
+  "registry": {
+   "data": {
+    "strings": "DWORD (0x00000001)"
+   },
+   "path": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\EnableLinkedConnections",
+   "hive": "HKLM"
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "event": {
+   "category": [
+    "configuration",
+    "registry"
+   ],
+   "provider": "Microsoft-Windows-Sysmon",
+   "kind": "event",
+   "action": "Registry value set (rule: RegistryEvent)",
+   "code": "13",
+   "created": "2026-10-01T07:53:43.122Z",
+   "type": [
+    "change"
+   ]
+  },
+  "agent": {
+   "name": "WIN-EN194VL6R3U",
+   "ephemeral_id": "cdc310e6-1b0d-49af-89ac-b08188b1140a",
+   "id": "b4108291-0a6d-4b73-85cd-bf5a5c004226",
+   "type": "winlogbeat",
+   "version": "9.5.4"
+  },
+  "@timestamp": "2026-10-01T07:53:42.463Z",
+  "winlog": {
+   "record_id": 227031,
+   "opcode": "Info",
+   "version": 2,
+   "computer_name": "WIN-EN194VL6R3U",
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "event_id": "13",
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "event_data": {
+    "Image": "C:\\Users\\Administrator\\Pictures\\2023\\2023-04_Site_Visit\\forecast_708e.exe",
+    "ProcessId": "1348",
+    "EventType": "SetValue",
+    "User": "WIN-EN194VL6R3U\\sysmaint",
+    "RuleName": "technique_id=T1548.002,technique_name=Bypass User Account Control",
+    "UtcTime": "2026-10-01 07:53:42.462",
+    "ProcessGuid": "{8A1A7C51-1185-6ABE-AD01-000000001100}",
+    "Details": "DWORD (0x00000001)",
+    "TargetObject": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\EnableLinkedConnections"
+   },
+   "task": "Registry value set (rule: RegistryEvent)",
+   "user": {
+    "name": "SYSTEM",
+    "identifier": "S-1-5-18",
+    "domain": "NT AUTHORITY",
+    "type": "User"
+   },
+   "process": {
+    "pid": 1580,
+    "thread": {
+     "id": 4536
+    }
+   },
+   "provider_name": "Microsoft-Windows-Sysmon"
+  },
+  "host": {
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.0.20"
+   ],
+   "name": "win-en194vl6r3u",
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "hostname": "WIN-EN194VL6R3U",
+   "architecture": "x86_64",
+   "os": {
+    "family": "windows",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "version": "10.0",
+    "platform": "windows",
+    "build": "20348.587",
+    "type": "windows"
+   }
+  },
+  "user": {
+   "domain": "WIN-EN194VL6R3U",
+   "name": "sysmaint"
+  },
+  "process": {
+   "name": "forecast_708e.exe",
+   "pid": 1348,
+   "entity_id": "{8A1A7C51-1185-6ABE-AD01-000000001100}",
+   "executable": "C:\\Users\\Administrator\\Pictures\\2023\\2023-04_Site_Visit\\forecast_708e.exe"
+  },
+  "rule": {
+   "name": "technique_id=T1548.002,technique_name=Bypass User Account Control"
+  }
+ },
+ "create_remote_thread": {
+  "log": {
+   "level": "information"
+  },
+  "threat": {
+   "framework": "MITRE ATT&CK",
+   "technique": {
+    "id": "T1055",
+    "name": "Process Injection"
+   }
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "event": {
+   "category": [
+    "process"
+   ],
+   "provider": "Microsoft-Windows-Sysmon",
+   "kind": "event",
+   "action": "CreateRemoteThread detected (rule: CreateRemoteThread)",
+   "code": "8",
+   "created": "2026-10-01T11:13:17.123Z",
+   "type": [
+    "change"
+   ]
+  },
+  "agent": {
+   "name": "WIN-EN194VL6R3U",
+   "ephemeral_id": "cdc310e6-1b0d-49af-89ac-b08188b1140a",
+   "id": "b4108291-0a6d-4b73-85cd-bf5a5c004226",
+   "type": "winlogbeat",
+   "version": "9.5.4"
+  },
+  "@timestamp": "2026-10-01T11:13:15.920Z",
+  "winlog": {
+   "record_id": 227037,
+   "opcode": "Info",
+   "version": 2,
+   "computer_name": "WIN-EN194VL6R3U",
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "event_id": "8",
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "event_data": {
+    "SourceProcessId": "5540",
+    "NewThreadId": "1016",
+    "SourceProcessGuid": "{8A1A7C51-4048-6ABE-A801-000000001100}",
+    "SourceUser": "WIN-EN194VL6R3U\\sysmaint",
+    "StartModule": "C:\\Windows\\SYSTEM32\\ntdll.dll",
+    "UtcTime": "2026-10-01 11:13:15.907",
+    "TargetImage": "C:\\Windows\\System32\\AggregatorHost.exe",
+    "StartAddress": "0x00007FFBBB567ED0",
+    "SourceImage": "C:\\Users\\sysmaint\\Pictures\\2025\\2025-06_Conference\\roadmap_d9b6.exe",
+    "StartFunction": "-",
+    "TargetProcessId": "4012",
+    "RuleName": "technique_id=T1055,technique_name=Process Injection",
+    "TargetUser": "NT AUTHORITY\\SYSTEM",
+    "TargetProcessGuid": "{8A1A7C51-A7AD-6ABC-4D00-000000001100}"
+   },
+   "task": "CreateRemoteThread detected (rule: CreateRemoteThread)",
+   "user": {
+    "name": "SYSTEM",
+    "identifier": "S-1-5-18",
+    "domain": "NT AUTHORITY",
+    "type": "User"
+   },
+   "process": {
+    "pid": 1580,
+    "thread": {
+     "id": 4536
+    }
+   },
+   "provider_name": "Microsoft-Windows-Sysmon"
+  },
+  "host": {
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.0.20"
+   ],
+   "name": "win-en194vl6r3u",
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "hostname": "WIN-EN194VL6R3U",
+   "architecture": "x86_64",
+   "os": {
+    "family": "windows",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "version": "10.0",
+    "platform": "windows",
+    "build": "20348.587",
+    "type": "windows"
+   }
+  },
+  "process": {
+   "name": "roadmap_d9b6.exe",
+   "pid": 5540,
+   "thread": {
+    "id": 1016
+   },
+   "entity_id": "{8A1A7C51-4048-6ABE-A801-000000001100}",
+   "executable": "C:\\Users\\sysmaint\\Pictures\\2025\\2025-06_Conference\\roadmap_d9b6.exe"
+  },
+  "rule": {
+   "name": "technique_id=T1055,technique_name=Process Injection"
+  }
+ },
+ "sysmon_queue_drop": {
+  "winlog": {
+   "record_id": 233086,
+   "opcode": "Info",
+   "version": 3,
+   "computer_name": "WIN-EN194VL6R3U",
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "event_id": "255",
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "event_data": {
+    "UtcTime": "2026-10-01 07:05:50.871",
+    "Description": "Events dropped from driver queue: RegistryEvent:63. DriverQueueSize: 50000, 63747852 bytes.",
+    "ID": "QUEUE"
+   },
+   "task": "Error report",
+   "user": {
+    "name": "SYSTEM",
+    "identifier": "S-1-5-18",
+    "domain": "NT AUTHORITY",
+    "type": "User"
+   },
+   "process": {
+    "pid": 1580,
+    "thread": {
+     "id": 4536
+    }
+   },
+   "provider_name": "Microsoft-Windows-Sysmon"
+  },
+  "log": {
+   "level": "error"
+  },
+  "host": {
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.0.20"
+   ],
+   "name": "win-en194vl6r3u",
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "hostname": "WIN-EN194VL6R3U",
+   "architecture": "x86_64",
+   "os": {
+    "family": "windows",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "version": "10.0",
+    "platform": "windows",
+    "build": "20348.587",
+    "type": "windows"
+   }
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "event": {
+   "kind": "event",
+   "action": "Error report",
+   "code": "255",
+   "created": "2026-10-01T07:06:05.881Z",
+   "provider": "Microsoft-Windows-Sysmon"
+  },
+  "agent": {
+   "name": "WIN-EN194VL6R3U",
+   "ephemeral_id": "cdc310e6-1b0d-49af-89ac-b08188b1140a",
+   "id": "b4108291-0a6d-4b73-85cd-bf5a5c004226",
+   "type": "winlogbeat",
+   "version": "9.5.4"
+  },
+  "@timestamp": "2026-10-01T07:05:50.871Z"
+ },
+ "sysmon_image_load_error": {
+  "winlog": {
+   "record_id": 229218,
+   "opcode": "Info",
+   "version": 3,
+   "computer_name": "WIN-EN194VL6R3U",
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "event_id": "255",
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "event_data": {
+    "UtcTime": "2026-10-01 15:53:00.760",
+    "Description": "Failed to find process image name",
+    "ID": "IMAGE_LOAD"
+   },
+   "task": "Error report",
+   "user": {
+    "name": "SYSTEM",
+    "identifier": "S-1-5-18",
+    "domain": "NT AUTHORITY",
+    "type": "User"
+   },
+   "process": {
+    "pid": 1580,
+    "thread": {
+     "id": 4536
+    }
+   },
+   "provider_name": "Microsoft-Windows-Sysmon"
+  },
+  "log": {
+   "level": "error"
+  },
+  "host": {
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.0.20"
+   ],
+   "name": "win-en194vl6r3u",
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "hostname": "WIN-EN194VL6R3U",
+   "architecture": "x86_64",
+   "os": {
+    "family": "windows",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "version": "10.0",
+    "platform": "windows",
+    "build": "20348.587",
+    "type": "windows"
+   }
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "event": {
+   "kind": "event",
+   "action": "Error report",
+   "code": "255",
+   "created": "2026-10-01T15:53:01.173Z",
+   "provider": "Microsoft-Windows-Sysmon"
+  },
+  "agent": {
+   "name": "WIN-EN194VL6R3U",
+   "ephemeral_id": "cdc310e6-1b0d-49af-89ac-b08188b1140a",
+   "id": "b4108291-0a6d-4b73-85cd-bf5a5c004226",
+   "type": "winlogbeat",
+   "version": "9.5.4"
+  },
+  "@timestamp": "2026-10-01T15:53:00.766Z"
+ },
+ "parent_unresolved": {
+  "log": {
+   "level": "information"
+  },
+  "threat": {
+   "framework": "MITRE ATT&CK",
+   "technique": {
+    "id": "T1059",
+    "subtechnique": {
+     "id": "T1059.003",
+     "name": "Windows Command Shell"
+    }
+   }
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "event": {
+   "category": [
+    "process"
+   ],
+   "provider": "Microsoft-Windows-Sysmon",
+   "kind": "event",
+   "action": "Process Create (rule: ProcessCreate)",
+   "code": "1",
+   "created": "2026-10-01T12:11:31.919Z",
+   "type": [
+    "start"
+   ]
+  },
+  "agent": {
+   "name": "WIN-EN194VL6R3U",
+   "ephemeral_id": "cdc310e6-1b0d-49af-89ac-b08188b1140a",
+   "id": "b4108291-0a6d-4b73-85cd-bf5a5c004226",
+   "type": "winlogbeat",
+   "version": "9.5.4"
+  },
+  "@timestamp": "2026-10-01T12:11:30.018Z",
+  "winlog": {
+   "record_id": 227649,
+   "opcode": "Info",
+   "version": 5,
+   "computer_name": "WIN-EN194VL6R3U",
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "event_id": "1",
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "event_data": {
+    "CurrentDirectory": "C:\\Users\\sysmaint\\Desktop\\tran.thi.bich\\Pictures\\2025\\2025-02_Customer_Event\\",
+    "ProcessId": "1096",
+    "User": "WIN-EN194VL6R3U\\sysmaint",
+    "ParentUser": "-",
+    "UtcTime": "2026-10-01 12:11:30.015",
+    "IntegrityLevel": "High",
+    "Product": "Microsoft\u00ae Windows\u00ae Operating System",
+    "CommandLine": "C:\\Windows\\SysWOW64\\cmd.exe  /c C:\\Users\\sysmaint\\AppData\\Local\\Temp\\{A5134584-88A8-4802-A85D-5DB08FCE25E9}\\{6797B7AB-4F00-4C7B-9A2B-B4FA02B50D84}\\unpack.bat \"C:\\Program Files\\ManageEngine\\PAM360\" C:\\Users\\sysmaint\\AppData\\Local\\Temp\\{A5134584-88A8-4802-A85D-5DB08FCE25E9}\\{6797B7AB-4F00-4C7B-9A2B-B4FA02B50D84}\\jarfiles.txt > \"C:\\Program Files\\ManageEngine\\PAM360\\logs\\unpacklog.txt\" 2>&1 ",
+    "FileVersion": "10.0.20348.1 (WinBuild.160101.0800)",
+    "Company": "Microsoft Corporation",
+    "Description": "Windows Command Processor",
+    "ParentProcessId": "6260",
+    "ProcessGuid": "{8A1A7C51-4DF2-6ABE-C401-000000001100}",
+    "Hashes": "SHA1=21AE65264256FA8BBE3B69C054545781A02D82B8,MD5=9FE95ED6B1F1194542E413FAC2E6116F,SHA256=F9B78911386A6AEB3582447593A218471F40AB780CAB2682F927DA1EC00034E2,IMPHASH=63B6D640EF299E8F8898CEA09B8AA342",
+    "ParentProcessGuid": "{00000000-0000-0000-0000-000000000000}",
+    "Image": "C:\\Windows\\SysWOW64\\cmd.exe",
+    "ParentImage": "-",
+    "OriginalFileName": "Cmd.Exe",
+    "TerminalSessionId": "5",
+    "LogonId": "0x2e9e3f",
+    "LogonGuid": "{8A1A7C51-E82D-6ABC-3F9E-2E0000000000}",
+    "ParentCommandLine": "-",
+    "RuleName": "technique_id=T1059.003,technique_name=Windows Command Shell"
+   },
+   "task": "Process Create (rule: ProcessCreate)",
+   "user": {
+    "name": "SYSTEM",
+    "identifier": "S-1-5-18",
+    "domain": "NT AUTHORITY",
+    "type": "User"
+   },
+   "process": {
+    "pid": 1580,
+    "thread": {
+     "id": 4536
+    }
+   },
+   "provider_name": "Microsoft-Windows-Sysmon"
+  },
+  "host": {
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.0.20"
+   ],
+   "name": "win-en194vl6r3u",
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "hostname": "WIN-EN194VL6R3U",
+   "architecture": "x86_64",
+   "os": {
+    "family": "windows",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "version": "10.0",
+    "platform": "windows",
+    "build": "20348.587",
+    "type": "windows"
+   }
+  },
+  "user": {
+   "domain": "WIN-EN194VL6R3U",
+   "name": "sysmaint"
+  },
+  "process": {
+   "name": "cmd.exe",
+   "executable": "C:\\Windows\\SysWOW64\\cmd.exe",
+   "parent": {
+    "pid": 6260,
+    "entity_id": "{00000000-0000-0000-0000-000000000000}"
+   },
+   "command_line": "C:\\Windows\\SysWOW64\\cmd.exe  /c C:\\Users\\sysmaint\\AppData\\Local\\Temp\\{A5134584-88A8-4802-A85D-5DB08FCE25E9}\\{6797B7AB-4F00-4C7B-9A2B-B4FA02B50D84}\\unpack.bat \"C:\\Program Files\\ManageEngine\\PAM360\" C:\\Users\\sysmaint\\AppData\\Local\\Temp\\{A5134584-88A8-4802-A85D-5DB08FCE25E9}\\{6797B7AB-4F00-4C7B-9A2B-B4FA02B50D84}\\jarfiles.txt > \"C:\\Program Files\\ManageEngine\\PAM360\\logs\\unpacklog.txt\" 2>&1 ",
+   "pe": {
+    "imphash": "63b6d640ef299e8f8898cea09b8aa342",
+    "product": "Microsoft\u00ae Windows\u00ae Operating System",
+    "company": "Microsoft Corporation",
+    "file_version": "10.0.20348.1 (WinBuild.160101.0800)",
+    "description": "Windows Command Processor",
+    "original_file_name": "Cmd.Exe"
+   },
+   "pid": 1096,
+   "entity_id": "{8A1A7C51-4DF2-6ABE-C401-000000001100}",
+   "working_directory": "C:\\Users\\sysmaint\\Desktop\\tran.thi.bich\\Pictures\\2025\\2025-02_Customer_Event\\",
+   "hash": {
+    "md5": "9fe95ed6b1f1194542e413fac2e6116f",
+    "sha256": "f9b78911386a6aeb3582447593a218471f40ab780cab2682f927da1ec00034e2",
+    "sha1": "21ae65264256fa8bbe3b69c054545781a02d82b8"
+   }
+  },
+  "rule": {
+   "name": "technique_id=T1059.003,technique_name=Windows Command Shell"
+  }
+ },
+ "network_connection": {
+  "log": {
+   "level": "information"
+  },
+  "destination": {
+   "port": 443,
+   "ip": "72.145.35.101"
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "event": {
+   "category": [
+    "network"
+   ],
+   "provider": "Microsoft-Windows-Sysmon",
+   "kind": "event",
+   "action": "Network connection detected (rule: NetworkConnect)",
+   "code": "3",
+   "created": "2026-10-01T01:20:40.433Z",
+   "type": [
+    "start",
+    "connection",
+    "protocol"
+   ]
+  },
+  "agent": {
+   "name": "WIN-EN194VL6R3U",
+   "ephemeral_id": "cdc310e6-1b0d-49af-89ac-b08188b1140a",
+   "id": "b4108291-0a6d-4b73-85cd-bf5a5c004226",
+   "type": "winlogbeat",
+   "version": "9.5.4"
+  },
+  "@timestamp": "2026-10-01T01:20:39.777Z",
+  "winlog": {
+   "record_id": 228151,
+   "opcode": "Info",
+   "version": 5,
+   "computer_name": "WIN-EN194VL6R3U",
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "event_id": "3",
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "event_data": {
+    "SourceHostname": "-",
+    "Image": "<unknown process>",
+    "SourceIsIpv6": "false",
+    "ProcessId": "6852",
+    "User": "-",
+    "DestinationPort": "443",
+    "UtcTime": "2026-09-30 06:31:21.419",
+    "SourcePort": "49808",
+    "Initiated": "true",
+    "DestinationIsIpv6": "false",
+    "SourceIp": "192.168.0.20",
+    "SourcePortName": "-",
+    "DestinationHostname": "-",
+    "RuleName": "Outbound SMB anomalous connections",
+    "ProcessGuid": "{8A1A7C51-B565-6ABD-A701-000000001100}",
+    "DestinationIp": "72.145.35.101",
+    "DestinationPortName": "-",
+    "Protocol": "tcp"
+   },
+   "task": "Network connection detected (rule: NetworkConnect)",
+   "user": {
+    "name": "SYSTEM",
+    "identifier": "S-1-5-18",
+    "domain": "NT AUTHORITY",
+    "type": "User"
+   },
+   "process": {
+    "pid": 1580,
+    "thread": {
+     "id": 4544
+    }
+   },
+   "provider_name": "Microsoft-Windows-Sysmon"
+  },
+  "source": {
+   "port": 49808,
+   "ip": "192.168.0.20"
+  },
+  "network": {
+   "transport": "tcp",
+   "direction": "egress",
+   "type": "ipv4"
+  },
+  "host": {
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.0.20"
+   ],
+   "name": "win-en194vl6r3u",
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "hostname": "WIN-EN194VL6R3U",
+   "architecture": "x86_64",
+   "os": {
+    "family": "windows",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "version": "10.0",
+    "platform": "windows",
+    "build": "20348.587",
+    "type": "windows"
+   }
+  },
+  "user": {},
+  "process": {
+   "name": "<unknown process>",
+   "pid": 6852,
+   "entity_id": "{8A1A7C51-B565-6ABD-A701-000000001100}",
+   "executable": "<unknown process>"
+  },
+  "rule": {
+   "name": "Outbound SMB anomalous connections"
+  }
+ },
+ "servicing_channel_disabled": {
+  "event": {
+   "code": "13",
+   "type": [
+    "change"
+   ],
+   "action": "Registry value set (rule: RegistryEvent)",
+   "category": [
+    "configuration",
+    "registry"
+   ],
+   "created": "2026-10-08T06:22:06.165Z",
+   "kind": "event",
+   "provider": "Microsoft-Windows-Sysmon"
+  },
+  "@timestamp": "2026-10-08T06:22:05.011Z",
+  "host": {
+   "name": "win-en194vl6r3u",
+   "os": {
+    "family": "windows",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "version": "10.0",
+    "build": "20348.587",
+    "platform": "windows",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "type": "windows"
+   },
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.0.20"
+   ],
+   "architecture": "x86_64",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "hostname": "WIN-EN194VL6R3U",
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02"
+  },
+  "user": {
+   "name": "SYSTEM",
+   "domain": "NT AUTHORITY"
+  },
+  "agent": {
+   "type": "winlogbeat",
+   "name": "WIN-EN194VL6R3U",
+   "ephemeral_id": "cdc310e6-1b0d-49af-89ac-b08188b1140a",
+   "version": "9.5.4",
+   "id": "b4108291-0a6d-4b73-85cd-bf5a5c004226"
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "process": {
+   "entity_id": "{8A1A7C51-3672-6AC7-FE01-000000001100}",
+   "pid": 5304,
+   "name": "TiWorker.exe",
+   "executable": "C:\\Windows\\winsxs\\amd64_microsoft-windows-servicingstack_31bf3856ad364e35_10.0.20348.5614_none_b1b45284f99acb50\\TiWorker.exe"
+  },
+  "winlog": {
+   "version": 2,
+   "record_id": 231516,
+   "user": {
+    "type": "User",
+    "name": "SYSTEM",
+    "identifier": "S-1-5-18",
+    "domain": "NT AUTHORITY"
+   },
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "computer_name": "WIN-EN194VL6R3U",
+   "task": "Registry value set (rule: RegistryEvent)",
+   "event_data": {
+    "User": "NT AUTHORITY\\SYSTEM",
+    "ProcessId": "5304",
+    "UtcTime": "2026-10-08 06:22:05.006",
+    "Image": "C:\\Windows\\winsxs\\amd64_microsoft-windows-servicingstack_31bf3856ad364e35_10.0.20348.5614_none_b1b45284f99acb50\\TiWorker.exe",
+    "ProcessGuid": "{8A1A7C51-3672-6AC7-FE01-000000001100}",
+    "RuleName": "-",
+    "EventType": "SetValue",
+    "TargetObject": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\Microsoft-Windows-Bluetooth-Bthmini/Operational\\Enabled",
+    "Details": "DWORD (0x00000000)"
+   },
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "provider_name": "Microsoft-Windows-Sysmon",
+   "process": {
+    "pid": 1580,
+    "thread": {
+     "id": 4536
+    }
+   },
+   "event_id": "13",
+   "opcode": "Info"
+  },
+  "registry": {
+   "data": {
+    "strings": "DWORD (0x00000000)"
+   },
+   "hive": "HKLM",
+   "path": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\Microsoft-Windows-Bluetooth-Bthmini/Operational\\Enabled"
+  },
+  "log": {
+   "level": "information"
+  }
+ }
+}

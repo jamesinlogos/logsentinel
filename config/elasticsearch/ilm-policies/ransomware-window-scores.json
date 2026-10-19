@@ -1,0 +1,17 @@
+{
+  "policy": {
+    "phases": {
+      "delete": {
+        "min_age": "90d",
+        "actions": {
+          "delete": {}
+        }
+      }
+    },
+    "_meta": {
+      "managed_by": "logsentinel",
+      "schema_version": 2,
+      "description": "Window scores are kept 90 days after index creation"
+    }
+  }
+}

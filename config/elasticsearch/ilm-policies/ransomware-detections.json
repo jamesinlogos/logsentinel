@@ -1,0 +1,17 @@
+{
+  "policy": {
+    "phases": {
+      "delete": {
+        "min_age": "365d",
+        "actions": {
+          "delete": {}
+        }
+      }
+    },
+    "_meta": {
+      "managed_by": "logsentinel",
+      "schema_version": 2,
+      "description": "Detections are kept 365 days after index creation"
+    }
+  }
+}

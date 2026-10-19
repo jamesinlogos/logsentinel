@@ -1,0 +1,15 @@
+{
+  "description": "Stamps event.ingested when a document reaches Elasticsearch (ECS)",
+  "processors": [
+    {
+      "set": {
+        "field": "event.ingested",
+        "value": "{{{_ingest.timestamp}}}"
+      }
+    }
+  ],
+  "_meta": {
+    "managed_by": "logsentinel",
+    "schema_version": 2
+  }
+}

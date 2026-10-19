@@ -1,0 +1,10 @@
+{
+  "name": "Ransomware notifications",
+  "connector_type_id": ".index",
+  "config": {
+    "index": "<ransomware-notifications-{now/M{yyyy.MM}}>",
+    "refresh": false,
+    "executionTimeField": "@timestamp"
+  },
+  "secrets": {}
+}

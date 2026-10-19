@@ -1,0 +1,22 @@
+# Editor settings (AGENTS.md section 11.3). Files that run on Linux keep LF; Python and Markdown
+# files keep the line ending they already have.
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{yml,yaml,json,md,conf}]
+indent_size = 2
+
+[*.{sh,conf,yml,yaml}]
+end_of_line = lf
+
+[{Makefile,Dockerfile}]
+end_of_line = lf
+
+[Makefile]
+indent_style = tab

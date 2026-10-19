@@ -1,0 +1,12 @@
+{
+  "policy": {
+    "phases": {
+      "delete": {"min_age": "90d", "actions": {"delete": {}}}
+    },
+    "_meta": {
+      "managed_by": "logsentinel",
+      "schema_version": 2,
+      "description": "Notification delivery receipts are retained 90 days after monthly index creation"
+    }
+  }
+}

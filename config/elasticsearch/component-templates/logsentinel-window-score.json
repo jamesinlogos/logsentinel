@@ -1,0 +1,284 @@
+{
+  "template": {
+    "settings": {
+      "index": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0,
+        "default_pipeline": "logsentinel-event-ingested"
+      }
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "ecs": {
+          "properties": {
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "message": {
+          "type": "match_only_text"
+        },
+        "event": {
+          "properties": {
+            "kind": {
+              "type": "keyword"
+            },
+            "category": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "module": {
+              "type": "keyword"
+            },
+            "dataset": {
+              "type": "keyword"
+            },
+            "start": {
+              "type": "date"
+            },
+            "end": {
+              "type": "date"
+            },
+            "duration": {
+              "type": "long"
+            },
+            "created": {
+              "type": "date"
+            },
+            "ingested": {
+              "type": "date"
+            },
+            "risk_score": {
+              "type": "float"
+            },
+            "risk_score_norm": {
+              "type": "float"
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "process": {
+          "properties": {
+            "entity_id": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "name": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "executable": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "command_line": {
+              "type": "wildcard"
+            },
+            "parent": {
+              "properties": {
+                "entity_id": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            }
+          }
+        },
+        "service": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "threat": {
+          "properties": {
+            "framework": {
+              "type": "keyword"
+            },
+            "technique": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "subtechnique": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "tactic": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "logsentinel": {
+          "properties": {
+            "schema_version": {
+              "type": "short"
+            },
+            "window": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "trigger": {
+                  "type": "keyword"
+                },
+                "activity": {
+                  "properties": {
+                    "events": {
+                      "type": "long"
+                    },
+                    "process_starts": {
+                      "type": "long"
+                    },
+                    "created_files": {
+                      "type": "long"
+                    },
+                    "distinct_extensions": {
+                      "type": "long"
+                    },
+                    "max_same_extension": {
+                      "type": "long"
+                    },
+                    "max_deletes": {
+                      "type": "long"
+                    },
+                    "max_name_dirs": {
+                      "type": "long"
+                    },
+                    "max_name_branches": {
+                      "type": "long"
+                    },
+                    "max_replaced_files": {
+                      "type": "long"
+                    },
+                    "max_cmd_children": {
+                      "type": "long"
+                    },
+                    "shadow_commands": {
+                      "type": "long"
+                    },
+                    "recovery_commands": {
+                      "type": "long"
+                    },
+                    "stop_commands": {
+                      "type": "long"
+                    },
+                    "log_tamper": {
+                      "type": "long"
+                    },
+                    "lolbin_runs": {
+                      "type": "long"
+                    },
+                    "run_key_writes": {
+                      "type": "long"
+                    },
+                    "policy_writes": {
+                      "type": "long"
+                    },
+                    "note_keyword_files": {
+                      "type": "long"
+                    },
+                    "suspicious_paths": {
+                      "type": "long"
+                    },
+                    "non_system_executables": {
+                      "type": "long"
+                    },
+                    "command_line_chars": {
+                      "type": "long"
+                    },
+                    "connections": {
+                      "type": "long"
+                    },
+                    "destination_ips": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "verdict": {
+              "properties": {
+                "gated": {
+                  "type": "boolean"
+                },
+                "suspicious": {
+                  "type": "boolean"
+                },
+                "reported": {
+                  "type": "boolean"
+                },
+                "label": {
+                  "type": "keyword"
+                },
+                "confidence_score": {
+                  "type": "float"
+                },
+                "threshold": {
+                  "type": "float"
+                },
+                "indicators": {
+                  "type": "keyword"
+                },
+                "scores": {
+                  "properties": {
+                    "indicator": {
+                      "type": "float"
+                    },
+                    "model": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "model": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                },
+                "version": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "_meta": {
+    "managed_by": "logsentinel",
+    "schema_version": 2,
+    "description": "Fields shared by detections and window scores (AGENTS.md section 11.9, inference/README.md section 7)"
+  }
+}

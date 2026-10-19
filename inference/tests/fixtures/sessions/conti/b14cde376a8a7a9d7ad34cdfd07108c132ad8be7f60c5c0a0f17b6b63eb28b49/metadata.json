@@ -1,0 +1,53 @@
+{
+  "format": "logsentinel.normalized-sysmon.jsonl/v1",
+  "session_id": "c9f66ac5-0d8d-4057-9bd4-d9155341a08e",
+  "source": {
+    "kafka_topic": "telemetry.windows.normalized",
+    "host_id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+    "processing": "none; original normalized Kafka payloads"
+  },
+  "label": {
+    "target_class_name": "conti-b14cde376a8a7a9d7ad34cdfd07108c132ad8be7f60c5c0a0f17b6b63eb28b49",
+    "target_class": 1
+  },
+  "mode": "execute",
+  "t_start": "2026-10-01T05:13:36.888Z",
+  "t_end": "2026-10-01T05:18:07.624Z",
+  "clock_offset_sec": 0.0,
+  "event_count": 87,
+  "pipeline_lag_max_sec": 1.968,
+  "pipeline_lag_p50_sec": 1.376,
+  "skipped_other_hosts": 0,
+  "skipped_invalid": 0,
+  "skipped_outside_session": 283,
+  "environment": {
+    "sentinelcap_version": "1.0.0",
+    "snapshot": "baseline",
+    "windows_build": "20348.587",
+    "winlogbeat_version": "9.5.4"
+  },
+  "process_entity_id": "{8A1A7C51-EC00-6ABD-AF01-000000001100}",
+  "sample_entity_ids": [
+    "{8A1A7C51-EC00-6ABD-AF01-000000001100}",
+    "{8A1A7C51-EC01-6ABD-B101-000000001100}",
+    "{8A1A7C51-EC01-6ABD-B201-000000001100}",
+    "{8A1A7C51-EC01-6ABD-B301-000000001100}",
+    "{8A1A7C51-EC01-6ABD-B401-000000001100}",
+    "{8A1A7C51-EC01-6ABD-B501-000000001100}",
+    "{8A1A7C51-EC21-6ABD-B801-000000001100}",
+    "{8A1A7C51-EC21-6ABD-B901-000000001100}",
+    "{8A1A7C51-EC21-6ABD-BB01-000000001100}",
+    "{8A1A7C51-EC24-6ABD-BC01-000000001100}",
+    "{8A1A7C51-EC24-6ABD-BD01-000000001100}",
+    "{8A1A7C51-EC24-6ABD-BE01-000000001100}",
+    "{8A1A7C51-EC24-6ABD-BF01-000000001100}",
+    "{8A1A7C51-EC24-6ABD-C001-000000001100}",
+    "{8A1A7C51-EC24-6ABD-C101-000000001100}",
+    "{8A1A7C51-EC24-6ABD-C201-000000001100}",
+    "{8A1A7C51-EC24-6ABD-C301-000000001100}",
+    "{8A1A7C51-EC24-6ABD-C401-000000001100}",
+    "{8A1A7C51-EC24-6ABD-C501-000000001100}",
+    "{8A1A7C51-EC24-6ABD-C601-000000001100}",
+    "{8A1A7C51-EC25-6ABD-C701-000000001100}"
+  ]
+}
