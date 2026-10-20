@@ -313,7 +313,7 @@ class Summarizer:
         if any(keyword in name for keyword in NOTE_KEYWORDS):
             self.note_keyword_files += step
         path = event.file_path
-        if path is not None and "\\" in path:
+        if path is not None and "\\" in path and not _windows_metadata_note(event):
             self._note_directory(process, name, path.rsplit("\\", 1)[0], step)
         if event.file_extension:
             _bump(self._extensions, event.file_extension, step)
@@ -337,6 +337,12 @@ class Summarizer:
             and key.endswith("\\enabled")
             and event.registry_value in _DISABLED_VALUES
             and not _SERVICING.match(event.executable or "")
+            and not (
+                event.executable == r"c:\windows\system32\drvinst.exe"
+                and key.startswith(
+                    "hklm\\software\\microsoft\\windows\\currentversion\\winevt\\channels\\"
+                )
+            )
         ):
             self.log_tamper += step
 
@@ -461,6 +467,24 @@ def suspicious_path(path: str) -> bool:
 
 def system_executable(path: str) -> bool:
     return path.startswith(SYSTEM_PATH_PREFIXES)
+
+
+def _windows_metadata_note(event: Event) -> bool:
+    """Exclude the observed OS metadata writes from the bulk-note directory count."""
+    path = event.file_path or ""
+    if (
+        event.file_name == "desktop.ini"
+        and event.executable == r"c:\windows\explorer.exe"
+        and path.endswith(r"\desktop.ini")
+        and path.startswith(("c:\\users\\", "c:\\$recycle.bin\\", "d:\\$recycle.bin\\"))
+    ):
+        return True
+    return (
+        event.file_name == "jsbytecodecache_64"
+        and event.executable == r"c:\windows\system32\svchost.exe"
+        and path.startswith("c:\\windows\\")
+        and path.endswith(r"\microsoft.system.package.metadata\autogen\jsbytecodecache_64")
+    )
 
 
 def _branch(directory: str) -> str:

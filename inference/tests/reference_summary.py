@@ -75,7 +75,11 @@ def reference_summarize(events: Iterable[Event]) -> WindowSummary:
             entropy_sum += file_name_entropy(name)
             if any(keyword in name for keyword in NOTE_KEYWORDS):
                 totals["note_keyword_files"] += 1
-            if event.file_path is not None and "\\" in event.file_path:
+            if (
+                event.file_path is not None
+                and "\\" in event.file_path
+                and not _windows_metadata_note(event)
+            ):
                 name_dirs[(process, name)].add(event.file_path.rsplit("\\", 1)[0])
             if event.file_extension:
                 extensions.add(event.file_extension)
@@ -167,8 +171,31 @@ def _registry_write(totals: Counter[str], event: Event) -> None:
         and key.endswith("\\enabled")
         and event.registry_value in _DISABLED_VALUES
         and not _SERVICING.match(event.executable or "")
+        and not (
+            event.executable == r"c:\windows\system32\drvinst.exe"
+            and key.startswith(
+                "hklm\\software\\microsoft\\windows\\currentversion\\winevt\\channels\\"
+            )
+        )
     ):
         totals["log_tamper"] += 1
+
+
+def _windows_metadata_note(event: Event) -> bool:
+    path = event.file_path or ""
+    if (
+        event.file_name == "desktop.ini"
+        and event.executable == r"c:\windows\explorer.exe"
+        and path.endswith(r"\desktop.ini")
+        and path.startswith(("c:\\users\\", "c:\\$recycle.bin\\", "d:\\$recycle.bin\\"))
+    ):
+        return True
+    return (
+        event.file_name == "jsbytecodecache_64"
+        and event.executable == r"c:\windows\system32\svchost.exe"
+        and path.startswith("c:\\windows\\")
+        and path.endswith(r"\microsoft.system.package.metadata\autogen\jsbytecodecache_64")
+    )
 
 
 def _replaced_files(

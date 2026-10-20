@@ -1,9 +1,10 @@
 {
-  "generated_at": "2026-10-11T20:31:22+00:00",
+  "generated_at": "2026-10-20T18:40:20+00:00",
   "captures": "..\\sentinelcap\\captures",
   "holdout": [
     "20261009T033557Z",
-    "20261009T120629Z"
+    "20261009T120629Z",
+    "20261012T012123Z"
   ],
   "window": {
     "size_sec": 60,
@@ -83,7 +84,7 @@
       }
     },
     "goodware": {
-      "sessions": 70,
+      "sessions": 72,
       "families": 1,
       "indicators": {
         "mass_note_drop": {
@@ -123,7 +124,7 @@
           "families": 1
         },
         "lolbins_execution": {
-          "sessions": 17,
+          "sessions": 19,
           "families": 1
         },
         "security_policy_tamper": {
@@ -131,7 +132,7 @@
           "families": 0
         },
         "remote_thread_injection": {
-          "sessions": 2,
+          "sessions": 4,
           "families": 1
         },
         "process_tampering": {
@@ -145,52 +146,52 @@
       }
     }
   },
-  "threshold": 0.58,
+  "threshold": 0.6,
   "threshold_selection": "tuned on the same out-of-fold outcomes reported below",
   "cross_validation": {
-    "model_auc": 0.9373,
+    "model_auc": 0.9251,
     "gate_only": {
       "window": {
         "tp": 666,
         "fp": 94,
-        "tn": 3009,
+        "tn": 3238,
         "fn": 158,
         "recall": 0.8083,
         "precision": 0.8763,
         "f2": 0.821,
-        "mcc": 0.8018
+        "mcc": 0.8045
       },
       "session": {
         "tp": 48,
         "fp": 7,
-        "tn": 63,
+        "tn": 65,
         "fn": 2,
         "recall": 0.96,
         "precision": 0.8727,
         "f2": 0.9412,
-        "mcc": 0.8509
+        "mcc": 0.8528
       }
     },
     "at_threshold": {
       "window": {
-        "tp": 446,
+        "tp": 442,
         "fp": 29,
-        "tn": 3074,
-        "fn": 378,
-        "recall": 0.5413,
-        "precision": 0.9389,
-        "f2": 0.5914,
-        "mcc": 0.6642
+        "tn": 3303,
+        "fn": 382,
+        "recall": 0.5364,
+        "precision": 0.9384,
+        "f2": 0.5867,
+        "mcc": 0.6637
       },
       "session": {
         "tp": 48,
         "fp": 3,
-        "tn": 67,
+        "tn": 69,
         "fn": 2,
         "recall": 0.96,
         "precision": 0.9412,
         "f2": 0.9562,
-        "mcc": 0.9147
+        "mcc": 0.9157
       }
     },
     "missed_ransomware": [
@@ -203,18 +204,18 @@
       "20261008T013340Z/goodware/deploy-config-files"
     ],
     "goodware_alerts": {
-      "goodware_hours": 20.38,
+      "goodware_hours": 22.03,
       "flagged_windows": 29,
-      "flagged_windows_per_hour": 1.42,
+      "flagged_windows_per_hour": 1.32,
       "detections_after_suppression": 25,
-      "detections_per_hour": 1.23,
+      "detections_per_hour": 1.13,
       "suspicious_detections": 8,
-      "suspicious_detections_per_hour": 0.39
+      "suspicious_detections_per_hour": 0.36
     },
     "time_to_first_detection": {
       "sessions": 48,
-      "median_sec": 2.6,
-      "p90_sec": 39.1,
+      "median_sec": 2.4,
+      "p90_sec": 39.2,
       "max_sec": 186.7
     },
     "concurrent_goodware": {
@@ -222,14 +223,14 @@
       "alone": {
         "gated_sessions": 48,
         "detected_sessions": 48,
-        "detected_windows": "446/824",
-        "mean_model_score": 0.6139
+        "detected_windows": "442/824",
+        "mean_model_score": 0.6212
       },
       "with_goodware": {
         "gated_sessions": 48,
-        "detected_sessions": 47,
+        "detected_sessions": 48,
         "detected_windows": "528/966",
-        "mean_model_score": 0.5571
+        "mean_model_score": 0.5532
       },
       "pairs": [
         "20261001T011932Z/akira/0ab9e88f2135f7fbd439435f0ff4da887bbfb1cae67ccc8209aac22e75e3486f+goodware/0118955b",
@@ -286,16 +287,16 @@
     }
   },
   "held_out": {
-    "model_version": "20261011T202925Z",
-    "threshold": 0.58,
+    "model_version": "20261020T175915Z",
+    "threshold": 0.6,
     "ransomware": {
-      "sessions": 30,
-      "detected": 30,
+      "sessions": 45,
+      "detected": 44,
       "time_to_first_detection": {
-        "sessions": 30,
-        "median_sec": 2.7,
-        "p90_sec": 42.8,
-        "max_sec": 52.6
+        "sessions": 44,
+        "median_sec": 3.6,
+        "p90_sec": 41.7,
+        "max_sec": 68.6
       }
     },
     "goodware": null,
@@ -303,212 +304,317 @@
       {
         "name": "20261009T033557Z/akira/369336e9f7b6e5d68a34ca420ba8a2076b8c232d9fff3f52c340fa664fc6b5e2",
         "label": 1,
-        "max_confidence": 0.9582,
+        "max_confidence": 0.9946,
         "detected": true,
-        "first_detection_sec": 2.1
+        "first_detection_sec": 0.8
       },
       {
         "name": "20261009T033557Z/blackbasta/2413841b2f5f656e269f61644d3957847b199107bb6b141c3208a03df59f0759",
         "label": 1,
-        "max_confidence": 0.9221,
+        "max_confidence": 0.9946,
         "detected": true,
         "first_detection_sec": 3.7
       },
       {
         "name": "20261009T033557Z/blackmatter/46a9f920cb9049c9be7bf3afba7ec13b0d0d170029363a115f429996822d4871",
         "label": 1,
-        "max_confidence": 0.9575,
+        "max_confidence": 0.9414,
         "detected": true,
         "first_detection_sec": 41.7
       },
       {
         "name": "20261009T033557Z/bqtlock/425b2f283b71237276f84d941d9c2982c7f61a9aff12ece10e15065b73b7165e",
         "label": 1,
-        "max_confidence": 0.9493,
+        "max_confidence": 0.9521,
         "detected": true,
         "first_detection_sec": 52.6
       },
       {
         "name": "20261009T033557Z/conti/248cf7de2303284958c6a3931d3f0b24e4e90c09f934f85f2cf6962a8de96209",
         "label": 1,
-        "max_confidence": 0.8055,
+        "max_confidence": 0.8036,
         "detected": true,
         "first_detection_sec": 5.1
       },
       {
         "name": "20261009T033557Z/hellokitty/af179b093adef005f85ed0c5e9a920381bf0993bd5fd2af393fe6551e3b934b4",
         "label": 1,
-        "max_confidence": 0.8018,
+        "max_confidence": 0.7878,
         "detected": true,
         "first_detection_sec": 2.1
       },
       {
         "name": "20261009T033557Z/lockbit/105912c9995a1d718c5442349d2cc4bb99426f75ff34554cdfd9a7272eeca398",
         "label": 1,
-        "max_confidence": 0.9873,
+        "max_confidence": 0.9453,
         "detected": true,
         "first_detection_sec": 1.3
       },
       {
         "name": "20261009T033557Z/lynx/b378b7ef0f906358eec595777a50f9bb5cc7bb6635e0f031d65b818a26bdc4ee",
         "label": 1,
-        "max_confidence": 0.8027,
+        "max_confidence": 0.8008,
         "detected": true,
         "first_detection_sec": 2.2
       },
       {
         "name": "20261009T033557Z/makop/f0a17efd62272b2bb2dfe0d57ca547044da75a558e32b2d94aa5788c18d9168c",
         "label": 1,
-        "max_confidence": 0.9922,
+        "max_confidence": 0.9597,
         "detected": true,
         "first_detection_sec": 15.6
       },
       {
         "name": "20261009T033557Z/medusa/6d000a159fe10af1b29ddf4e4015931a9e9d0a020aeef0c602d8c5419b5966e6",
         "label": 1,
-        "max_confidence": 0.9198,
+        "max_confidence": 0.9469,
         "detected": true,
         "first_detection_sec": 3.6
       },
       {
         "name": "20261009T033557Z/nebula/112a40f154ad5de7f8fffa34e50751ab8b893f5285f96e7179177374127fcb6c",
         "label": 1,
-        "max_confidence": 0.9695,
+        "max_confidence": 0.9651,
         "detected": true,
         "first_detection_sec": 1.9
       },
       {
         "name": "20261009T033557Z/nitrogen/b5189876dfdbe889bba43f7702d1e61e61d48803c78ff78eab3f43b4fb0b3a22",
         "label": 1,
-        "max_confidence": 0.8047,
+        "max_confidence": 0.8048,
         "detected": true,
         "first_detection_sec": 0.6
       },
       {
         "name": "20261009T033557Z/trigona/48877a3a4c72c1daf3a80e3c034b56a04cec7ce3856887fed73e645e53c76b96",
         "label": 1,
-        "max_confidence": 0.9508,
+        "max_confidence": 0.9479,
         "detected": true,
         "first_detection_sec": 15.2
       },
       {
         "name": "20261009T033557Z/whitelock/a501583bca532c4ea11b56780a13a865b609d6a0fcd92b9c9b522f1edcc49c29",
         "label": 1,
-        "max_confidence": 0.5803,
+        "max_confidence": 0.6353,
         "detected": true,
-        "first_detection_sec": 48.6
+        "first_detection_sec": 68.6
       },
       {
         "name": "20261009T033557Z/yurei/0303f89829763e734b1f9d4f46671e59bfaa1be5d8ec84d35a203efbfcb9bb15",
         "label": 1,
-        "max_confidence": 0.9523,
+        "max_confidence": 0.8984,
         "detected": true,
-        "first_detection_sec": 1.3
+        "first_detection_sec": 0.7
       },
       {
         "name": "20261009T120629Z/akira/369336e9f7b6e5d68a34ca420ba8a2076b8c232d9fff3f52c340fa664fc6b5e2",
         "label": 1,
-        "max_confidence": 0.9582,
+        "max_confidence": 0.9946,
         "detected": true,
-        "first_detection_sec": 2.1
+        "first_detection_sec": 0.6
       },
       {
         "name": "20261009T120629Z/blackbasta/2413841b2f5f656e269f61644d3957847b199107bb6b141c3208a03df59f0759",
         "label": 1,
-        "max_confidence": 0.9221,
+        "max_confidence": 0.9946,
         "detected": true,
         "first_detection_sec": 2.7
       },
       {
         "name": "20261009T120629Z/blackmatter/46a9f920cb9049c9be7bf3afba7ec13b0d0d170029363a115f429996822d4871",
         "label": 1,
-        "max_confidence": 0.9548,
+        "max_confidence": 0.9416,
         "detected": true,
         "first_detection_sec": 42.8
       },
       {
         "name": "20261009T120629Z/bqtlock/425b2f283b71237276f84d941d9c2982c7f61a9aff12ece10e15065b73b7165e",
         "label": 1,
-        "max_confidence": 0.9737,
+        "max_confidence": 0.9273,
         "detected": true,
         "first_detection_sec": 39.4
       },
       {
         "name": "20261009T120629Z/conti/248cf7de2303284958c6a3931d3f0b24e4e90c09f934f85f2cf6962a8de96209",
         "label": 1,
-        "max_confidence": 0.8055,
+        "max_confidence": 0.8036,
         "detected": true,
         "first_detection_sec": 5.1
       },
       {
         "name": "20261009T120629Z/hellokitty/af179b093adef005f85ed0c5e9a920381bf0993bd5fd2af393fe6551e3b934b4",
         "label": 1,
-        "max_confidence": 0.8018,
+        "max_confidence": 0.7869,
         "detected": true,
         "first_detection_sec": 2.1
       },
       {
         "name": "20261009T120629Z/lockbit/105912c9995a1d718c5442349d2cc4bb99426f75ff34554cdfd9a7272eeca398",
         "label": 1,
-        "max_confidence": 0.9575,
+        "max_confidence": 0.9143,
         "detected": true,
         "first_detection_sec": 1.6
       },
       {
         "name": "20261009T120629Z/lynx/b378b7ef0f906358eec595777a50f9bb5cc7bb6635e0f031d65b818a26bdc4ee",
         "label": 1,
-        "max_confidence": 0.8027,
+        "max_confidence": 0.8004,
         "detected": true,
         "first_detection_sec": 2.0
       },
       {
         "name": "20261009T120629Z/makop/f0a17efd62272b2bb2dfe0d57ca547044da75a558e32b2d94aa5788c18d9168c",
         "label": 1,
-        "max_confidence": 0.9924,
+        "max_confidence": 0.9597,
         "detected": true,
         "first_detection_sec": 14.1
       },
       {
         "name": "20261009T120629Z/medusa/6d000a159fe10af1b29ddf4e4015931a9e9d0a020aeef0c602d8c5419b5966e6",
         "label": 1,
-        "max_confidence": 0.9069,
+        "max_confidence": 0.9469,
         "detected": true,
         "first_detection_sec": 2.4
       },
       {
         "name": "20261009T120629Z/nebula/112a40f154ad5de7f8fffa34e50751ab8b893f5285f96e7179177374127fcb6c",
         "label": 1,
-        "max_confidence": 0.972,
+        "max_confidence": 0.9652,
         "detected": true,
         "first_detection_sec": 2.0
       },
       {
         "name": "20261009T120629Z/nitrogen/b5189876dfdbe889bba43f7702d1e61e61d48803c78ff78eab3f43b4fb0b3a22",
         "label": 1,
-        "max_confidence": 0.8047,
+        "max_confidence": 0.8048,
         "detected": true,
         "first_detection_sec": 0.6
       },
       {
         "name": "20261009T120629Z/trigona/48877a3a4c72c1daf3a80e3c034b56a04cec7ce3856887fed73e645e53c76b96",
         "label": 1,
-        "max_confidence": 0.9508,
+        "max_confidence": 0.9479,
         "detected": true,
         "first_detection_sec": 15.4
       },
       {
         "name": "20261009T120629Z/whitelock/a501583bca532c4ea11b56780a13a865b609d6a0fcd92b9c9b522f1edcc49c29",
         "label": 1,
-        "max_confidence": 0.6539,
+        "max_confidence": 0.65,
         "detected": true,
         "first_detection_sec": 16.8
       },
       {
         "name": "20261009T120629Z/yurei/0303f89829763e734b1f9d4f46671e59bfaa1be5d8ec84d35a203efbfcb9bb15",
         "label": 1,
-        "max_confidence": 0.9872,
+        "max_confidence": 0.9105,
         "detected": true,
-        "first_detection_sec": 0.9
+        "first_detection_sec": 0.5
+      },
+      {
+        "name": "20261012T012123Z/akira/369336e9f7b6e5d68a34ca420ba8a2076b8c232d9fff3f52c340fa664fc6b5e2",
+        "label": 1,
+        "max_confidence": 0.9958,
+        "detected": true,
+        "first_detection_sec": 1.8
+      },
+      {
+        "name": "20261012T012123Z/blackbasta/2413841b2f5f656e269f61644d3957847b199107bb6b141c3208a03df59f0759",
+        "label": 1,
+        "max_confidence": 0.9946,
+        "detected": true,
+        "first_detection_sec": 5.7
+      },
+      {
+        "name": "20261012T012123Z/blackmatter/46a9f920cb9049c9be7bf3afba7ec13b0d0d170029363a115f429996822d4871",
+        "label": 1,
+        "max_confidence": 0.9484,
+        "detected": true,
+        "first_detection_sec": 65.4
+      },
+      {
+        "name": "20261012T012123Z/bqtlock/425b2f283b71237276f84d941d9c2982c7f61a9aff12ece10e15065b73b7165e",
+        "label": 1,
+        "max_confidence": 0.9512,
+        "detected": true,
+        "first_detection_sec": 40.9
+      },
+      {
+        "name": "20261012T012123Z/conti/248cf7de2303284958c6a3931d3f0b24e4e90c09f934f85f2cf6962a8de96209",
+        "label": 1,
+        "max_confidence": 0.7995,
+        "detected": true,
+        "first_detection_sec": 5.3
+      },
+      {
+        "name": "20261012T012123Z/hellokitty/af179b093adef005f85ed0c5e9a920381bf0993bd5fd2af393fe6551e3b934b4",
+        "label": 1,
+        "max_confidence": 0.7951,
+        "detected": true,
+        "first_detection_sec": 3.2
+      },
+      {
+        "name": "20261012T012123Z/lockbit/105912c9995a1d718c5442349d2cc4bb99426f75ff34554cdfd9a7272eeca398",
+        "label": 1,
+        "max_confidence": 0.9481,
+        "detected": true,
+        "first_detection_sec": 2.4
+      },
+      {
+        "name": "20261012T012123Z/lynx/b378b7ef0f906358eec595777a50f9bb5cc7bb6635e0f031d65b818a26bdc4ee",
+        "label": 1,
+        "max_confidence": 0.8035,
+        "detected": true,
+        "first_detection_sec": 3.8
+      },
+      {
+        "name": "20261012T012123Z/makop/f0a17efd62272b2bb2dfe0d57ca547044da75a558e32b2d94aa5788c18d9168c",
+        "label": 1,
+        "max_confidence": null,
+        "detected": false,
+        "first_detection_sec": null
+      },
+      {
+        "name": "20261012T012123Z/medusa/6d000a159fe10af1b29ddf4e4015931a9e9d0a020aeef0c602d8c5419b5966e6",
+        "label": 1,
+        "max_confidence": 0.9873,
+        "detected": true,
+        "first_detection_sec": 6.7
+      },
+      {
+        "name": "20261012T012123Z/nebula/112a40f154ad5de7f8fffa34e50751ab8b893f5285f96e7179177374127fcb6c",
+        "label": 1,
+        "max_confidence": 0.9748,
+        "detected": true,
+        "first_detection_sec": 3.1
+      },
+      {
+        "name": "20261012T012123Z/nitrogen/b5189876dfdbe889bba43f7702d1e61e61d48803c78ff78eab3f43b4fb0b3a22",
+        "label": 1,
+        "max_confidence": 0.8048,
+        "detected": true,
+        "first_detection_sec": 1.5
+      },
+      {
+        "name": "20261012T012123Z/trigona/48877a3a4c72c1daf3a80e3c034b56a04cec7ce3856887fed73e645e53c76b96",
+        "label": 1,
+        "max_confidence": 0.981,
+        "detected": true,
+        "first_detection_sec": 16.4
+      },
+      {
+        "name": "20261012T012123Z/whitelock/a501583bca532c4ea11b56780a13a865b609d6a0fcd92b9c9b522f1edcc49c29",
+        "label": 1,
+        "max_confidence": 0.6642,
+        "detected": true,
+        "first_detection_sec": 13.0
+      },
+      {
+        "name": "20261012T012123Z/yurei/0303f89829763e734b1f9d4f46671e59bfaa1be5d8ec84d35a203efbfcb9bb15",
+        "label": 1,
+        "max_confidence": 0.8929,
+        "detected": true,
+        "first_detection_sec": 1.0
       }
     ]
   }

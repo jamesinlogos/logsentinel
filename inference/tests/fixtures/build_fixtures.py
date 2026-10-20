@@ -78,6 +78,38 @@ SINGLE_EVENTS: dict[str, tuple[str, int] | tuple[str, int, str]] = {
         231516,
         "20261008T050249Z",
     ),
+    # Windows metadata writes and driver registration from the labelled goodware capture.
+    "explorer_desktop_ini": (
+        "goodware/windows-operations-01",
+        229203,
+        "20261020T172719Z",
+    ),
+    "svchost_jsbytecodecache_64": (
+        "goodware/windows-operations-02",
+        81889,
+        "20261020T172719Z",
+    ),
+    "drvinst_channel_disabled": (
+        "goodware/windows-operations-01",
+        77202,
+        "20261020T172719Z",
+    ),
+    # Ransomware writes similarly named files; their directory counts must remain.
+    "bqtlock_desktop_ini_tmp": (
+        "bqtlock/425b2f283b71237276f84d941d9c2982c7f61a9aff12ece10e15065b73b7165e",
+        77538,
+        "20261009T033557Z",
+    ),
+    "bqtlock_jsbytecodecache_64_tmp": (
+        "bqtlock/425b2f283b71237276f84d941d9c2982c7f61a9aff12ece10e15065b73b7165e",
+        88885,
+        "20261009T033557Z",
+    ),
+    "nebula_desktop_ini_nbl": (
+        "nebula/112a40f154ad5de7f8fffa34e50751ab8b893f5285f96e7179177374127fcb6c",
+        77579,
+        "20261012T012123Z",
+    ),
 }
 
 

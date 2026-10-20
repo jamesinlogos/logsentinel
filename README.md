@@ -132,11 +132,13 @@ The model is in `inference/artifacts/` (mounted read-only). A missing or mismatc
 
 ### 3.2 Training and evaluation data from SentinelCap
 
-Real Sysmon captured by the `sentinelcap` CLI (`sentinelcap/README.md`): each sample is detonated in a lab Windows Server VM and flows through the production pipeline (Sysmon → Winlogbeat → Kafka → `logstash-ingest` → `windows-telemetry-*`). `sentinelcap` reads `telemetry.windows.normalized` and stores the documents as-is in JSONL, with the label (`target_class`/`target_class_name`) in a metadata sidecar. Training and online data share one `logstash-ingest`, so there is no training-serving skew.
+Training and evaluation use real Sysmon documents from `telemetry.windows.normalized` with session labels in a `metadata.json` sidecar (`sentinelcap/README.md`). SentinelCap captured the ransomware, installer and admin-scenario sessions through the lab Windows VM and the production ingest pipeline (Sysmon to Winlogbeat to Kafka to `logstash-ingest`). The two operations goodware sessions in `20261020T172719Z` were a user-authorized historical query of the same normalized Kafka topic, stored in SentinelCap's capture format without running the SentinelCap CLI or VM. Their collection details are in `source-manifest.json`. Training and online data use the same normalized event schema.
 
-**Current data:** 150 sessions (1,249,140 events) in 7 runs, under `sentinelcap/captures/<run>/<family>/<sample>/` (`session.jsonl` + `metadata.json`):
-- 80 ransomware sessions, 16 families: akira, blackbasta, blackmatter, bqtlock, conti, embargo, hellokitty, lockbit, lynx, makop, medusa, nebula, nitrogen, trigona, whitelock, yurei (15 samples run twice);
-- 70 goodware sessions: 50 installers or portable apps (`--execute`), 20 admin scenarios (`--interactive`).
+**Current capture data:** 167 sessions and 1,426,598 events across 9 runs, counted from `metadata.json` under `sentinelcap/captures/<run>/<family>/<sample>/` (each session has `session.jsonl`):
+- 95 ransomware sessions from 16 families: 50 original training sessions and 45 held-out sessions that repeat 15 samples across three runs. The held-out runs do not train the current model or select its threshold.
+- 72 goodware sessions: 50 installers or portable apps (`--execute`), 20 admin scenarios (`--interactive`), and two operator-labelled operations sessions collected from Kafka over one 49-minute interval. One of the new sessions reports dropped Sysmon source events.
+
+The current model trains on 50 ransomware and all 72 goodware sessions; its evaluation and threshold are in `inference/README.md` section 6.
 
 The volume is still small by design (section 12). Loader rules (labels per session, event-volume balance, split by family, encryption without bulk file traces): `inference/README.md` section 9.1.
 
@@ -156,7 +158,7 @@ Computed per `host.id` over 60 s windows (scheduled every 10 s, or closed early 
 | Indicator flags | 13 flags (0/1) from the Indicator Engine | — |
 
 - **Network features (real data):** the `sentinelcap` lab VM is deliberately Internet-connected. In run `20261001T011932Z` the sample's process has Event 3 in 14/50 ransomware and 21/50 goodware sessions (`inference/README.md` section 3); an Akira sample (`c974d8c6…`) opens 2,196 connections, 2,195 to port 443. Event 3 is therefore a feature, not an indicator.
-- **Event 22 (DNS): 0 events** in 150 sessions despite outbound connections (cause undetermined: Sysmon/`DnsQuery` configuration or fixed-IP samples); domain features (domain entropy, DGA) wait for Event 22 data.
+- **Event 22 (DNS): 0 events** in 167 captured sessions despite outbound connections (cause undetermined: Sysmon/`DnsQuery` configuration or fixed-IP samples); domain features (domain entropy, DGA) wait for Event 22 data.
 - **Limit:** Sysmon exposes no file content, so no true Shannon entropy; features are behaviour/frequency based, including **file-name** entropy.
 
 ---
@@ -397,8 +399,8 @@ The generic procedure is in `AGENTS.md` section 5 (`scripts/migrate_stack.py`); 
 | Phase 2 | Kafka topics; Elasticsearch configuration (ingest pipeline, ILM, component and index templates) | Done by `kafka-init` and `elasticsearch-init` in `docker compose up -d` (every `up`, idempotent); `create-topics.sh` and `init-elasticsearch.sh` still run by hand. The topic must exist before `sentinelcap` subscribes to `telemetry.windows.normalized`, otherwise `UNKNOWN_TOPIC_OR_PART` |
 | Phase 3 | Sysmon + Winlogbeat on the Windows Server | Real events flow into `telemetry.windows.sysmon.raw` |
 | Phase 4 | Full parse/enrich of ECS fields in `logstash-ingest` | `telemetry.windows.normalized` is clean: per-host order, no `message`/`event.original` |
-| Phase 5 | Training dataset via `sentinelcap` (`sentinelcap batch manifest.csv`: each sample in the lab VM, data through the Phase 3/4 pipeline) | Lossless JSONL + metadata sidecar in `sentinelcap/captures/`, enough for the first training round |
-| Phase 6 | **Develop `inference`** (`inference/README.md`) | Done: service meeting the section 5 contract; model trained by `make model` on `sentinelcap` captures (ransomware and goodware, including admin scenarios). Remaining: a new held-out ransomware run and long-running operational goodware (`inference/README.md` section 6) |
+| Phase 5 | Training dataset via SentinelCap, with the authorized historical Kafka operations backfill documented in section 3.2 | Labelled JSONL + metadata sidecar in `sentinelcap/captures/` |
+| Phase 6 | **Develop `inference`** (`inference/README.md`) | Done: service meeting the section 5 contract; model trained and threshold selected with the `make model` workflow on `sentinelcap` captures (ransomware and goodware, including admin scenarios). Remaining: an independent ransomware holdout batch and longer operational goodware outside training (`inference/README.md` section 6) |
 | Phase 7 | Connect `logstash-detection-sink`, build the Kibana dashboards | Five dashboards (section 9.1); the "Ransomware Detections" dashboard works |
 | Phase 8 | Kibana Alerting and notifications | Done: rule `ransomware-detections`, Index connector, `notifications` worker (Telegram, Gmail); install: section 9.2 |
 
@@ -410,7 +412,7 @@ The generic procedure is in `AGENTS.md` section 5 (`scripts/migrate_stack.py`); 
 - The Basic license is in use: notices go through the Index connector and the `notifications` worker. The Kibana key, the Telegram token and the Gmail App Password sit in `.env`, which backups and stack exports include.
 - Real Telegram and Gmail delivery is exercised only by `notification_test.py --enqueue` (one synthetic notice); the tests of the worker use recording providers.
 - Sysmon gives no file-content entropy: features are behaviour/frequency based.
-- The `sentinelcap` dataset (section 3.2: 150 sessions, 80 ransomware from 16 families, 70 goodware) is small and from one lab VM: more samples, families and capture time are needed before results count as reliable.
+- The capture dataset (section 3.2: 167 sessions, 95 ransomware from 16 families, 72 goodware) is small and comes from one lab environment: more samples, families and capture time are needed before results count as reliable.
 - `ingest` and `sink-inference` run 1 worker to keep event order, so detection throughput is one thread (≈ 2.7 thousand events/s after the filter cost reduction, section 7.1; real peak 1,875). Fine for a one-host lab VM; if load grows, partition by host instead of adding workers.
 - Single node everywhere (`kafka` 1 broker, `elasticsearch` 1 node): PoC, not production architecture.
 - `inference` delivers detections and window scores at-least-once with replay (offset committed only after every record of the window is acknowledged and its events leave the window buffer): a restart duplicates records on the topic with the same `logsentinel.window.id`, so Elasticsearch keeps one document per index (`inference/README.md` section 9.2). Run a single instance: no rebalance/scale-out handling, and the `sink-inference` partition key is `host.name` while windows are per `host.id`.

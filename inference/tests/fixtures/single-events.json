@@ -1120,5 +1120,628 @@
   "log": {
    "level": "information"
   }
+ },
+ "explorer_desktop_ini": {
+  "winlog": {
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "provider_name": "Microsoft-Windows-Sysmon",
+   "version": 2,
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "record_id": 229203,
+   "opcode": "Info",
+   "task": "File created (rule: FileCreate)",
+   "event_id": "11",
+   "event_data": {
+    "Image": "C:\\Windows\\Explorer.EXE",
+    "TargetFilename": "C:\\Users\\sysmaint.HVAN\\AppData\\Local\\Microsoft\\Windows\\Application Shortcuts\\desktop.ini",
+    "RuleName": "-",
+    "User": "HVAN\\sysmaint",
+    "ProcessId": "6080",
+    "UtcTime": "2026-10-20 16:31:55.685",
+    "ProcessGuid": "{8A1A7C51-977B-6AD7-6E00-000000001300}",
+    "CreationUtcTime": "2026-10-20 16:31:55.685"
+   },
+   "user": {
+    "identifier": "S-1-5-18",
+    "name": "SYSTEM",
+    "type": "User",
+    "domain": "NT AUTHORITY"
+   },
+   "computer_name": "winsrv.hvan.vn",
+   "process": {
+    "pid": 2968,
+    "thread": {
+     "id": 4308
+    }
+   }
+  },
+  "host": {
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "name": "winsrv",
+   "architecture": "x86_64",
+   "hostname": "winsrv",
+   "os": {
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "build": "20348.587",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "version": "10.0",
+    "family": "windows",
+    "type": "windows",
+    "platform": "windows"
+   },
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.0.20"
+   ]
+  },
+  "@timestamp": "2026-10-20T16:31:55.696Z",
+  "agent": {
+   "name": "winsrv",
+   "id": "b4108291-0a6d-4b73-85cd-bf5a5c004226",
+   "version": "9.5.4",
+   "type": "winlogbeat",
+   "ephemeral_id": "cd3a914d-c14f-496a-8868-4883fbaa72cc"
+  },
+  "log": {
+   "level": "information"
+  },
+  "file": {
+   "path": "C:\\Users\\sysmaint.HVAN\\AppData\\Local\\Microsoft\\Windows\\Application Shortcuts\\desktop.ini",
+   "name": "desktop.ini",
+   "extension": "ini"
+  },
+  "user": {
+   "name": "sysmaint",
+   "domain": "HVAN"
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "process": {
+   "name": "Explorer.EXE",
+   "pid": 6080,
+   "entity_id": "{8A1A7C51-977B-6AD7-6E00-000000001300}",
+   "executable": "C:\\Windows\\Explorer.EXE"
+  },
+  "event": {
+   "created": "2026-10-20T16:31:56.213Z",
+   "action": "File created (rule: FileCreate)",
+   "provider": "Microsoft-Windows-Sysmon",
+   "category": [
+    "file"
+   ],
+   "code": "11",
+   "type": [
+    "creation"
+   ],
+   "kind": "event"
+  }
+ },
+ "svchost_jsbytecodecache_64": {
+  "winlog": {
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "provider_name": "Microsoft-Windows-Sysmon",
+   "version": 2,
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "record_id": 81889,
+   "opcode": "Info",
+   "task": "File created (rule: FileCreate)",
+   "event_id": "11",
+   "event_data": {
+    "Image": "C:\\Windows\\system32\\svchost.exe",
+    "TargetFilename": "C:\\Windows\\SystemApps\\Microsoft.BioEnrollment_cw5n1h2txyewy\\microsoft.system.package.metadata\\Autogen\\JSByteCodeCache_64",
+    "RuleName": "technique_id=T1574.010,technique_name=Services File Permissions Weakness",
+    "User": "NT AUTHORITY\\SYSTEM",
+    "ProcessId": "4284",
+    "UtcTime": "2026-10-20 15:58:02.370",
+    "ProcessGuid": "{ADEA7DD7-8F67-6AD7-5800-000000001300}",
+    "CreationUtcTime": "2026-09-16 13:57:22.161"
+   },
+   "user": {
+    "identifier": "S-1-5-18",
+    "name": "SYSTEM",
+    "type": "User",
+    "domain": "NT AUTHORITY"
+   },
+   "computer_name": "WIN-NPN0UOI4TNI",
+   "process": {
+    "pid": 2884,
+    "thread": {
+     "id": 4172
+    }
+   }
+  },
+  "host": {
+   "mac": [
+    "00-50-56-29-9E-E9"
+   ],
+   "name": "win-npn0uoi4tni",
+   "architecture": "x86_64",
+   "hostname": "WIN-NPN0UOI4TNI",
+   "os": {
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "build": "20348.587",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "version": "10.0",
+    "family": "windows",
+    "type": "windows",
+    "platform": "windows"
+   },
+   "id": "adea7dd7-853b-4d56-b06b-846c7584f635",
+   "ip": [
+    "fe80::1d4d:ecc0:d5f6:ea7d",
+    "192.168.0.129"
+   ]
+  },
+  "@timestamp": "2026-10-20T15:58:02.373Z",
+  "threat": {
+   "technique": {
+    "subtechnique": {
+     "name": "Services File Permissions Weakness",
+     "id": "T1574.010"
+    },
+    "id": "T1574"
+   },
+   "framework": "MITRE ATT&CK"
+  },
+  "agent": {
+   "name": "WIN-NPN0UOI4TNI",
+   "id": "2d2e1cb2-c768-445e-95a2-71d156c7b3af",
+   "version": "9.5.4",
+   "type": "winlogbeat",
+   "ephemeral_id": "26260f35-b3ff-47b2-bf79-09ae637852da"
+  },
+  "log": {
+   "level": "information"
+  },
+  "file": {
+   "path": "C:\\Windows\\SystemApps\\Microsoft.BioEnrollment_cw5n1h2txyewy\\microsoft.system.package.metadata\\Autogen\\JSByteCodeCache_64",
+   "name": "JSByteCodeCache_64"
+  },
+  "rule": {
+   "name": "technique_id=T1574.010,technique_name=Services File Permissions Weakness"
+  },
+  "user": {
+   "name": "SYSTEM",
+   "domain": "NT AUTHORITY"
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "process": {
+   "name": "svchost.exe",
+   "pid": 4284,
+   "entity_id": "{ADEA7DD7-8F67-6AD7-5800-000000001300}",
+   "executable": "C:\\Windows\\system32\\svchost.exe"
+  },
+  "event": {
+   "created": "2026-10-20T15:59:33.461Z",
+   "action": "File created (rule: FileCreate)",
+   "provider": "Microsoft-Windows-Sysmon",
+   "category": [
+    "file"
+   ],
+   "code": "11",
+   "type": [
+    "creation"
+   ],
+   "kind": "event"
+  }
+ },
+ "drvinst_channel_disabled": {
+  "winlog": {
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "provider_name": "Microsoft-Windows-Sysmon",
+   "version": 2,
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "record_id": 77202,
+   "opcode": "Info",
+   "task": "Registry value set (rule: RegistryEvent)",
+   "event_id": "13",
+   "event_data": {
+    "Image": "C:\\Windows\\System32\\drvinst.exe",
+    "TargetObject": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\Microsoft-Windows-Bluetooth-Bthmini/Operational\\Enabled",
+    "Details": "DWORD (0x00000000)",
+    "RuleName": "-",
+    "User": "NT AUTHORITY\\SYSTEM",
+    "ProcessId": "2344",
+    "UtcTime": "2026-10-20 15:53:41.232",
+    "ProcessGuid": "{8A1A7C51-8E81-6AD7-CC00-000000001100}",
+    "EventType": "SetValue"
+   },
+   "user": {
+    "identifier": "S-1-5-18",
+    "name": "SYSTEM",
+    "type": "User",
+    "domain": "NT AUTHORITY"
+   },
+   "computer_name": "WIN-EN194VL6R3U",
+   "process": {
+    "pid": 2604,
+    "thread": {
+     "id": 4040
+    }
+   }
+  },
+  "host": {
+   "mac": [
+    "00-50-56-29-9E-E9"
+   ],
+   "name": "win-en194vl6r3u",
+   "architecture": "x86_64",
+   "hostname": "WIN-EN194VL6R3U",
+   "os": {
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "build": "20348.587",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "version": "10.0",
+    "family": "windows",
+    "type": "windows",
+    "platform": "windows"
+   },
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "ip": [
+    "fe80::387e:c69c:9713:383a",
+    "192.168.0.20"
+   ]
+  },
+  "@timestamp": "2026-10-20T15:53:41.240Z",
+  "agent": {
+   "name": "WIN-EN194VL6R3U",
+   "id": "2d2e1cb2-c768-445e-95a2-71d156c7b3af",
+   "version": "9.5.4",
+   "type": "winlogbeat",
+   "ephemeral_id": "9c82cf04-7e87-4123-866e-ec4e3769ee65"
+  },
+  "log": {
+   "level": "information"
+  },
+  "user": {
+   "name": "SYSTEM",
+   "domain": "NT AUTHORITY"
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "process": {
+   "name": "drvinst.exe",
+   "pid": 2344,
+   "entity_id": "{8A1A7C51-8E81-6AD7-CC00-000000001100}",
+   "executable": "C:\\Windows\\System32\\drvinst.exe"
+  },
+  "event": {
+   "created": "2026-10-20T15:53:41.752Z",
+   "action": "Registry value set (rule: RegistryEvent)",
+   "provider": "Microsoft-Windows-Sysmon",
+   "category": [
+    "configuration",
+    "registry"
+   ],
+   "code": "13",
+   "type": [
+    "change"
+   ],
+   "kind": "event"
+  },
+  "registry": {
+   "path": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\Microsoft-Windows-Bluetooth-Bthmini/Operational\\Enabled",
+   "data": {
+    "strings": "DWORD (0x00000000)"
+   },
+   "hive": "HKLM"
+  }
+ },
+ "bqtlock_desktop_ini_tmp": {
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "@timestamp": "2026-10-09T04:21:18.476Z",
+  "file": {
+   "name": "desktop.ini.tmp",
+   "path": "D:\\$RECYCLE.BIN\\S-1-5-21-2153490556-1396965309-3114490714-1000\\desktop.ini.tmp",
+   "extension": "tmp"
+  },
+  "winlog": {
+   "task": "File created (rule: FileCreate)",
+   "event_data": {
+    "TargetFilename": "D:\\$RECYCLE.BIN\\S-1-5-21-2153490556-1396965309-3114490714-1000\\desktop.ini.tmp",
+    "ProcessGuid": "{8A1A7C51-6B95-6AC8-F300-000000001100}",
+    "UtcTime": "2026-10-09 04:21:18.465",
+    "User": "WIN-EN194VL6R3U\\sysmaint",
+    "ProcessId": "5920",
+    "Image": "C:\\Users\\Administrator\\Desktop\\Reports\\newsletter_75fd.exe",
+    "CreationUtcTime": "2026-10-09 04:21:18.465",
+    "RuleName": "-"
+   },
+   "version": 2,
+   "user": {
+    "domain": "NT AUTHORITY",
+    "identifier": "S-1-5-18",
+    "name": "SYSTEM",
+    "type": "User"
+   },
+   "provider_name": "Microsoft-Windows-Sysmon",
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "process": {
+    "pid": 1460,
+    "thread": {
+     "id": 4556
+    }
+   },
+   "computer_name": "WIN-EN194VL6R3U",
+   "opcode": "Info",
+   "record_id": 77538,
+   "event_id": "11",
+   "channel": "Microsoft-Windows-Sysmon/Operational"
+  },
+  "log": {
+   "level": "information"
+  },
+  "host": {
+   "hostname": "WIN-EN194VL6R3U",
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "name": "win-en194vl6r3u",
+   "os": {
+    "build": "20348.587",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "family": "windows",
+    "version": "10.0",
+    "platform": "windows",
+    "type": "windows"
+   },
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.0.20"
+   ],
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "architecture": "x86_64"
+  },
+  "event": {
+   "code": "11",
+   "provider": "Microsoft-Windows-Sysmon",
+   "created": "2026-10-09T04:21:18.690Z",
+   "action": "File created (rule: FileCreate)",
+   "category": [
+    "file"
+   ],
+   "kind": "event",
+   "type": [
+    "creation"
+   ]
+  },
+  "agent": {
+   "id": "2d2e1cb2-c768-445e-95a2-71d156c7b3af",
+   "name": "WIN-EN194VL6R3U",
+   "ephemeral_id": "621831ec-e327-46a4-8de6-8068ba511c7b",
+   "version": "9.5.4",
+   "type": "winlogbeat"
+  },
+  "user": {
+   "domain": "WIN-EN194VL6R3U",
+   "name": "sysmaint"
+  },
+  "process": {
+   "pid": 5920,
+   "name": "newsletter_75fd.exe",
+   "entity_id": "{8A1A7C51-6B95-6AC8-F300-000000001100}",
+   "executable": "C:\\Users\\Administrator\\Desktop\\Reports\\newsletter_75fd.exe"
+  }
+ },
+ "bqtlock_jsbytecodecache_64_tmp": {
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "log": {
+   "level": "information"
+  },
+  "@timestamp": "2026-10-09T04:21:42.757Z",
+  "winlog": {
+   "task": "File created (rule: FileCreate)",
+   "event_data": {
+    "TargetFilename": "C:\\Windows\\PrintDialog\\microsoft.system.package.metadata\\Autogen\\JSByteCodeCache_64.tmp",
+    "ProcessGuid": "{8A1A7C51-6B96-6AC8-F800-000000001100}",
+    "UtcTime": "2026-10-09 04:21:42.751",
+    "User": "WIN-EN194VL6R3U\\sysmaint",
+    "ProcessId": "1096",
+    "Image": "C:\\Users\\Administrator\\Desktop\\Reports\\newsletter_75fd.exe",
+    "CreationUtcTime": "2026-10-09 04:21:42.751",
+    "RuleName": "technique_id=T1574.010,technique_name=Services File Permissions Weakness"
+   },
+   "version": 2,
+   "user": {
+    "domain": "NT AUTHORITY",
+    "identifier": "S-1-5-18",
+    "name": "SYSTEM",
+    "type": "User"
+   },
+   "provider_name": "Microsoft-Windows-Sysmon",
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "process": {
+    "pid": 1460,
+    "thread": {
+     "id": 4556
+    }
+   },
+   "computer_name": "WIN-EN194VL6R3U",
+   "opcode": "Info",
+   "record_id": 88885,
+   "event_id": "11",
+   "channel": "Microsoft-Windows-Sysmon/Operational"
+  },
+  "file": {
+   "name": "JSByteCodeCache_64.tmp",
+   "path": "C:\\Windows\\PrintDialog\\microsoft.system.package.metadata\\Autogen\\JSByteCodeCache_64.tmp",
+   "extension": "tmp"
+  },
+  "host": {
+   "hostname": "WIN-EN194VL6R3U",
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "name": "win-en194vl6r3u",
+   "os": {
+    "build": "20348.587",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "family": "windows",
+    "version": "10.0",
+    "platform": "windows",
+    "type": "windows"
+   },
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.0.20"
+   ],
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "architecture": "x86_64"
+  },
+  "event": {
+   "code": "11",
+   "provider": "Microsoft-Windows-Sysmon",
+   "created": "2026-10-09T04:21:43.553Z",
+   "action": "File created (rule: FileCreate)",
+   "category": [
+    "file"
+   ],
+   "kind": "event",
+   "type": [
+    "creation"
+   ]
+  },
+  "agent": {
+   "id": "2d2e1cb2-c768-445e-95a2-71d156c7b3af",
+   "name": "WIN-EN194VL6R3U",
+   "ephemeral_id": "621831ec-e327-46a4-8de6-8068ba511c7b",
+   "version": "9.5.4",
+   "type": "winlogbeat"
+  },
+  "user": {
+   "domain": "WIN-EN194VL6R3U",
+   "name": "sysmaint"
+  },
+  "process": {
+   "pid": 1096,
+   "name": "newsletter_75fd.exe",
+   "entity_id": "{8A1A7C51-6B96-6AC8-F800-000000001100}",
+   "executable": "C:\\Users\\Administrator\\Desktop\\Reports\\newsletter_75fd.exe"
+  },
+  "rule": {
+   "name": "technique_id=T1574.010,technique_name=Services File Permissions Weakness"
+  },
+  "threat": {
+   "framework": "MITRE ATT&CK",
+   "technique": {
+    "id": "T1574",
+    "subtechnique": {
+     "id": "T1574.010",
+     "name": "Services File Permissions Weakness"
+    }
+   }
+  }
+ },
+ "nebula_desktop_ini_nbl": {
+  "agent": {
+   "id": "2d2e1cb2-c768-445e-95a2-71d156c7b3af",
+   "name": "WIN-EN194VL6R3U",
+   "version": "9.5.4",
+   "ephemeral_id": "621831ec-e327-46a4-8de6-8068ba511c7b",
+   "type": "winlogbeat"
+  },
+  "user": {
+   "domain": "WIN-EN194VL6R3U",
+   "name": "sysmaint"
+  },
+  "host": {
+   "id": "8a1a7c51-9e51-4829-94d7-e8fe2e6c6f02",
+   "name": "win-en194vl6r3u",
+   "mac": [
+    "00-0C-29-EF-5A-87"
+   ],
+   "hostname": "WIN-EN194VL6R3U",
+   "os": {
+    "build": "20348.587",
+    "family": "windows",
+    "name": "Windows Server 2022 Standard Evaluation",
+    "version": "10.0",
+    "kernel": "10.0.20348.587 (WinBuild.160101.0800)",
+    "platform": "windows",
+    "type": "windows"
+   },
+   "ip": [
+    "fe80::61c1:1b75:e4ad:124",
+    "192.168.0.20"
+   ],
+   "architecture": "x86_64"
+  },
+  "ecs": {
+   "version": "8.0.0"
+  },
+  "file": {
+   "extension": "nbl",
+   "path": "C:\\Users\\sysmaint\\Desktop\\desktop.ini.nbl",
+   "name": "desktop.ini.nbl"
+  },
+  "winlog": {
+   "event_data": {
+    "UtcTime": "2026-10-12 03:07:40.840",
+    "ProcessGuid": "{8A1A7C51-4EFB-6ACC-1A01-000000001100}",
+    "RuleName": "-",
+    "ProcessId": "6860",
+    "User": "WIN-EN194VL6R3U\\sysmaint",
+    "Image": "D:\\Backup\\DB_Exports\\2023\\2023-06\\budget_2d59.exe",
+    "CreationUtcTime": "2026-10-12 03:07:40.840",
+    "TargetFilename": "C:\\Users\\sysmaint\\Desktop\\desktop.ini.nbl"
+   },
+   "version": 2,
+   "user": {
+    "identifier": "S-1-5-18",
+    "name": "SYSTEM",
+    "domain": "NT AUTHORITY",
+    "type": "User"
+   },
+   "computer_name": "WIN-EN194VL6R3U",
+   "provider_guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+   "opcode": "Info",
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "provider_name": "Microsoft-Windows-Sysmon",
+   "process": {
+    "pid": 1460,
+    "thread": {
+     "id": 4556
+    }
+   },
+   "record_id": 77579,
+   "event_id": "11",
+   "task": "File created (rule: FileCreate)"
+  },
+  "process": {
+   "pid": 6860,
+   "name": "budget_2d59.exe",
+   "executable": "D:\\Backup\\DB_Exports\\2023\\2023-06\\budget_2d59.exe",
+   "entity_id": "{8A1A7C51-4EFB-6ACC-1A01-000000001100}"
+  },
+  "event": {
+   "type": [
+    "creation"
+   ],
+   "created": "2026-10-12T03:07:41.261Z",
+   "action": "File created (rule: FileCreate)",
+   "code": "11",
+   "category": [
+    "file"
+   ],
+   "kind": "event",
+   "provider": "Microsoft-Windows-Sysmon"
+  },
+  "@timestamp": "2026-10-12T03:07:40.854Z",
+  "log": {
+   "level": "information"
+  }
  }
 }

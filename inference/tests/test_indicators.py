@@ -63,6 +63,33 @@ def test_note_in_nine_directories_is_no_mass_note_drop(sessions: dict[str, Sessi
     assert not result.gated
 
 
+@pytest.mark.parametrize("name", ["explorer_desktop_ini", "svchost_jsbytecodecache_64"])
+def test_windows_metadata_files_do_not_count_as_bulk_notes(
+    single_events: dict[str, Any], name: str
+) -> None:
+    summary = summarize([parse_event(single_events[name])])
+    assert summary.created_files == 1
+    assert summary.max_name_dirs == 0
+    assert summary.max_name_branches == 0
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "bqtlock_desktop_ini_tmp",
+        "bqtlock_jsbytecodecache_64_tmp",
+        "nebula_desktop_ini_nbl",
+    ],
+)
+def test_ransomware_near_suffix_files_still_count_as_bulk_notes(
+    single_events: dict[str, Any], name: str
+) -> None:
+    summary = summarize([parse_event(single_events[name])])
+    assert summary.created_files == 1
+    assert summary.max_name_dirs == 1
+    assert summary.max_name_branches == 1
+
+
 def test_medusa_recovery_and_bursts(sessions: dict[str, Session]) -> None:
     assert {
         "recovery_disable",
@@ -112,6 +139,17 @@ def test_windows_servicing_registering_a_disabled_channel_is_not_log_tampering(
     elsewhere = copy.deepcopy(servicing)
     elsewhere["process"]["executable"] = r"C:\Users\Public\TiWorker.exe"
     assert "event_log_tamper" in fired([parse_event(elsewhere)])
+
+
+def test_driver_install_channel_write_is_excluded_but_malicious_write_is_not(
+    single_events: dict[str, Any],
+) -> None:
+    benign = summarize([parse_event(single_events["drvinst_channel_disabled"])])
+    malicious = summarize([parse_event(single_events["sysmon_channel_disabled"])])
+    assert benign.log_tamper == 0
+    assert "event_log_tamper" not in evaluate(benign).fired
+    assert malicious.log_tamper == 1
+    assert "event_log_tamper" in evaluate(malicious).fired
 
 
 def test_process_tampering_rule() -> None:

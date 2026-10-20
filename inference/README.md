@@ -19,7 +19,7 @@ make check    # ruff + mypy + pytest (real fixtures, no Kafka)
 make model    # train + evaluate on ../sentinelcap/captures -> artifacts/ (HOLDOUT runs excluded)
 make run      # run the service (Kafka from config.yaml / environment)
 ```
-Without `make` (Windows) run the commands of the `Makefile`, e.g. `python -m training.train --captures ../sentinelcap/captures --holdout 20261009T033557Z --holdout 20261009T120629Z`.
+Without `make` (Windows) run the commands of the `Makefile`, e.g. `python -m training.train --captures ../sentinelcap/captures --holdout 20261009T033557Z --holdout 20261009T120629Z --holdout 20261012T012123Z`.
 
 - `make model` = `train` then `evaluate`, with the same `--seed`/`--max-windows`/`--config`/`--holdout`. `train` writes `model.pkl` and `model-meta.json` (one `version`). `evaluate` picks the threshold and stores it in `model-meta.json` (with `threshold_basis`, the settings it was chosen for) and `artifacts/evaluation.json`; it refuses to write a threshold for a model trained with other settings.
 - Held-out runs (`HOLDOUT` in the `Makefile`, section 9.1 rule 10) never train the model or pick the threshold; `evaluate` scores them last (`held_out`). Sessions added to such a run need only `make evaluate`. A run that recaptures held-out samples (same hashes) must be in `HOLDOUT` too, otherwise `train` and `evaluate` stop.
@@ -162,11 +162,12 @@ Measured on run 2026-10-01: **50 ransomware sessions** (11 families: akira, blac
 | `shadow_copy_deletion` | Command line that deletes or shrinks shadow copies or the backup catalog: `delete shadows`, `Win32_Shadowcopy` + `Remove-WmiObject`/`Delete`, `wmic shadowcopy … delete`, `resize shadowstorage`, `wbadmin delete` (also via `cmd.exe`, PowerShell, WMI; the parent is not traced) | 1 | 24/50 (7/11) | 0/50 | 0.5 |
 | `recovery_disable` | `bcdedit … recoveryenabled no`, `bootstatuspolicy ignoreallfailures`, `reagentc /disable` | 1 | 13/50 (6/11) | 0/50 | 0.4 |
 | `service_stop_burst` | ≥ 5 stop commands for services/processes in the window: `net stop`/`net1 stop`, `sc stop`, `sc config … start= disabled`, `Stop-Service`, `taskkill` | 1 | 9/50 (5/11) | 0/50 | 0.4 |
-| `event_log_tamper` | Write of `…\WINEVT\Channels\<channel>\Enabled = 0` (Event 13) by a process other than Windows servicing (`c:\windows\winsxs\<dir>\tiworker.exe`), or `wevtutil cl`/`sl … /e:false`, `Clear-EventLog` (Event 1) | 13, 1 | 7/50 (4/11) | 0/50 | 0.5 |
+| `event_log_tamper` | Write of `…\WINEVT\Channels\<channel>\Enabled = 0` (Event 13) except Windows servicing (`c:\windows\winsxs\<dir>\tiworker.exe`) and exact `c:\windows\system32\drvinst.exe` writes under `HKLM\Software\Microsoft\Windows\CurrentVersion\WINEVT\Channels\`, or `wevtutil cl`/`sl … /e:false`, `Clear-EventLog` (Event 1) | 13, 1 | 7/50 (4/11) | 0/50 | 0.5 |
 
 - With the service's 60 s windows (`training/evaluate.py`) the ransomware counts are the same; goodware `mass_note_drop` drops to 2/50 (Windows Admin Center fails inside one window). `wmic shadowcopy … delete` (8 sessions: BlackBasta `a1202037…`, 5 LockBit, 2 Trigona) is part of `shadow_copy_deletion`. Narrowing `mass_note_drop` further does not separate: requiring an extension removes only Windows Admin Center; counting by level-2 root puts 2 ransomware sessions in one root.
-- **`mass_file_replace`** came from WhiteLock `a501583b…` (held-out run): 5,070 `<name>.jpg.fbin` files written, 4,980 originals deleted, no note, no other indicator. On run 2026-10-01 and held-out run `20261009T033557Z`: 5 ransomware sessions of 5 families (Akira 2,569 files / 78 directories; BQTLock, Nebula, WhiteLock, Yurei 630–9,717 files / 19–1,966 directories) against 70 goodware sessions with at most 101 files (one installer, 1 directory) and at most 5 directories. Weight 0.8 (highest): it is the destructive act itself and never appeared in goodware, while the other five strong indicators all did in admin-scenario goodware. With this weight WhiteLock's lowest maximum confidence is 0.5803 against the threshold 0.58 (section 9.5). Rule and weight were chosen after seeing that run, so it no longer checks them independently (section 9.5).
-- **`event_log_tamper` servicing exception:** `TiWorker.exe` (from `c:\windows\winsxs\…`) registers log channels as disabled during updates and role installs. It is the only source of such writes in goodware (2 scenario sessions: Windows Update, AD DS install); ransomware disables channels with the sample itself (4 sessions). Only that exact path is skipped. `wevtutil` has no exception (the log-archival scenario uses `wevtutil cl`; Phase 3 separates it, section 9.5).
+- **`mass_file_replace`** came from WhiteLock `a501583b…` (held-out run): 5,070 `<name>.jpg.fbin` files written, 4,980 originals deleted, no note, no other indicator. On run 2026-10-01 and held-out run `20261009T033557Z`: 5 ransomware sessions of 5 families (Akira 2,569 files / 78 directories; BQTLock, Nebula, WhiteLock, Yurei 630–9,717 files / 19–1,966 directories) against 70 goodware sessions with at most 101 files (one installer, 1 directory) and at most 5 directories. Weight 0.8 (highest): it is the destructive act itself and never appeared in goodware, while the other five strong indicators all did in admin-scenario goodware. In the previous model, WhiteLock's lowest maximum confidence was 0.5803 against its threshold 0.58 (section 9.5). Rule and weight were chosen after seeing that run, so it no longer checks them independently (section 9.5).
+- **`mass_note_drop` metadata exceptions:** only the per-process, same-name directory count skips exact `desktop.ini` writes by `c:\windows\explorer.exe` under `c:\users\`, `c:\$recycle.bin\` or `d:\$recycle.bin\`, and exact `JSByteCodeCache_64` writes by `c:\windows\system32\svchost.exe` under `c:\windows\...\microsoft.system.package.metadata\autogen\`. Other file counts and features still include these events. Captured ransomware writes `desktop.ini.tmp`, `desktop.ini.nbl`, `desktop.ini.crinal` and `JSByteCodeCache_64.tmp`; those suffixes remain eligible.
+- **`event_log_tamper` servicing exceptions:** `TiWorker.exe` under `c:\windows\winsxs\...` and exact `c:\windows\system32\drvinst.exe` writes of `HKLM\Software\Microsoft\Windows\CurrentVersion\WINEVT\Channels\<channel>\Enabled = 0` are skipped. The latter occurred during driver installation in the two new goodware sessions. `wevtutil` commands and writes by other processes still count. The earlier 20 admin scenarios had only the `TiWorker.exe` source of these benign writes.
 
 **Support group** (adds to `indicator_score`, never opens the gate alone):
 
@@ -225,8 +226,8 @@ Only combinations that co-occur in ransomware and appear in 0/50 goodware sessio
   | **Shuffled windows** | **off** | **0.924** (0.923 – 0.926) |
 
   (Folds: one family per fold, goodware in 5 separate folds; section 6 uses another split, so the AUCs are not comparable.) ADWIN would only return if the service learned online from feedback (section 5.4).
-- **Training data:** SentinelCap captures (`../sentinelcap/README.md`, `../README.md` section 3.2), the same `logstash-ingest` output used at inference, no schema mapping: run 2026-10-01 (50 ransomware sessions of 11 families, 50 installer/portable goodware sessions) and 20 admin-scenario goodware sessions (`manifest-scenarios.csv`, section 9.5). More samples are needed before the model can be called reliable (`../README.md` section 12). Loader rules: section 9.1.
-- **Implementation** (`model.py`, `training/train.py`): `river.forest.ARFClassifier(n_models=10, seed=42)` with `NoDrift` detectors; offline training on window features (section 8) with window labels (section 9.1 rule 2); scheduled windows only (section 5.2), at most 30 labelled windows per session, shuffled with a seed before `learn_one`; no concurrent-goodware windows (rule 9). Model `20261011T202925Z`: 1,971 labelled windows (513 ransomware, 1,458 goodware); 200 ransomware windows without sample events are dropped. `model-meta.json` stores the feature list and the river version; the service refuses a mismatching model (section 9.2).
+- **Training data:** SentinelCap captures (`../sentinelcap/README.md`, `../README.md` section 3.2): 50 ransomware and 50 installer/portable goodware sessions from 2026-10-01, 20 admin-scenario goodware sessions (section 9.5), and two operator-labelled operations goodware sessions in `20261020T172719Z`. More independent samples are needed before the model can be called reliable (`../README.md` section 12). Loader rules: section 9.1.
+- **Implementation** (`model.py`, `training/train.py`): `river.forest.ARFClassifier(n_models=10, seed=42)` with `NoDrift` detectors; offline training on window features (section 8) with window labels (section 9.1 rule 2); scheduled windows only (section 5.2), at most 30 labelled windows per session, shuffled with a seed before `learn_one`; no concurrent-goodware windows (rule 9). Model `20261020T175915Z`: 2,031 labelled windows (513 ransomware, 1,518 goodware) from 50 ransomware and 72 goodware sessions; 200 ransomware windows without sample events are dropped. `model-meta.json` stores the feature list and the river version; the service refuses a mismatching model (section 9.2).
 
 ### 5.2 Windows the model scores
 The model is trained on scheduled windows (section 4.0), whose `end` lies on the 10 s grid, and scores every window the service closes, early ones included. An early window has the same 60 s span and the same 37 features as a scheduled one; only its `end` is the time of an event. Evaluation replays sessions through the service's `Pipeline`, so the figures of section 6 include early windows (labels as in section 9.1 rule 2). The score of a window depends only on its own events: no per-host history enters the model score or the confidence.
@@ -246,29 +247,29 @@ Monitor-only, no online learning: the Global Model changes only with an offline 
 
 Metrics: **F2** (β=2; a missed ransomware is worse than a false alarm) and **MCC** (balanced view on imbalanced classes).
 
-### Results (model `20261011T202925Z`, `artifacts/evaluation.json`)
+### Results (model `20261020T175915Z`, `artifacts/evaluation.json`)
 The model version is a UTC stamp `YYYYMMDDTHHMMSSZ` (`../AGENTS.md` section 11.3).
 
-- **Data:** run 2026-10-01 (50 ransomware, 50 installer goodware) and 20 admin-scenario goodware sessions captured 2026-10-08/09 (section 9.5): 120 sessions, 20.4 hours of goodware. The held-out runs `20261009T033557Z` and `20261009T120629Z` (the same 15 new ransomware samples captured twice, 5 families not in training) are outside training and threshold selection (section 9.1 rule 10). Indicators include `mass_file_replace` and the Windows servicing exception.
-- **Method** (`training/evaluate.py`): family-grouped cross-validation (section 9.1 rule 6). Each ransomware family is a fold; goodware samples (each hash or scenario whole in one fold) are spread over the same 11 folds. A fold's model is trained on the other folds only (`evaluate` stops if no goodware remains outside a fold). Each session is replayed once through the service's `Pipeline` (`replay`): scheduled and early windows, confidence and model score rounded as the service writes them. Session level: detected if at least one gated window has confidence ≥ threshold. Threshold = best session-level F2 (ties: window-level MCC, then the higher threshold): **0.58**. It is selected on the same out-of-fold results the table reports, so the metrics are optimistic.
+- **Data:** 122 training and threshold-selection sessions: 50 ransomware, 50 installer goodware, 20 admin-scenario goodware, and two operations goodware sessions from the operator-labelled 49-minute interval in run `20261020T172719Z`. Each session contributes at most 30 labelled scheduled training windows; replay evaluation sees all events and includes early windows. The runs `20261009T033557Z`, `20261009T120629Z` and `20261012T012123Z` hold out the same 15 ransomware samples captured three times (section 9.1 rule 10). One new goodware session records a Sysmon Event 255 `QUEUE` report of dropped source events.
+- **Method** (`training/evaluate.py`): family-grouped cross-validation (section 9.1 rule 6). Each ransomware family is a fold; goodware sessions are spread over the same 11 folds and each session is scored outside its training fold. Replays use the service's `Pipeline` with scheduled and early windows. A session is detected if at least one gated window reaches the threshold. Best session-level F2, then window-level MCC, then the higher threshold selects **0.60**. Selection uses the same out-of-fold results reported here, so these metrics are optimistic.
 
 | | Recall | Precision | F2 | MCC |
 |---|---|---|---|---|
-| Session level at threshold (TP 48, FN 2, FP 3, TN 67) | 0.96 | 0.94 | 0.96 | 0.91 |
-| Session level, Phase 2 gate only (TP 48, FN 2, FP 7, TN 63) | 0.96 | 0.87 | 0.94 | 0.85 |
-| Window level at threshold (TP 446, FN 378, FP 29, TN 3,074) | 0.54 | 0.94 | 0.59 | 0.66 |
+| Session at threshold (TP 48, FN 2, FP 3, TN 69) | 0.96 | 0.94 | 0.96 | 0.92 |
+| Session, Phase 2 gate only (TP 48, FN 2, FP 7, TN 65) | 0.96 | 0.87 | 0.94 | 0.85 |
+| Window at threshold (TP 442, FN 382, FP 29, TN 3,303) | 0.54 | 0.94 | 0.59 | 0.66 |
 
-The window-level row counts every labelled window of the replays, early windows included.
+The window row counts all labelled replay windows, including early windows.
 
-- **Phase 3 removes false alarms:** 7 goodware sessions pass the gate; at the threshold 3 remain — MDaemon `3a60f6dd…`, XAMPP `12e818ce…` and the scenario `deploy-config-files`. Flagged goodware windows drop from 94 to 29.
-- **Global Model alone:** AUC 0.937 over all labelled windows (out-of-fold). AUC is unstable between trainings: seeds 1 and 7 give 0.950 and 0.928 (thresholds 0.56 and 0.61, the same session counts), and adding only the column `ind_mass_file_replace` (non-zero in 3 windows of one training session) once moved it from 0.884 to 0.926, so differences of a few percent are not evidence.
-- **Cost of the threshold:** 0.54 of ransomware windows reach 0.58 (gate alone: 0.81); the other gated ones are emitted as `indicator_match`. The 2 missed sessions never pass the gate (BlackBasta `17205c43…`, LockBit `032690f1…`, section 4.2).
-- **Concurrent goodware** (rule 9; 50 pairs): 47 of 48 sessions detected (alone: 48 of 48). The miss is BlackMatter `9bae897c…` together with goodware `71bcfda9…`: 0.5782 against the threshold 0.58 (alone 0.8038). Ransomware windows detected 528/966 (alone: 446/824); mean model score 0.614 → 0.557.
-- **False alarms over time:** 20.38 hours of goodware (4.49 h installers, 15.89 h scenarios), 29 flagged windows (1.42/h). After suppression (`EmissionPolicy`) 25 detections are emitted (all labels), 8 of them `suspicious_ransomware_behavior` (0.39/h). Optimistic: the threshold was chosen on this data.
-- **Time to first detection** (48 detected sessions): median 2.6 s, p90 39.1 s, max 186.7 s (event time, from the first event of the sample's process to the end of the first window reaching the threshold; an early window ends at the event that brings the indicator). The service emits an early window at its event and a scheduled one when the next event or `idle_flush_sec` closes it; upstream delay comes on top: Sysmon → Winlogbeat (`pipeline_lag_*` of SentinelCap measures only this hop; run 2026-10-01: median of the per-session maximum 2.2 s, highest 16.2 s) and Kafka/Logstash/service loop (not measured on the real system; simulation in section 9.2).
-- **Held-out runs** (`held_out`; 15 samples captured twice = 30 sessions): **30/30 detected** (15/15 per run), including BQTLock, Makop, Nebula, WhiteLock and Yurei (not in training). Time to first detection: median 2.7 s, p90 42.8 s, max 52.6 s (run `20261009T033557Z`: median 3.6 s, max 52.6 s; run `20261009T120629Z`: median 2.4 s, max 42.8 s). Lowest maximum confidence: WhiteLock `a501583b…`, 0.5803 and 0.6539 against the threshold 0.58 (table in section 9.5). Ransomware only, so no false-alarm measurement. Not independent: `mass_file_replace` and its weight were chosen after seeing WhiteLock (section 9.5).
-- **The window-sampling seed contains the run name:** `training_rows` seeds with `f"{seed}:{session.key}"` and `session.key` contains the run name, so renaming a run shifts the AUC and the threshold slightly (`../AGENTS.md` section 10).
-- **Data still to collect:** (1) a new held-out ransomware batch (unseen samples) to re-check `mass_file_replace` and the 0.8 weight, after which the current 15 samples can join training; (2) new admin/operations goodware not used for the threshold (operations like `deploy-config-files`, service stops, bulk file replacement across directories); (3) long normal-operation captures to measure flagged windows per host per day. After each batch run `make model` (`make evaluate` if only held-out sessions were added) and compare with the tables above.
+- **False alarms:** 7 goodware sessions pass the gate and 3 remain at the threshold: MDaemon `3a60f6dd...`, XAMPP `12e818ce...` and `deploy-config-files`. Across 22.03 hours of goodware, 29 windows are flagged (1.32/h), and suppression emits 25 detections of any label (1.13/h), 8 suspicious (0.36/h).
+- **Global Model:** out-of-fold AUC 0.9251. Earlier multi-seed results in section 5.1 used a different training set and do not estimate uncertainty for this model.
+- **Threshold cost:** 442/824 ransomware windows (0.54) reach 0.60, versus 666/824 (0.81) passing the gate. The two missed training sessions never pass the gate: BlackBasta `17205c43...` and LockBit `032690f1...` (section 4.2).
+- **Concurrent goodware** (rule 9; 50 pairs): 48/48 detectable sessions remain detected with goodware overlaid (48/48 alone). Detected ransomware windows: 528/966 with goodware versus 442/824 alone; mean model score 0.6212 to 0.5532.
+- **Time to first detection** (48 detected cross-validation sessions): median 2.4 s, p90 39.2 s, max 186.7 s in event time, from the first event of the sample's process to the end of its first threshold-reaching window. Upstream and service-loop delays add to this; section 9.2's simulation used the previous model.
+- **Held-out ransomware:** **44/45 detected** across three runs, with the same 15 samples recaptured three times. The missed third-run Makop session never passes the Phase 2 gate. Among 44 detections, median first-detection time is 3.6 s, p90 41.7 s, maximum 68.6 s. First-run WhiteLock is detected at 68.6 s, accepted for this version (section 9.5). These ransomware-only repeats do not measure goodware false alarms or independent sample diversity.
+- **New operations goodware, direct replay:** the previous-rule control with retraining emitted 8 detections (6 suspicious) in the labelled 49-minute interval; the updated rule and model emit 0. These two sessions participated in training and threshold selection, so this is an in-sample check. The archived local experiment's `comparison.json` and the capture `source-manifest.json` record the comparison and source limitations.
+- **Window-sampling seed:** `training_rows` seeds with `f"{seed}:{session.key}"`; the run name is part of `session.key`, so renaming a run can shift AUC and the threshold (`../AGENTS.md` section 10).
+- **Data still to collect:** an independent ransomware holdout batch, operations goodware outside training and threshold selection, and long normal-operation captures to measure detections per host per day. After each batch, run `make model` (or `make evaluate` for holdout-only additions) and compare with these figures.
 
 ---
 
@@ -283,7 +284,7 @@ For every scored window the service writes **two streams** from one result (`sch
 
 Both streams carry scheduled and early windows (section 4.0); `logsentinel.window.trigger` tells them apart.
 
-Example: the first reported window of Medusa `49c9b3dd…` (fixture `tests/fixtures/sessions`), an early window, model `20261011T202925Z`, threshold 0.58 (calibrated). The session is in the training set, so the example only illustrates the format (18 windows: 13 scheduled and 5 early; 11 gated; 5 reported, all early). `activity` is laid out several fields per line; `event.created` was set by the script that generated the example.
+Historical output example from the previous model: the first reported window of Medusa `49c9b3dd...` (fixture `tests/fixtures/sessions`), an early window, model `20261011T202925Z`, threshold 0.58 (calibrated at that time). The session is in the training set, so the example only illustrates the format (18 windows: 13 scheduled and 5 early; 11 gated; 5 reported, all early). `activity` is laid out several fields per line; `event.created` was set by the script that generated the example.
 ```json
 {
   "@timestamp": "2026-10-01T09:03:18.861Z",
@@ -387,7 +388,7 @@ Rules of the loader (`training/sentinelcap_dataset.py`), derived from run 2026-1
    | Mixed, ≤ 30 windows/session | 0.898 / 0.901 / 0.900 | ≤ 0.02 | 0.76 – 0.85 |
 
    Mixing separates the classes worse and raises the confidence of flagged goodware; session-level results do not change. `evaluate` reports the test (`concurrent_goodware` in `evaluation.json`).
-10. **Held-out runs (`--holdout RUN`):** `HOLDOUT` in the `Makefile` = `20261009T033557Z` and `20261009T120629Z` (the same 15 new ransomware samples captured twice). They are outside training, cross-validation and threshold selection; `evaluate` scores them last (`held_out`), only when the model was trained with the same list. A wrong run name, or a training run containing a sample (same hash) of a held-out run, stops `train` and `evaluate`; a run that recaptures held-out samples must go to `--holdout`.
+10. **Held-out runs (`--holdout RUN`):** `HOLDOUT` in the `Makefile` = `20261009T033557Z`, `20261009T120629Z` and `20261012T012123Z` (the same 15 ransomware samples captured three times). They are outside training, cross-validation and threshold selection; `evaluate` scores them last (`held_out`), only when the model was trained with the same list. A wrong run name or a training run containing a sample (same hash) of a held-out run stops `train` and `evaluate`; any recapture of held-out samples belongs in `--holdout`.
 
 ### 9.2 Operational reliability
 
@@ -399,7 +400,7 @@ Each point has a test on real data (`tests/`); ✔ marks behaviour also run on r
 - **Input boundary ✔** (`events.py`). Payload > 256 KiB, integer > 4,300 digits, JSON nested deeper than the parser handles (≈ 16,900 levels), timestamp outside 2000–2100 or QUEUE count > 18 digits → `InvalidEventError` (counted in `invalid`, the offset advances). Regexes run in linear time: token gap ≤ 256 characters, command lines cut at 32,768 characters (longest in the corpus 4,155, largest gap 16, so no result changes over 9,715 Event 1 command lines).
 - **Host clock** (`windowing.py`). Windows follow `@timestamp`; after `late_reset_events` (20) consecutive events older than the window, the host follows the new clock (`clock_resets`), whether a forged future timestamp or a guest clock set back; its early-close state starts again too. The service clock is not used, so old captures replay.
 - **Idle flush** (`window.idle_flush_sec`, `Pipeline.tick`). A scheduled window closes when the next event passes its end, so the last window of a burst waits for `idle_flush_sec` of silence; an early window closes at its own event. Default 3 s. Extra records reuse the same window id (one document). `idle_flush_sec` and `host_evict_sec` are not part of the window settings in `model-meta.json` (`WindowConfig.training_fields`): changing them needs no retraining.
-- **Delay of the service loop (simulation).** All 150 sessions (120 with fold models, the 30 held-out ones with the full model, threshold 0.58) through the real `Pipeline` and a model of the loop: events arrive in 1 s clumps plus 0.5 s of Kafka/Logstash transport (`floor(event time) + 1.5 s`), `POLL_TIMEOUT_SEC` 1 s, `idle_flush_sec` 3 s. Not measured on real Winlogbeat and Kafka. The script and its output were temporary files and are not kept.
+- **Historical delay simulation (previous model `20261011T202925Z`).** All 150 sessions (120 with fold models, the 30 held-out ones with the full model, threshold 0.58) went through the real `Pipeline` and a model of the loop: events arrive in 1 s clumps plus 0.5 s of Kafka/Logstash transport (`floor(event time) + 1.5 s`), `POLL_TIMEOUT_SEC` 1 s, `idle_flush_sec` 3 s. Not measured on real Winlogbeat and Kafka. The script and its output were temporary files and are not kept.
 
   | | Cross-validation (48 detected sessions) | Held-out (30 sessions) |
   |---|---|---|
@@ -409,7 +410,7 @@ Each point has a test on real data (`tests/`); ✔ marks behaviour also run on r
   | Event that brings the alert → record: median / p90 / max | 0.89 s / 1.37 s / 1.50 s | 1.06 s / 1.41 s / 1.48 s |
   | Records sent (early windows) | 4,560 (164, 22 on goodware) | 1,050 (81) |
 
-  Records are the window-score documents the service sends: a window sent again after an idle flush is one more record under the same id. The three cross-validation seeds (thresholds 0.58, 0.56, 0.61) give the same goodware result: 7 sessions alerted, 3 `suspicious` (MDaemon, XAMPP, `deploy-config-files`), 8 `suspicious` detection records (0.39/h), 27 detection records of any label (1.32/h; section 6 counts 25 detections in a replay without idle flush).
+  Records are the window-score documents the service sends: a window sent again after an idle flush is one more record under the same id. In that historical simulation, the three cross-validation seeds (thresholds 0.58, 0.56, 0.61) gave the same goodware result: 7 sessions alerted, 3 `suspicious` (MDaemon, XAMPP, `deploy-config-files`), 8 `suspicious` detection records (0.39/h), 27 detection records of any label (1.32/h; the previous model's replay without idle flush counted 25 detections).
 - **Host lifecycle.** A host silent for `host_evict_sec` gets its last window scored, then its window state, early-close state and suppression state are removed. No limit on host count; the memory of one host is bounded: at most `max_events_per_host` buffered events, plus at most a quarter of that in pushed-out events that the expiry heap of the trailing window still references until it is rebuilt (`test_a_stalled_clock_cannot_make_the_buffer_grow`). Measured on three real sessions (Akira, goodware, Medusa), with all events in one window: parsed event 746–812 bytes plus counting state 145–988 bytes per event, so a host at the limit of 200,000 events holds ≈ 190–350 MB.
 - **Artifacts are one set ✔** (`artifacts.py`). Model `version`, window (size, slide), feature names and river version must match; the threshold is used only with the weights it was chosen for (`threshold_basis`). Anything missing, corrupt or inconsistent (including a model that has not been through `evaluate`) → exit code 2: no partial run, no default threshold. `train` writes `model.pkl` first and `model-meta.json` last; `evaluate` writes no threshold for a model trained with other settings. No per-file digests.
 - **Healthcheck** (`status.py`, `healthcheck.py`). The loop writes `status.json` every second; unhealthy when it is older than 30 s or when no broker has been reachable for `kafka.down_after_sec` (librdkafka statistics; `GroupCoordinator` is ignored because it does not reflect the cluster). `degraded` only holds `kafka_unreachable`. No detections, or a silent host, is never unhealthy.
@@ -463,52 +464,51 @@ The monitored machine is under `logsentinel.monitored_host.*`, not `host.*` (ECS
 
 ### 9.5 Admin-scenario goodware and held-out runs
 
-**Data.** 20 `--interactive` goodware sessions in 4 runs (`20261008T013340Z`, `20261008T050249Z`, `20261008T192247Z`, `20261008T195850Z`; 15.89 hours): 15 short admin scenarios and 5 continuous ones (Windows Update 3.9 h, AD DS install 3.7 h, server file download 3.0 h, backup verification 0.8 h, health monitoring 0.4 h). Held-out run `20261009T033557Z`: 15 new ransomware samples, no hash shared with any training run; run `20261009T120629Z` recaptures exactly those 15.
+**Data.** Twenty `--interactive` goodware sessions in four runs (`20261008T013340Z`, `20261008T050249Z`, `20261008T192247Z`, `20261008T195850Z`; 15.89 hours) cover 15 short admin scenarios and five continuous ones. Two operator-labelled goodware sessions (`20261020T172719Z/goodware/windows-operations-01` and `windows-operations-02`) cover the same 49-minute operations interval on separate hosts. One records a Sysmon Event 255 `QUEUE` report of source telemetry loss. The three held-out runs recapture the same 15 ransomware samples; none enters training or threshold selection.
 
-**Scenarios that trigger a strong indicator** (7 of 20; last column: current model, out-of-fold cross-validation):
+**Original admin scenarios that trigger a strong indicator** (7 of 20; last column: current model, out-of-fold cross-validation):
 
-| Scenario | Strong indicator | Command / activity | Flagged suspicious |
+| Scenario | Strong indicator | Activity | Flagged suspicious |
 |---|---|---|---|
-| boot-config-maintenance | `recovery_disable` | `bcdedit /set {default} recoveryenabled no`, `bootstatuspolicy ignoreallfailures` | no |
+| boot-config-maintenance | `recovery_disable` | `bcdedit` recovery settings | no |
 | deploy-config-files | `mass_note_drop` (+ `ransom_note_keyword`) | PowerShell writes `project-readme.txt` to 32 directories in 27 branches | **yes** |
-| log-archival | `event_log_tamper` | `wevtutil cl application`, `wevtutil cl "windows powershell"` | no |
-| service-maintenance | `service_stop_burst` | `net stop spooler/wuauserv/bits /y`, `sc stop wsearch/themes`, repeated | no |
-| shadow-copy-cleanup | `shadow_copy_deletion` | `vssadmin delete shadows /oldest`, `vssadmin resize shadowstorage`, `wbadmin delete catalog` | no |
-| windows-update-maintenance-continuous | `event_log_tamper` (Event 13) | `TiWorker.exe` registers log channels as disabled | does not pass the gate (section 4.1) |
-| ad-install-operations-continuous | `event_log_tamper` (Event 13) | as above | does not pass the gate |
-| other 13 scenarios (backup, compress-documents, file-encryption, disk-cleanup, …) | — | — | no |
+| log-archival | `event_log_tamper` | `wevtutil cl` clears logs | no |
+| service-maintenance | `service_stop_burst` | repeated service-stop commands | no |
+| shadow-copy-cleanup | `shadow_copy_deletion` | `vssadmin` and `wbadmin` cleanup | no |
+| windows-update-maintenance-continuous | `event_log_tamper` (Event 13) | `TiWorker.exe` registers disabled log channels | does not pass the gate |
+| ad-install-operations-continuous | `event_log_tamper` (Event 13) | same Windows servicing activity | does not pass the gate |
+| other 13 scenarios | — | — | no |
 
-The first four use exactly the commands ransomware uses, so rules cannot separate them; that is Phase 3's job. Over 20.4 hours of goodware (installers and scenarios): 8 suspicious detections, 3 flagged sessions (`evaluation.json`).
+The earlier comparison of training with and without admin scenarios (threshold 0.55, before `mass_file_replace`) is historical. The current model trains on all 72 goodware sessions. Across 22.03 hours of goodware it emits 25 detections (8 suspicious) from 3 flagged sessions in out-of-fold evaluation (`artifacts/evaluation.json`).
 
-**Decisions in force** (in-memory cross-validation, seed 42, same folds; each scenario whole in one fold, so scored unseen):
-- Scenario goodware is trained with all other labelled data except held-out runs, and `evaluate` picks the threshold. Versus a model blind to it with the threshold set from it (0.55): same false-alarm level (0.31 suspicious/hour on scenario goodware), earlier detection (median 8.7 s vs 9.5 s, p90 43.1 s in both). Measured on an earlier build, before `mass_file_replace` existed and before the merged window flow.
+**Held-out ransomware, current model `20261020T175915Z`, threshold 0.60.** Each cell gives maximum confidence / seconds to first detection in runs `20261009T033557Z`, `20261009T120629Z` and `20261012T012123Z`, respectively:
 
-**Held-out runs: 15 samples captured twice** (operator confirmed all 15 encrypt; model `20261011T202925Z`, threshold 0.58). Each cell: run `20261009T033557Z` / run `20261009T120629Z`:
+| Family | First run | Second run | Third run |
+|---|---|---|---|
+| Akira `369336e9...` | 0.9946 / 0.8 | 0.9946 / 0.6 | 0.9958 / 1.8 |
+| BlackBasta `2413841b...` | 0.9946 / 3.7 | 0.9946 / 2.7 | 0.9946 / 5.7 |
+| BlackMatter `46a9f920...` | 0.9414 / 41.7 | 0.9416 / 42.8 | 0.9484 / 65.4 |
+| BQTLock `425b2f28...` | 0.9521 / 52.6 | 0.9273 / 39.4 | 0.9512 / 40.9 |
+| Conti `248cf7de...` | 0.8036 / 5.1 | 0.8036 / 5.1 | 0.7995 / 5.3 |
+| HelloKitty `af179b09...` | 0.7878 / 2.1 | 0.7869 / 2.1 | 0.7951 / 3.2 |
+| LockBit `105912c9...` | 0.9453 / 1.3 | 0.9143 / 1.6 | 0.9481 / 2.4 |
+| Lynx `b378b7ef...` | 0.8008 / 2.2 | 0.8004 / 2.0 | 0.8035 / 3.8 |
+| Makop `f0a17efd...` | 0.9597 / 15.6 | 0.9597 / 14.1 | missed (no gate) |
+| Medusa `6d000a15...` | 0.9469 / 3.6 | 0.9469 / 2.4 | 0.9873 / 6.7 |
+| Nebula `112a40f1...` | 0.9651 / 1.9 | 0.9652 / 2.0 | 0.9748 / 3.1 |
+| Nitrogen `b5189876...` | 0.8048 / 0.6 | 0.8048 / 0.6 | 0.8048 / 1.5 |
+| Trigona `48877a3a...` | 0.9479 / 15.2 | 0.9479 / 15.4 | 0.9810 / 16.4 |
+| WhiteLock `a501583b...` | 0.6353 / 68.6 | 0.6500 / 16.8 | 0.6642 / 13.0 |
+| Yurei `0303f898...` | 0.8984 / 0.7 | 0.9105 / 0.5 | 0.8929 / 1.0 |
 
-| Family | Max confidence | Time to first detection |
-|---|---|---|
-| Akira `369336e9…` | 0.96 / 0.96 | 2.1 s / 2.1 s |
-| BlackBasta `2413841b…` | 0.92 / 0.92 | 3.7 s / 2.7 s |
-| BlackMatter `46a9f920…` | 0.96 / 0.95 | 41.7 s / 42.8 s |
-| BQTLock (new family) `425b2f28…` | 0.95 / 0.97 | 52.6 s / 39.4 s |
-| Conti `248cf7de…` | 0.81 / 0.81 | 5.1 s / 5.1 s |
-| HelloKitty `af179b09…` | 0.80 / 0.80 | 2.1 s / 2.1 s |
-| LockBit `105912c9…` | 0.99 / 0.96 | 1.3 s / 1.6 s |
-| Lynx `b378b7ef…` | 0.80 / 0.80 | 2.2 s / 2.0 s |
-| Makop (new family) `f0a17efd…` | 0.99 / 0.99 | 15.6 s / 14.1 s |
-| Medusa `6d000a15…` | 0.92 / 0.91 | 3.6 s / 2.4 s |
-| Nebula (new family) `112a40f1…` | 0.97 / 0.97 | 1.9 s / 2.0 s |
-| Nitrogen `b5189876…` | 0.80 / 0.80 | 0.6 s / 0.6 s |
-| Trigona `48877a3a…` | 0.95 / 0.95 | 15.2 s / 15.4 s |
-| WhiteLock (new family) `a501583b…` | 0.5803 / 0.6539 | 48.6 s / 16.8 s |
-| Yurei (new family) `0303f898…` | 0.95 / 0.99 | 1.3 s / 0.9 s |
+Result: **44/45 detected**. Median first-detection time is 3.6 s, p90 41.7 s, maximum 68.6 s among detections. The third-run Makop miss did not pass the gate. The three runs repeat the same samples, and `mass_file_replace` was designed after seeing an earlier WhiteLock run; a new independent holdout batch remains necessary.
 
-Result: **30/30** (15/15 per run), median 2.7 s, p90 42.8 s, max 52.6 s (run `20261009T033557Z`: median 3.6 s, max 52.6 s; run `20261009T120629Z`: median 2.4 s, max 42.8 s). Lowest maximum confidence: WhiteLock (0.5803, 0.6539), against the 0.58 threshold; in the first run its first detection comes at 48.6 s. Not independent: WhiteLock writes a copy `<name>.fbin` and deletes the original, drops no note and touches neither shadow copies nor services, so before `mass_file_replace` (weight 0.8) none of its windows passed the gate and run `20261009T033557Z` detected only 14/15; rule and weight were chosen after seeing it. Both runs are the same samples and ransomware only (no false-alarm measurement), so a new held-out batch is needed.
+**New operations goodware.** The prior rule and retrained control emitted 8 detections (6 suspicious) across the two new sessions; the exact file/process/path exceptions and matching new model emit 0. These sessions influenced both training and threshold selection, so this direct replay is an in-sample check. Executable/path masquerading can evade the exception, and source `QUEUE` loss limits the interval's completeness.
 
-**Remaining hard case:** `deploy-config-files` spreads one file named `readme` over many directories, exactly like dropping ransom notes. No separating rule can be derived from a single scenario; more goodware of this kind is needed first.
+**Remaining hard case:** `deploy-config-files` spreads one file named `readme` over many directories, like dropping ransom notes. More independent goodware of this kind is needed to measure and separate it.
 
 ### 9.6 Harness and layout
-- `tests/` — `make test` (fast, real data, fake broker that acknowledges immediately, manually or never). Fixtures come from `tests/fixtures/build_fixtures.py`: 6 complete sessions (gzip) and 10 single events chosen by `record_id` from real captures. Counting is checked against `tests/reference_summary.py`, a recount of a window from scratch (section 4.0). Reliability scenarios have their own tests (offsets advance only after ACK, crash/stop + replay loses nothing, delivery failure stops the service, full producer queue, hostile messages, host clock jumps, mismatching artifacts).
+- `tests/` — `make test` (fast, real data, fake broker that acknowledges immediately, manually or never). Fixtures come from `tests/fixtures/build_fixtures.py`: complete sessions (gzip) and single events chosen by `record_id` from real captures. Counting is checked against `tests/reference_summary.py`, a recount of a window from scratch (section 4.0). Reliability scenarios have their own tests (offsets advance only after ACK, crash/stop + replay loses nothing, delivery failure stops the service, full producer queue, hostile messages, host clock jumps, mismatching artifacts).
 - `training/evaluate.py` — indicator coverage over the service's scheduled windows, family-grouped CV on sessions replayed through `Pipeline` (MCC, F2 at window and session level, AUC), threshold selection, concurrent-goodware test, goodware detections per hour after suppression, time to first detection.
 - `training/e2e_restart.py` (`make e2e-restart`) — kill -9 the service mid-stream on a real broker and rerun it; nothing may be lost (section 9.3).
 - `training/replay_to_kafka.py` — replays the exact payloads of one session into `telemetry.windows.normalized` (key `host.name`, like `sink-inference`); `--realtime` keeps the original spacing (at most 5 s). Timestamps are not changed, so replay only while the victim VM sends no logs (same `host.id`):
