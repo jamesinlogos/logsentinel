@@ -15,8 +15,17 @@ window, not a confirmed infection, and windows overlap: do not add their activit
 
 ## Behaviour
 
-* **Envelope**: a document of `ransomware-notifications-*` with `event.id`, `event.created` and `message`; the worker
-  sends `message` unchanged (plain text, Telegram cut at 4096 characters). A missing field aborts the poll with an error.
+* **Envelope**: a document of `ransomware-notifications-*` with `event.id`, `event.created` and `message`. A missing
+  field aborts the poll with an error.
+* **Format** (`formatting.py`): the worker parses the Kibana `message` (header lines plus one `Host:` block per example
+  window) and renders it per channel: Telegram HTML (`parse_mode=HTML`, severity icon, per-host card, indicator list
+  with MITRE ids, size-limited to 4096 characters by dropping detail, never by cutting a tag) and an email with a
+  `[LogSentinel][CRITICAL|ALERT|WARNING]` subject, a plain-text part and an HTML part. Host-derived values are
+  escaped. `CRITICAL` means an example is critical; `WARNING` applies only when every window is shown. `ALERT`
+  means some windows are not shown and no example is critical, so their severity is unknown. A partial notice
+  counts only hosts in its examples. A message with an incomplete `Host:` block or another layout mismatch
+  uses the plain-text fallback, which caps Telegram at 4096 characters (including the TEST notice).
+  Indicator labels, MITRE ids and descriptions live in `formatting.INDICATORS`.
 * **Receipt**: `_id` = SHA-256 of `event.id`, NUL and the channel (`telegram`, `gmail`); index month = `event.created`
   (UTC). Fields: `logsentinel.notification.{id, channel, sent, attempts, retry_at, sent_at}`. A channel that was
   sent is never sent again; the other channel retries on its own.
@@ -58,7 +67,8 @@ python scripts/notification_test.py             # read its receipts, send nothin
 ```
 
 `accepted` means both providers accepted the message, not that anyone read it. Installing the connector and action
-in Kibana: `README.md` section 9.2. Starting the worker and sending a test need the user's consent
+in Kibana: `docker compose up -d` does it (service `kibana-init`, which this worker waits for); by hand, `README.md`
+section 9.2. Starting the worker and sending a test need the user's consent
 (`AGENTS.md` section 7). Two copies of the stack with the same credentials both send: stop the old one after a move.
 
 ## Checks

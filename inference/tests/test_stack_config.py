@@ -23,7 +23,11 @@ ROOT = Path(__file__).resolve().parents[2]
 SERVICES: dict[str, dict[str, Any]] = yaml.safe_load(
     (ROOT / "docker-compose.yml").read_text(encoding="utf-8")
 )["services"]
-INIT_SERVICES = {"kafka-init": "create-topics.sh", "elasticsearch-init": "init-elasticsearch.sh"}
+INIT_SERVICES = {
+    "kafka-init": "create-topics.sh",
+    "elasticsearch-init": "init-elasticsearch.sh",
+    "kibana-init": "init-kibana.sh",
+}
 DEFAULT = re.compile(r"\$\{(LOGSENTINEL_[A-Z0-9_]+):-([^}]*)\}")
 TOPIC_VARIABLES = {
     "LOGSENTINEL_TOPIC_RAW_TELEMETRY",
@@ -72,6 +76,24 @@ def test_elasticsearch_init_reads_the_repository_configuration() -> None:
     assert environment("elasticsearch-init") == {"LOGSENTINEL_ES_HOST": host}
 
 
+def test_kibana_init_installs_the_alerting_from_the_repository_configuration() -> None:
+    definition = SERVICES["kibana-init"]
+    # The scripts resolve ROOT as the parent of their folder: /scripts -> /, so /config, /archives.
+    assert {"./config:/config:ro", "./archives:/archives"} <= mounts("kibana-init")
+    assert environment("kibana-init") == {
+        "LOGSENTINEL_ES_HOST": "http://elasticsearch:9200",
+        "LOGSENTINEL_KIBANA_HOST": "http://kibana:5601",
+    }
+    assert definition["depends_on"]["elasticsearch-init"]["condition"] == (
+        "service_completed_successfully"
+    )  # the notification templates exist before notification_setup.py compares them
+    script = (ROOT / "scripts" / "init-kibana.sh").read_text(encoding="utf-8")
+    assert script.index("apply alerting_setup") < script.index("apply notification_setup")
+    for name in ("alerting_setup", "notification_setup"):
+        assert (ROOT / "scripts" / f"{name}.py").is_file()
+    assert (ROOT / "config" / "kibana").is_dir()
+
+
 def test_kafka_init_uses_the_internal_listener_of_the_broker() -> None:
     advertised = environment("kafka")["KAFKA_ADVERTISED_LISTENERS"]
     internal = re.search(r"INTERNAL://([^,]+)", advertised)
@@ -88,7 +110,7 @@ def test_kafka_init_uses_the_internal_listener_of_the_broker() -> None:
         ("logstash-ingest", {"kafka-init", "elasticsearch-init"}),
         ("logstash-detection-sink", {"kafka-init", "elasticsearch-init"}),
         ("inference", {"kafka-init"}),
-        ("notifications", {"elasticsearch-init"}),  # it writes receipts into a templated index
+        ("notifications", {"elasticsearch-init", "kibana-init"}),  # receipts index; rule + action
     ],
 )
 def test_services_wait_for_the_init_services_they_need(service: str, needs: set[str]) -> None:
@@ -98,7 +120,11 @@ def test_services_wait_for_the_init_services_they_need(service: str, needs: set[
 
 
 def test_an_init_service_waits_for_its_server_to_be_healthy() -> None:
-    for init, server in (("kafka-init", "kafka"), ("elasticsearch-init", "elasticsearch")):
+    for init, server in (
+        ("kafka-init", "kafka"),
+        ("elasticsearch-init", "elasticsearch"),
+        ("kibana-init", "kibana"),
+    ):
         assert SERVICES[init]["depends_on"][server]["condition"] == "service_healthy"
         assert "healthcheck" in SERVICES[server]
 

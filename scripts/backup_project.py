@@ -46,6 +46,7 @@ EXCLUDED_NAMES = {
     ".git",
 }
 EXCLUDED_SUFFIXES = (".egg-info",)
+EXCLUDED_PREFIXES = ("pytest-cache-files-",)
 EXCLUDED_PATHS = (
     "sentinelcap/captures",
     "sentinelcap/samples",  # malware samples: not source, and antivirus blocks reading them
@@ -77,7 +78,11 @@ def iter_files(base: Path, root: Path) -> Iterator[Path]:
     """Files below ``base`` that belong to the repository backup (``root`` fixes the paths)."""
     for path in sorted(base.iterdir()):
         relative = path.relative_to(root).as_posix()
-        if path.name in EXCLUDED_NAMES or path.name.endswith(EXCLUDED_SUFFIXES):
+        if (
+            path.name in EXCLUDED_NAMES
+            or path.name.endswith(EXCLUDED_SUFFIXES)
+            or path.name.startswith(EXCLUDED_PREFIXES)
+        ):
             continue
         if relative in EXCLUDED_PATHS:
             continue

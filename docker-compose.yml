@@ -4,9 +4,10 @@
 # <service>-data and the one network is "backend" (Compose prefixes all of them with the
 # project name below, e.g. logsentinel_backend).
 #
-# `docker compose up -d` leaves a stack that is ready to use: the one-shot services kafka-init and
-# elasticsearch-init create the topics and install the Elasticsearch configuration, and everything
-# that writes or reads them starts only after they have succeeded. The defaults after `:-` below are
+# `docker compose up -d` leaves a stack that is ready to use: the one-shot services kafka-init,
+# elasticsearch-init and kibana-init create the topics, install the Elasticsearch configuration and
+# install the Kibana alerting rule with its notification action, and everything that writes or reads
+# them starts only after they have succeeded. The defaults after `:-` below are
 # the versions of .env, so a missing .env cannot downgrade the images (a test keeps them equal).
 name: logsentinel
 
@@ -180,6 +181,35 @@ services:
       start_period: 120s
     networks: [backend]
 
+  # Kibana alerting of README.md section 9.2: the rule `ransomware-detections`, then the notification
+  # connector and the one action that queues notices for the `notifications` worker. It runs
+  # scripts/init-kibana.sh (alerting_setup.py and notification_setup.py with --apply) in a plain
+  # Python image: both scripts use only the standard library. They create only what is absent and
+  # refuse to change anything that exists and differs, so a restart of the stack is a no-op. They
+  # read ../config next to the scripts (/config) and write their reports and the backup of the
+  # public Kibana state to ../archives (/archives, ./archives on the host).
+  kibana-init:
+    image: python:3.14-slim
+    container_name: logsentinel-kibana-init
+    restart: "no"
+    logging: *default-logging
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      elasticsearch-init:
+        condition: service_completed_successfully
+      kibana:
+        condition: service_healthy
+    entrypoint: ["bash", "/scripts/init-kibana.sh"]
+    volumes:
+      - ./scripts:/scripts:ro
+      - ./config:/config:ro
+      - ./archives:/archives
+    environment:
+      - LOGSENTINEL_ES_HOST=http://elasticsearch:9200
+      - LOGSENTINEL_KIBANA_HOST=http://kibana:5601
+    networks: [backend]
+
   # ---------------------------------------------------------------------
   # Ingest pipeline: parses raw Sysmon telemetry, normalizes to ECS,
   # writes to Elasticsearch and republishes to Kafka for inference.
@@ -284,6 +314,9 @@ services:
       elasticsearch:
         condition: service_healthy
       elasticsearch-init:
+        condition: service_completed_successfully
+      # Without its rule and action there is nothing to send; if kibana-init fails, `up -d` says so.
+      kibana-init:
         condition: service_completed_successfully
     environment:
       - LOGSENTINEL_ES_HOST=http://elasticsearch:9200

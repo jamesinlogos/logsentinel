@@ -18,6 +18,8 @@ from email.message import EmailMessage
 from email.utils import parseaddr
 from typing import Any
 
+from notifications import formatting
+
 CHANNELS = ("telegram", "gmail")
 SCHEMA_VERSION = 2
 
@@ -213,7 +215,16 @@ class Providers:
 
     def send(self, channel: str, message: str) -> None:
         if channel == "telegram":
-            body = {"chat_id": self.settings.telegram_chat_id, "text": message[:4096]}
+            alert = formatting.parse_alert(message)
+            body: dict[str, Any] = {"chat_id": self.settings.telegram_chat_id}
+            if alert is None:
+                body["text"] = message[:4096]
+            else:
+                body.update(
+                    text=formatting.telegram_html(alert),
+                    parse_mode="HTML",
+                    disable_web_page_preview=True,
+                )
             request = urllib.request.Request(
                 f"https://api.telegram.org/bot{self.settings.telegram_bot_token}/sendMessage",
                 data=json.dumps(body).encode(),
@@ -229,8 +240,14 @@ class Providers:
             mail = EmailMessage()
             mail["From"] = self.settings.gmail_sender
             mail["To"] = ", ".join(self.settings.email_recipients)
-            mail["Subject"] = "LogSentinel ransomware detection"
-            mail.set_content(message)
+            alert = formatting.parse_alert(message)
+            if alert is None:
+                mail["Subject"] = "LogSentinel ransomware detection"
+                mail.set_content(message)
+            else:
+                mail["Subject"] = formatting.email_subject(alert)
+                mail.set_content(formatting.email_text(alert))
+                mail.add_alternative(formatting.email_html(alert), subtype="html")
             with smtplib.SMTP_SSL(
                 "smtp.gmail.com",
                 465,

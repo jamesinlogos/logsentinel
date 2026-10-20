@@ -64,8 +64,20 @@ TOPIC_VARIABLES = (
     "LOGSENTINEL_TOPIC_DETECTIONS",
     "LOGSENTINEL_TOPIC_WINDOW_SCORES",
 )
-HEALTHY_SERVICES = 7
-INIT_SERVICES = 2
+HEALTHY_SERVICES = (
+    "logsentinel-kafka",
+    "logsentinel-elasticsearch",
+    "logsentinel-kibana",
+    "logsentinel-logstash-ingest",
+    "logsentinel-logstash-detection-sink",
+    "logsentinel-inference",
+    "logsentinel-notifications",
+)
+INIT_SERVICES = (
+    "logsentinel-kafka-init",
+    "logsentinel-elasticsearch-init",
+    "logsentinel-kibana-init",
+)
 CHUNK = 4 * 1024 * 1024
 MIN_FREE_BYTES = 5 * 1024**3
 KAFKA_HOST_VARIABLE = "LOGSENTINEL_KAFKA_ADVERTISED_HOST"
@@ -129,9 +141,9 @@ def service_states() -> dict[str, str]:
 
 
 def stack_is_up(states: dict[str, str]) -> bool:
-    healthy = sum("(healthy)" in status for status in states.values())
-    exited = sum(status.startswith("Exited (0)") for status in states.values())
-    return healthy >= HEALTHY_SERVICES and exited >= INIT_SERVICES
+    return all("(healthy)" in states.get(name, "") for name in HEALTHY_SERVICES) and all(
+        states.get(name, "").startswith("Exited (0)") for name in INIT_SERVICES
+    )
 
 
 def wait_until_up(timeout_sec: float) -> dict[str, str]:
