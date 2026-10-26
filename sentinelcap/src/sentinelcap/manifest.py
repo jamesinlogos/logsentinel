@@ -5,8 +5,8 @@ must match the mode it is loaded for. ``label`` is the only source of the label.
 ``family`` is lower-cased (one output directory per family) and, like ``sample``,
 must be path-safe because both name the output directories.
 
-* ``--execute``: ``sample`` is the SHA-256 of the sample and ``path`` is its
-  location inside the victim VM.
+* ``--execute`` / ``--validate``: ``sample`` is the SHA-256 of the sample and
+  ``path`` is its location inside the victim VM.
 * ``--interactive``: ``sample`` is a free-form scenario name such as ``backup`` or
   ``compress-documents`` (kept verbatim as the scenario) and ``path`` is empty.
 * ``capture`` (CLI command, no manifest): ``sample`` is a session code such as
@@ -17,8 +17,9 @@ from __future__ import annotations
 
 import csv
 import re
+from collections import defaultdict
 from enum import Enum
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 from pydantic import BaseModel, Field
 
@@ -33,6 +34,7 @@ class Mode(str, Enum):
     EXECUTE = "execute"
     INTERACTIVE = "interactive"
     CAPTURE = "capture"
+    VALIDATE = "validate"
 
 
 class ManifestEntry(BaseModel):
@@ -77,13 +79,12 @@ def parse_row(row: dict[str, str | None], mode: Mode) -> ManifestEntry:
     if raw_label not in ("0", "1"):
         raise ValueError(f"the 'label' column must be 0 or 1, got {raw_label!r}")
 
-    if mode is Mode.EXECUTE:
+    if mode is Mode.EXECUTE or mode is Mode.VALIDATE:
+        flag = f"--{mode.value}"
         if not SHA256_RE.fullmatch(sample):
-            raise ValueError(
-                f"--execute needs a 64-character hex SHA-256 in 'sample', got {sample!r}"
-            )
+            raise ValueError(f"{flag} needs a 64-character hex SHA-256 in 'sample', got {sample!r}")
         if not path:
-            raise ValueError("--execute needs a guest 'path' for the sample")
+            raise ValueError(f"{flag} needs a guest 'path' for the sample")
         sample = sample.lower()
     else:
         if path:
@@ -119,3 +120,42 @@ def load_manifest(path: str | Path, mode: Mode) -> list[ManifestEntry]:
     if not entries:
         raise ValueError(f"Manifest '{path}' is empty.")
     return entries
+
+
+def group_validate_pairs(
+    entries: list[ManifestEntry],
+) -> list[tuple[ManifestEntry, ManifestEntry]]:
+    """Group ``manifest-validate.csv`` rows into (ransomware, goodware) pairs.
+
+    Each pair must share the same guest parent directory and contain exactly one
+    label-1 and one label-0 row. Pair order follows the first appearance of each
+    directory in the manifest.
+    """
+    by_dir: dict[str, list[ManifestEntry]] = defaultdict(list)
+    order: list[str] = []
+    for entry in entries:
+        if entry.path is None:
+            raise ValueError(f"{entry.session_name}: --validate needs a guest path")
+        key = str(PureWindowsPath(entry.path).parent).casefold()
+        if key not in by_dir:
+            order.append(key)
+        by_dir[key].append(entry)
+
+    pairs: list[tuple[ManifestEntry, ManifestEntry]] = []
+    for key in order:
+        group = by_dir[key]
+        guest_dir = PureWindowsPath(group[0].path or "").parent
+        if len(group) != 2:
+            raise ValueError(
+                f"validate pair under {guest_dir} needs exactly 2 rows (got {len(group)})"
+            )
+        labels = {e.label for e in group}
+        if labels != {0, 1}:
+            raise ValueError(
+                f"validate pair under {guest_dir} needs one ransomware (label 1) "
+                "and one goodware (label 0)"
+            )
+        ransomware = next(e for e in group if e.label == 1)
+        goodware = next(e for e in group if e.label == 0)
+        pairs.append((ransomware, goodware))
+    return pairs

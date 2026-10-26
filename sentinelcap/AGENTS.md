@@ -14,9 +14,9 @@
 - **UAC (settled, do not re-propose):** UAC stays enabled (default) in the snapshot, never disabled; the operator always clicks Yes, in both classes. No captured ransomware sample showed a prompt, goodware installers usually do; the resulting `process.integrity_level` difference is kept (using it as a feature is a training-side decision). Never add automatic UAC handling.
 - **Lossless:** `session.jsonl` holds each payload byte-for-byte as received from Kafka. Fields may be parsed to find bounds/conditions; **never modify, add or remove one**. Labels live only in `metadata.json`.
 - **Labels come only from the manifest `label` column** (`--label`), never from `family` or the presence of `path`.
-- **Fail-fast:** an invalid session (no Event 1 of the sample, existing directory, bad manifest) writes nothing and reports a clear error; a failure on any sample in `build baseline` creates no `baseline` snapshot. Never skip silently.
+- **Fail-fast:** an invalid session (no Event 1 of the sample, existing directory, bad manifest) writes nothing and reports a clear error; a failure on any sample in `build baseline` creates no `baseline` snapshot; a failure in `build validate` creates no `validate` snapshot. Never skip silently.
 - **Simplicity:** add nothing beyond the behaviors described here (including the "Known limitations" of `README.md`); if a design point is unclear, stop and ask.
-- **Test and VM safety:** never write or delete files in the existing `captures/` (user test data; tests use `tmp_path`); tests never run real VMware or Kafka; do not run `sentinelcap build baseline/run/batch` on the real VM unless the user asks.
+- **Test and VM safety:** never write or delete files in the existing `captures/` (user test data; tests use `tmp_path`); tests never run real VMware or Kafka; do not run `sentinelcap build baseline/validate/run/batch` on the real VM unless the user asks.
 
 ## Event fields that may be read
 Only these (nested ECS paths in the payload):
@@ -52,6 +52,21 @@ Only these (nested ECS paths in the payload):
    - Never pass paths with spaces on the `runProgramInGuest` command line (vmrun joins arguments into one line); use `vm.run_powershell` or vmrun file commands.
 4. Delete, then recreate `vmware.baseline_snapshot` **while the VM is running and logged in**; stop if it still exists after deletion; then power off.
 5. Write `manifest.csv` (`family,sample,path,label`); an existing one is always kept as `manifest-<YYYYMMDDTHHMMSSZ>.csv` (UTC).
+
+**`build validate`** (`baseline.py`):
+1. Same revert/start/list as `build baseline` from `original`; does **not** modify `baseline` or `manifest.csv`.
+2. Pair every ransomware with a goodware from `samples_dir`: both classes required and **equal counts** (fail-fast otherwise); `random.Random(seed)` shuffles each class then zips them into pairs.
+3. Place each pair into the **same** usable guest directory (distinct directories for different pairs when enough exist; seeded names); placement mechanics match `build baseline` (7-Zip in guest for ransomware, direct copy for goodware).
+4. Delete, then recreate `vmware.validate_snapshot` (default `validate`) while the VM is running and logged in; then power off.
+5. Write `manifest-validate.csv` (ransomware then goodware per pair, in pair order); an existing one is kept as `manifest-validate-<YYYYMMDDTHHMMSSZ>.csv`.
+
+**`batch --validate`** (`orchestrate.py`, `manifest.group_validate_pairs`):
+1. Load `manifest-validate.csv` with the same row rules as `--execute`; group rows into pairs that share a guest parent directory (exactly one label 1 and one label 0 each).
+2. For each pair: revert `vmware.validate_snapshot` → start → wait for VMware Tools → open Explorer once at the shared directory.
+3. The operator double-clicks **both** executables. Buffer until Event 1 of each appears within `exec_detect_timeout_sec`; missing either invalidates the pair and writes nothing for it.
+4. Two `ExecuteSession`s share the event stream; recording stops when **both** quiet/max-wait rules are met. Then `post_capture_drain_sec`.
+5. Export two sessions into the same run directory (`mode = "validate"`, `environment.snapshot` = `validate`); each uses its own `t_exec`/`t_end`, `process_entity_id` and `sample_entity_ids`. A failed pair records an error for both rows and the batch continues.
+6. Does not touch the `baseline` snapshot. `run` does not accept `--validate`.
 
 **`--execute`** (`orchestrate.py`):
 1. Revert `baseline` → start → wait for VMware Tools → open Explorer at the directory of `path` (PowerShell `Start-Process` in `-EncodedCommand`, so `3D Objects` stays one argument).
@@ -103,18 +118,19 @@ Only these (nested ECS paths in the payload):
   }
 }
 ```
-- `mode` is `execute`, `interactive` or `capture`. `process_entity_id` and `sample_entity_ids` exist only for `execute`, `scenario` (verbatim) only for `interactive`; `label.target_class` comes from the `label` column.
+- `mode` is `execute`, `interactive`, `capture` or `validate`. `process_entity_id` and `sample_entity_ids` exist for `execute` and `validate`, `scenario` (verbatim) only for `interactive`; `label.target_class` comes from the `label` column.
 - `pipeline_lag_*`: max/median of `event.created − @timestamp` over the selected events; `null` if none has `event.created`.
-- `environment.snapshot` is `vmware.baseline_snapshot`; `windows_build` and `winlogbeat_version` come from the first event in the window (`null` if missing). No configuration-file hashes.
+- `environment.snapshot` is `vmware.baseline_snapshot` (`execute`/`interactive`), `vmware.validate_snapshot` (`validate`), or `null` (`capture`); `windows_build` and `winlogbeat_version` come from the first event in the window (`null` if missing). No configuration-file hashes.
 - `skipped_invalid` counts messages that are not a JSON object (host unknown: skipped with a warning, session not cancelled). For another host's message only `host.id` is read; it counts in `skipped_other_hosts`. Victim-VM events are still read strictly (a bad `@timestamp` cancels the session).
 
 **CLI** (`cli.py`):
-- `run` and `batch` take exactly one of `--execute`/`--interactive`.
+- `run` takes exactly one of `--execute`/`--interactive`.
+- `batch` takes exactly one of `--execute`/`--interactive`/`--validate`.
 - `batch` prints a per-row result table (success or failure with the reason) and exits non-zero if any row failed.
-- `capture` takes `--family`, `--sample`, `--label`, `--duration`, `--force`; `build baseline` takes `--samples-dir`, `--seed`; the `vm` group only controls the VM manually.
+- `capture` takes `--family`, `--sample`, `--label`, `--duration`, `--force`; `build baseline` and `build validate` take `--samples-dir`, `--seed`; the `vm` group only controls the VM manually.
 
 **Config** (`config.py`, `config.yaml`): precedence CLI > `SENTINELCAP__…` environment variables > YAML > defaults.
-- `vmware.original_snapshot` `original`, `vmware.baseline_snapshot` `baseline`; `kafka.post_capture_drain_sec` 45 (under `kafka`, not `capture`).
+- `vmware.original_snapshot` `original`, `vmware.baseline_snapshot` `baseline`, `vmware.validate_snapshot` `validate`; `kafka.post_capture_drain_sec` 45 (under `kafka`, not `capture`).
 - `capture.exec_detect_timeout_sec` 120, `quiet_window_sec` 90, `settle_sec` 120, `max_wait_sec` 300, `clock_offset_median_events` 5.
 - `baseline.samples_dir` `samples`, `sample_target_roots`, `sample_zip_password` `infected`, `sevenzip_guest_path` `C:\Program Files\7-Zip\7z.exe`, `seed`.
 - Unknown YAML keys are rejected (as in inference); empty environment variables are ignored. Do not touch `guest_password`.
@@ -122,15 +138,15 @@ Only these (nested ECS paths in the payload):
 ## Code layout
 | File | Role |
 |---|---|
-| `manifest.py` | Read and validate the manifest per mode (`Mode.EXECUTE`, `INTERACTIVE`, `CAPTURE`) |
+| `manifest.py` | Read and validate the manifest per mode; `group_validate_pairs` for `--validate` |
 | `config.py` | VMware, Kafka, capture and baseline settings |
 | `errors.py` | `SentinelcapError` (root; `VMwareError` derives from it) |
 | `guest_names.py` | Sample names, forbidden tokens, target-directory filter |
 | `session.py` | Pure functions: event fields, `t_exec`, the sample's process set, quiet rule |
 | `capture.py` | Kafka consumer, host event buffer, clock offset, `prepare_session_dir`, safe session write, pipeline lag |
-| `baseline.py` | `build baseline`: find samples, spread over roots, place, snapshot, manifest |
-| `orchestrate.py` | `execute`, `interactive`, `capture`, `batch` flows; run directory |
-| `cli.py` | Commands `run`, `batch`, `capture`, `build baseline`, `config`, `vm` |
+| `baseline.py` | `build baseline` / `build validate`: find samples, place, snapshot, manifest |
+| `orchestrate.py` | `execute`, `interactive`, `validate` pair, `capture`, `batch` flows; run directory |
+| `cli.py` | Commands `run`, `batch`, `capture`, `build baseline`, `build validate`, `config`, `vm` |
 | `vm.py` | VMware control via `vmrun` (snapshots, guest file/program operations); `run_in_guest` rejects arguments with whitespace, pass such values through `run_powershell` |
 
 ## Testing and quality
@@ -145,9 +161,11 @@ Only these (nested ECS paths in the payload):
   - Clock offset: median over the first N events.
   - `capture`: writes the run-directory format with `mode = "capture"`; rejects bad input.
   - `batch`: a failing row does not stop the rest; result table; non-zero exit code; one shared run directory.
+  - `batch --validate`: pairs by shared guest directory; revert to `validate`; both Event 1s required; stop when both quiet; two exports with `mode = validate`; a failed pair marks both rows and continues.
   - `vm`: correct `vmrun` arguments per operation; arguments with spaces quoted; `delete_snapshot` errors if the snapshot remains after deletion.
   - `guest_names`: forbidden tokens rejected; generated names safe; seeded selection reproducible; directories containing `setup` or outside the root excluded.
   - `build baseline`: order revert/start/list/place/snapshot/power off; 7-Zip with `x -p -o -y`; zip extracted then renamed; extraction failure creates no snapshot and writes no manifest; the manifest re-reads with `Mode.EXECUTE`.
+  - `build validate`: every ransomware/goodware pair shares a guest directory; equal counts required; `validate` snapshot (not `baseline`); `manifest-validate.csv`; unequal counts or a missing class is an error before placement.
 
 ## Definition of done
 - New and updated tests pass; type hints and lint are clean.

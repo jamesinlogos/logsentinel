@@ -15,3 +15,4 @@ pytest-cache-files-*/
 # Backups, transcripts and stack exports: local only, they hold data and credentials
 /archives/
 /logsentinel-migration/
+/logsentinel-export/

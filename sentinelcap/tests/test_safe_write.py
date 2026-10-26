@@ -202,6 +202,7 @@ def test_env_overrides_yaml(tmp_path, monkeypatch) -> None:
     assert cfg.vmware.guest_password == "from-env"
     assert cfg.kafka.post_capture_drain_sec == 45
     assert (cfg.vmware.original_snapshot, cfg.vmware.baseline_snapshot) == ("original", "baseline")
+    assert cfg.vmware.validate_snapshot == "validate"
     assert cfg.baseline.sample_zip_password == "infected"
 
 

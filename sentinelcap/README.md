@@ -23,7 +23,8 @@ Logstash owns Sysmon parsing, ECS normalization, hash extraction and MITRE enric
 - VMware Workstation and `vmrun.exe` on the host; victim VM with VMware Tools, host time sync and an interactive guest session for the user in `config.yaml`.
 - Snapshots of the victim VM:
   - `original`: clean Windows, decoy folder tree, 7-Zip at `baseline.sevenzip_guest_path`, Defender disabled, no samples.
-  - `baseline`: made from `original` by `sentinelcap build baseline` with the VM running and the guest user logged in; every session reverts to it.
+  - `baseline`: made from `original` by `sentinelcap build baseline` with the VM running and the guest user logged in; every collection session reverts to it.
+  - `validate`: made from `original` by `sentinelcap build validate` with every ransomware/goodware pair sharing a guest folder; does not replace `baseline`.
 - Samples under `baseline.samples_dir`: `ransomware/<Family>/<sha256>.zip` (WinZip AES-256, password `infected`, one `<sha256>.exe` inside; never extracted on the host) and `goodware/<sha256>.exe`.
 - Topic `telemetry.windows.normalized` exists (`docker compose up -d` creates it via `kafka-init`; otherwise capture fails with `UNKNOWN_TOPIC_OR_PART`) and Logstash produces to it.
 - Winlogbeat in the snapshots sets `key` on `output.kafka` (`config/winlogbeat/winlogbeat.yml`); re-take the snapshots after changing it on the guest.
@@ -62,6 +63,30 @@ sentinelcap config show
 5. Writes `manifest.csv` (`family,sample,path,label`); an existing one is kept as `manifest-<YYYYMMDDTHHMMSSZ>.csv` (UTC).
 
 Any failure stops the command before the snapshot, so the previous `baseline` stays. The session mode comes from `--execute` or `--interactive`, never from the manifest.
+
+### `build validate` (stack-validation pairs)
+
+Pairs **every** ransomware sample with a goodware sample and places each pair into the **same** guest directory so the operator can later launch both together against a live stack. Ransomware and goodware counts must be equal.
+
+1. Reverts to `original`, starts the VM, lists usable directories (same rules as `build baseline`).
+2. Seed-shuffles each class and zips them into pairs; stops if either class is missing or the counts differ.
+3. Places each pair into one directory with distinct safe names (different pairs get different directories when enough exist; same copy/extract/rename mechanics as `build baseline`).
+4. Replaces the `validate` snapshot while the VM is running (does **not** touch `baseline` or `manifest.csv`), then powers off.
+5. Writes `manifest-validate.csv` (ransomware then goodware per pair); an existing file is kept as `manifest-validate-<YYYYMMDDTHHMMSSZ>.csv`.
+
+### `batch --validate` (simultaneous pair capture)
+
+Runs each pair from `manifest-validate.csv` against the live stack: both samples in one Explorer window, one Kafka capture, two session exports.
+
+1. Groups rows that share a guest parent directory (exactly one ransomware and one goodware each).
+2. Per pair: reverts to `validate`, starts the VM, opens Explorer at the shared folder.
+3. The operator double-clicks **both** executables. Both Sysmon Event 1s must appear within `exec_detect_timeout_sec`.
+4. Records until **both** samples meet the usual quiet/max-wait rule, then drains and writes two sessions (`mode = validate`, snapshot `validate`) into one run directory.
+5. A failed pair fails both rows in the result table; the batch continues with the next pair. Does not touch `baseline`.
+
+```powershell
+sentinelcap batch manifest-validate.csv --validate --config config.yaml
+```
 
 ### `--execute` (ransomware and goodware executables)
 
@@ -156,6 +181,12 @@ For the other scenarios use `server-backup-verify-continuous.ps1 -IntervalMinute
 # Place the samples and (re)create the baseline snapshot; writes manifest.csv.
 sentinelcap build baseline --seed 42 --config config.yaml
 
+# Every ransomware/goodware pair in a shared folder; validate snapshot + manifest-validate.csv.
+sentinelcap build validate --seed 42 --config config.yaml
+
+# Run each validate pair simultaneously (both double-clicks in one Explorer window).
+sentinelcap batch manifest-validate.csv --validate --config config.yaml
+
 # One session. --execute: click the executable when prompted.
 sentinelcap run --execute --family Akira --sample <sha256> `
   --path "C:\Users\Public\Documents\invoice_a7f3.exe" --label 1 --config config.yaml
@@ -166,6 +197,7 @@ sentinelcap run --interactive --family goodware --sample backup --label 0 --conf
 # Every manifest row; prints a result table and exits 1 if any row failed.
 sentinelcap batch manifest.csv --execute --config config.yaml
 sentinelcap batch manifest-scenarios.csv --interactive --config config.yaml
+sentinelcap batch manifest-validate.csv --validate --config config.yaml
 
 # Record the host without controlling the VM (sample = session name).
 sentinelcap capture --family idle --sample idle-01 --label 0 --duration 300 --config config.yaml
@@ -246,7 +278,7 @@ akira,4afda03d...,C:\Users\Public\Documents\invoice_a7f3.exe,1
 goodware,backup,,0
 ```
 
-`label` (0 or 1) is the only source of the label. `--execute` rows need a 64-hex `sample` and a guest `path`; `--interactive` rows need a scenario name as `sample` and an empty `path`; rows that do not match the mode are rejected. `build baseline` writes the `--execute` rows.
+`label` (0 or 1) is the only source of the label. `--execute` rows need a 64-hex `sample` and a guest `path`; `--interactive` rows need a scenario name as `sample` and an empty `path`; rows that do not match the mode are rejected. `build baseline` writes the training `--execute` rows; `build validate` writes `manifest-validate.csv` (two rows per pair).
 
 ## Output
 
@@ -255,7 +287,7 @@ Each session (all modes) writes `<out_dir>/<run>/<family>/<sample>/`; `<run>` is
 | File | Contents |
 |---|---|
 | `session.jsonl` | Original JSON messages from `telemetry.windows.normalized` inside `[t_start, t_end]`, byte for byte, in arrival order; no added label. |
-| `metadata.json` | Format `logsentinel.normalized-sysmon.jsonl/v1`, session ID, source, label (`target_class`, `target_class_name`), `mode` (`execute`, `interactive` or `capture`), `t_start`, `t_end`, `clock_offset_sec`, counters (`event_count`, `skipped_other_hosts`, `skipped_invalid`: messages that are not a JSON object, `skipped_outside_session`), `pipeline_lag_max_sec`/`pipeline_lag_p50_sec` (`event.created - @timestamp`; null without `event.created`), `environment` (`sentinelcap_version`, `snapshot`, `windows_build`, `winlogbeat_version`), plus `process_entity_id` and `sample_entity_ids` (`execute`) or `scenario` (`interactive`). |
+| `metadata.json` | Format `logsentinel.normalized-sysmon.jsonl/v1`, session ID, source, label (`target_class`, `target_class_name`), `mode` (`execute`, `interactive`, `capture` or `validate`), `t_start`, `t_end`, `clock_offset_sec`, counters (`event_count`, `skipped_other_hosts`, `skipped_invalid`: messages that are not a JSON object, `skipped_outside_session`), `pipeline_lag_max_sec`/`pipeline_lag_p50_sec` (`event.created - @timestamp`; null without `event.created`), `environment` (`sentinelcap_version`, `snapshot`, `windows_build`, `winlogbeat_version`), plus `process_entity_id` and `sample_entity_ids` (`execute` / `validate`) or `scenario` (`interactive`). |
 
 **Partial directories.** Both files are written to `<family>/.<sample>.partial/`, renamed to `<sample>` only when complete (`--force` moves the previous session to `.<sample>.old` during the swap). Directories whose name starts with `.` are unfinished and must be skipped by loaders; the next export of the same family/sample cleans them up (or restores `.old` after an interrupted swap).
 
@@ -272,8 +304,8 @@ src/sentinelcap/
   errors.py         SentinelcapError (VMwareError derives from it)
   vm.py             VMware Workstation control (vmrun)
   guest_names.py    Sample names and guest target directories
-  baseline.py       build baseline
-  orchestrate.py    execute / interactive / capture / batch workflows
+  baseline.py       build baseline / build validate
+  orchestrate.py    execute / interactive / validate / capture / batch workflows
   capture.py        Lossless normalized Kafka capture and session export
   session.py        Pure logic: t_exec detection, sample processes, quiet-window rule
   manifest.py       Manifest validation
@@ -298,6 +330,6 @@ Deliberately left undone; `AGENTS.md` treats this list as out of scope.
 - Not done on purpose: pre-run checks, hashes of the Logstash/Sysmon/Winlogbeat configuration files (collection runs are separated by the `<run>` directory instead), finer label granularity. `environment.snapshot` records only the configured name, not what the snapshot contains.
 - `clock_offset_sec` still includes the pipeline delay; the median only removes the effect of a single late event.
 - `pipeline_lag_*` covers only Sysmon -> Winlogbeat (both stamps from the guest clock); the Kafka/Logstash part of the delay is not visible in the payload.
-- `build baseline` does not recompute the SHA-256 of the extracted executable (the manifest `sample` is the zip file name); a mismatch shows up at collection time as "No Sysmon Event 1".
+- `build baseline` / `build validate` do not recompute the SHA-256 of the extracted executable (the manifest `sample` is the zip file name); a mismatch shows up at collection time as "No Sysmon Event 1".
 - `sample_entity_ids` is incomplete by design (see Sample processes under `--execute`): code injected into other processes (e.g. a new `explorer.exe`), files written through SMB (process `System`) and payloads written without an Event 11/29 of a sample process are not tracked. Their events are still in `session.jsonl` with the session label.
-- The unit tests use fakes for VMware and Kafka; `build baseline`, `run`, `batch` and live polling run against the real VM only in the collection runs themselves.
+- The unit tests use fakes for VMware and Kafka; `build baseline`, `build validate`, `run`, `batch` and live polling run against the real VM only in the collection runs themselves.

@@ -1,7 +1,11 @@
-"""`build baseline`: place every sample in the guest and save the baseline snapshot.
+"""`build baseline` and `build validate`: place samples in the guest and save snapshots.
 
 Samples are only copied, extracted (7-Zip inside the guest) and renamed; none is
 executed. Ransomware stays AES-encrypted on the host.
+
+``build validate`` pairs every ransomware with a goodware, places each pair in
+the same guest folder, and saves the ``validate`` snapshot without touching
+``baseline``.
 """
 
 from __future__ import annotations
@@ -215,4 +219,100 @@ def build_baseline(
 
     write_manifest(rows, manifest_path)
     logger.info("Wrote %d row(s) to %s", len(rows), manifest_path)
+    return rows
+
+
+def pair_validate_samples(
+    samples: list[SampleFile], rng: random.Random
+) -> list[tuple[SampleFile, SampleFile]]:
+    """Pair every ransomware with a goodware (seeded shuffle, equal counts required).
+
+    Returns ``(ransomware, goodware)`` tuples. Counts must match so no sample is
+    left unpaired (fail-fast).
+    """
+    ransomware = [s for s in samples if s.label == 1]
+    goodware = [s for s in samples if s.label == 0]
+    if not ransomware:
+        raise ValueError("validate needs at least one ransomware sample under samples_dir")
+    if not goodware:
+        raise ValueError("validate needs at least one goodware sample under samples_dir")
+    if len(ransomware) != len(goodware):
+        raise ValueError(
+            "validate needs the same number of ransomware and goodware samples "
+            f"(got {len(ransomware)} ransomware, {len(goodware)} goodware)"
+        )
+    rng.shuffle(ransomware)
+    rng.shuffle(goodware)
+    return list(zip(ransomware, goodware, strict=True))
+
+
+def build_validate(
+    cfg: SentinelcapConfig,
+    samples_dir: Path | None = None,
+    seed: int | None = None,
+    manifest_path: Path = Path("manifest-validate.csv"),
+) -> list[ManifestEntry]:
+    """Place every ransomware/goodware pair in a shared guest folder; save ``validate``.
+
+    Each pair shares one directory; different pairs get different directories when
+    enough usable directories exist. Reverts to ``original``; does not modify
+    ``baseline`` or ``manifest.csv``. Any failure stops before the snapshot.
+    Returns manifest rows (ransomware then goodware for each pair, in pair order).
+    """
+    samples = discover_samples(Path(samples_dir or cfg.baseline.samples_dir))
+    rng = random.Random(seed if seed is not None else cfg.baseline.seed)
+    pairs = pair_validate_samples(samples, rng)
+    pair_count = len(pairs)
+    vm = VMwareController(cfg.vmware)
+    rows: list[ManifestEntry] = []
+    vm_started = False
+    try:
+        vm.revert_to(cfg.vmware.original_snapshot)
+        vm.start()
+        vm_started = True
+        vm.wait_tools_ready()
+        time.sleep(cfg.vmware.start_boot_wait_sec)
+
+        by_root = _candidate_dirs(vm, cfg.baseline.sample_target_roots)
+        candidates = [d for dirs in by_root.values() for d in dirs]
+        free_dirs = list(candidates)
+        rng.shuffle(free_dirs)
+        used_paths: set[str] = set()
+        count_width = len(str(pair_count))
+        for i, (ransomware, goodware) in enumerate(pairs, start=1):
+            if free_dirs:
+                target_dir = free_dirs.pop()
+            else:
+                target_dir = rng.choice(candidates)
+            logger.info(
+                "[%s/%d] pair %s + goodware/%s -> %s",
+                str(i).zfill(count_width),
+                pair_count,
+                f"{ransomware.family}/{ransomware.sha256[:12]}",
+                goodware.sha256[:12],
+                target_dir,
+            )
+            for sample in (ransomware, goodware):
+                guest_path = f"{target_dir}\\{guest_names.random_name(rng)}"
+                while guest_path.casefold() in used_paths:
+                    guest_path = f"{target_dir}\\{guest_names.random_name(rng)}"
+                used_paths.add(guest_path.casefold())
+                place_sample(cfg, vm, sample, guest_path)
+                rows.append(
+                    ManifestEntry(
+                        family=sample.family,
+                        sample=sample.sha256,
+                        path=guest_path,
+                        label=sample.label,
+                    )
+                )
+
+        vm.delete_snapshot(cfg.vmware.validate_snapshot)
+        vm.create_snapshot(cfg.vmware.validate_snapshot)
+    finally:
+        if vm_started:
+            vm.stop_hard()
+
+    write_manifest(rows, manifest_path)
+    logger.info("Wrote %d row(s) (%d pair(s)) to %s", len(rows), pair_count, manifest_path)
     return rows

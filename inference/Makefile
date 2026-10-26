@@ -10,7 +10,7 @@ RUFF = $(PYTHON) -m ruff
 # Capture runs kept for the independent check (inference/README.md section 9.1 rule 10): never trained on,
 # never used to pick the threshold, scored at the end of `make evaluate`. A run that captures
 # the reference samples again belongs here too (train and evaluate stop if one is missing).
-HOLDOUT ?= 20261009T033557Z 20261009T120629Z 20261012T012123Z
+HOLDOUT ?= 20261009T033557Z 20261009T120629Z 20261012T012123Z 20261024T081012Z 20261026T034309Z
 HOLDOUT_ARGS = $(foreach run,$(HOLDOUT),--holdout $(run))
 
 setup:

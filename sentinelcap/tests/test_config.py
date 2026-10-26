@@ -44,6 +44,7 @@ def test_the_template_is_a_valid_configuration(tmp_path: Path, template: dict[st
     cfg = SentinelcapConfig.load(write(tmp_path, template))
     assert cfg.kafka.host_id == "host-1"
     assert cfg.vmware.baseline_snapshot == "baseline"
+    assert cfg.vmware.validate_snapshot == "validate"
 
 
 def test_the_template_and_the_models_name_the_same_fields_and_defaults() -> None:

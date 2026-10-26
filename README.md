@@ -134,11 +134,11 @@ The model is in `inference/artifacts/` (mounted read-only). A missing or mismatc
 
 Training and evaluation use real Sysmon documents from `telemetry.windows.normalized` with session labels in a `metadata.json` sidecar (`sentinelcap/README.md`). SentinelCap captured the ransomware, installer and admin-scenario sessions through the lab Windows VM and the production ingest pipeline (Sysmon to Winlogbeat to Kafka to `logstash-ingest`). The two operations goodware sessions in `20261020T172719Z` were a user-authorized historical query of the same normalized Kafka topic, stored in SentinelCap's capture format without running the SentinelCap CLI or VM. Their collection details are in `source-manifest.json`. Training and online data use the same normalized event schema.
 
-**Current capture data:** 167 sessions and 1,426,598 events across 9 runs, counted from `metadata.json` under `sentinelcap/captures/<run>/<family>/<sample>/` (each session has `session.jsonl`):
-- 95 ransomware sessions from 16 families: 50 original training sessions and 45 held-out sessions that repeat 15 samples across three runs. The held-out runs do not train the current model or select its threshold.
+**Current capture data:** 197 sessions and 1,606,636 events across 11 runs, counted from `metadata.json` under `sentinelcap/captures/<run>/<family>/<sample>/` (each session has `session.jsonl`):
+- 125 ransomware sessions from 16 families: 50 original training sessions and 75 held-out sessions that repeat 15 samples across five runs. The held-out runs do not train the current model or select its threshold.
 - 72 goodware sessions: 50 installers or portable apps (`--execute`), 20 admin scenarios (`--interactive`), and two operator-labelled operations sessions collected from Kafka over one 49-minute interval. One of the new sessions reports dropped Sysmon source events.
 
-The current model trains on 50 ransomware and all 72 goodware sessions; its evaluation and threshold are in `inference/README.md` section 6.
+The current model (`20261026T071635Z`, threshold 0.60) trains on 50 ransomware and all 72 goodware sessions; its evaluation is in `inference/README.md` section 6.
 
 The volume is still small by design (section 12). Loader rules (labels per session, event-volume balance, split by family, encryption without bulk file traces): `inference/README.md` section 9.1.
 
@@ -327,7 +327,7 @@ The whole backend (`kafka`, `elasticsearch`, `kibana`, `logstash-ingest`, `logst
 1. Install Sysmon with the Sysmon-Modular configuration (section 10.4; required Event IDs: section 3.1).
 2. Install Winlogbeat with output to the Kafka broker (sample: `config/winlogbeat/winlogbeat.yml`). **`key: '%{[host.name]}'` in `output.kafka` is mandatory**; otherwise a host's events spread over partitions and lose their order (section 7.1).
 3. Confirm logs reach the topic: `docker exec logsentinel-kafka /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:29092 --topic telemetry.windows.sysmon.raw --from-beginning --max-messages 1`.
-4. **`sentinelcap` lab VM:** the Winlogbeat configuration lives in the `original` and `baseline` snapshots. After editing it on the guest, restart Winlogbeat and re-take the snapshots, or every revert returns to the snapshot's configuration. After a revert Winlogbeat may resend events from before the snapshot (`@timestamp` older than the run); `sentinelcap` drops them as outside `[t0, t1]`. Best to snapshot after Winlogbeat has sent all its events.
+4. **`sentinelcap` lab VM:** the Winlogbeat configuration lives in the `original`, `baseline` and `validate` snapshots. After editing it on the guest, restart Winlogbeat and re-take the snapshots, or every revert returns to the snapshot's configuration. After a revert Winlogbeat may resend events from before the snapshot (`@timestamp` older than the run); `sentinelcap` drops them as outside `[t0, t1]`. Best to snapshot after Winlogbeat has sent all its events. Stack-validation pairs use `build validate` / `batch --validate` (`sentinelcap/README.md`).
 
 ### 10.4 Sysmon configuration (Sysmon-Modular)
 
@@ -377,12 +377,12 @@ The generic procedure is in `AGENTS.md` section 5 (`scripts/migrate_stack.py`); 
 
 - Windows 10/11 x64, Python 3.12 or later (`py -3`) and Docker Desktop with WSL 2 and **Linux containers**, started before the import (`docker info --format '{{.OSType}}'` prints `linux`).
 - Elasticsearch needs `vm.max_map_count` raised in the Docker Desktop VM; set it as Elastic's [Windows/WSL 2 instructions](https://www.elastic.co/docs/deploy-manage/deploy/self-managed/install-elasticsearch-docker-prod) say.
-- On the source: `python3 scripts/migrate_stack.py export --out <directory outside the project> --images --leave-stopped`, then `python3 scripts/migrate_stack.py verify <directory>` (prints `export intact`). `--leave-stopped` keeps the source off, so two copies with the same credentials do not both send notifications; keep the source volumes until the target is verified.
+- On the source: `python scripts/migrate_stack.py export --out <directory outside the project>` (optional `--images`, `--leave-stopped`), then `python scripts/migrate_stack.py verify <directory>` (prints `export intact`). `--leave-stopped` keeps the source off, so two copies with the same credentials do not both send notifications; keep the source volumes until the target is verified. Export directories must stay outside the project (for example `..\logsentinel-export`).
 - Copy the whole directory, then on the target (the export carries `.env`, so the Kibana key and the Telegram/Gmail credentials come along; keep it private):
 
   ```powershell
-  py -3 D:\logsentinel-migration\tools\migrate_stack.py verify D:\logsentinel-migration
-  py -3 D:\logsentinel-migration\tools\migrate_stack.py import --source D:\logsentinel-migration --target C:\logsentinel --kafka-host 192.168.110.1
+  py -3 ..\logsentinel-export\tools\migrate_stack.py verify ..\logsentinel-export
+  py -3 ..\logsentinel-export\tools\migrate_stack.py import --source ..\logsentinel-export --target C:\logsentinel --kafka-host 192.168.110.1
   ```
 
   `--kafka-host` is the address of the new host that the monitored VM can reach (not loopback). `import` refuses existing containers or volumes and compares document counts and Kafka offsets with the source.

@@ -61,3 +61,16 @@ def test_missing_named_container_is_not_ready() -> None:
     del states["logsentinel-kibana-init"]
 
     assert not migration.stack_is_up(states)
+
+
+def test_not_ready_reason_names_missing_init() -> None:
+    states = ready_states()
+    del states["logsentinel-kafka-init"]
+    del states["logsentinel-elasticsearch-init"]
+    del states["logsentinel-kibana-init"]
+
+    reason = migration.stack_not_ready_reason(states)
+
+    assert "logsentinel-kafka-init: missing" in reason
+    assert "docker compose up kafka-init" in reason
+    assert "logsentinel-notifications" not in reason

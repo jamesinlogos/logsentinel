@@ -1,8 +1,8 @@
-"""Collection pipelines: revert -> start -> (execute | interactive) -> export.
+"""Collection pipelines: revert -> start -> (execute | interactive | validate) -> export.
 
-The tool never launches a sample. In ``--execute`` the operator double-clicks the
-executable in the VM; in ``--interactive`` the operator performs the scenario
-between two Enter presses.
+The tool never launches a sample. In ``--execute`` / ``--validate`` the operator
+double-clicks the executable(s) in the VM; in ``--interactive`` the operator
+performs the scenario between two Enter presses.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from sentinelcap.capture import KafkaCapture, prepare_session_dir
 from sentinelcap.config import SentinelcapConfig
 from sentinelcap.errors import SentinelcapError
 from sentinelcap.logging_utils import get_logger
-from sentinelcap.manifest import ManifestEntry, Mode
+from sentinelcap.manifest import ManifestEntry, Mode, group_validate_pairs
 from sentinelcap.session import (
     EventInfo,
     ExecuteSession,
@@ -41,9 +41,9 @@ class SessionWindow:
     t_start: datetime
     t_end: datetime
     process_entity_id: str | None = None
-    """``--execute`` only."""
+    """``--execute`` / ``--validate`` only."""
     sample_entity_ids: list[str] | None = None
-    """``--execute`` only."""
+    """``--execute`` / ``--validate`` only."""
     scenario: str | None = None
     """``--interactive`` only."""
     clock_offset_sec: float = 0.0
@@ -56,9 +56,7 @@ def new_run_dir(cfg: SentinelcapConfig) -> Path:
 
 def _guest_sample_path(entry: ManifestEntry) -> str:
     if entry.path is None:
-        raise SentinelcapError(
-            f"{entry.session_name}: --execute needs the guest path of the sample"
-        )
+        raise SentinelcapError(f"{entry.session_name}: needs the guest path of the sample")
     return entry.path
 
 
@@ -76,6 +74,40 @@ def detect_exec(capture: KafkaCapture, entry: ManifestEntry, timeout_sec: float)
     raise SentinelcapError(
         f"No Sysmon Event 1 for {path} with SHA-256 {entry.sample} within {timeout_sec:g}s; "
         "the sample did not run or the manifest sample/path is wrong"
+    )
+
+
+def detect_exec_pair(
+    capture: KafkaCapture,
+    ransomware: ManifestEntry,
+    goodware: ManifestEntry,
+    timeout_sec: float,
+) -> tuple[EventInfo, EventInfo]:
+    """Buffer until Event 1 of both samples appears, else fail."""
+    rw_path = _guest_sample_path(ransomware)
+    gw_path = _guest_sample_path(goodware)
+    deadline = time.monotonic() + timeout_sec
+    checked = 0
+    found_rw: EventInfo | None = None
+    found_gw: EventInfo | None = None
+    while (remaining := deadline - time.monotonic()) > 0:
+        capture.poll_event(timeout=min(1.0, remaining))
+        new_events = capture.events[checked:]
+        checked = len(capture.events)
+        if found_rw is None:
+            found_rw = find_exec_event(new_events, rw_path, ransomware.sample)
+        if found_gw is None:
+            found_gw = find_exec_event(new_events, gw_path, goodware.sample)
+        if found_rw is not None and found_gw is not None:
+            return found_rw, found_gw
+    missing = []
+    if found_rw is None:
+        missing.append(f"ransomware {rw_path} SHA-256 {ransomware.sample}")
+    if found_gw is None:
+        missing.append(f"goodware {gw_path} SHA-256 {goodware.sample}")
+    raise SentinelcapError(
+        f"No Sysmon Event 1 for {' and '.join(missing)} within {timeout_sec:g}s; "
+        "a sample did not run or the manifest sample/path is wrong"
     )
 
 
@@ -161,6 +193,92 @@ def _collect_interactive(
     )
 
 
+def _collect_validate_pair(
+    cfg: SentinelcapConfig,
+    capture: KafkaCapture,
+    vm: VMwareController,
+    ransomware: ManifestEntry,
+    goodware: ManifestEntry,
+) -> tuple[SessionWindow, SessionWindow]:
+    """Run ransomware and goodware together; stop when both quiet rules are met."""
+    rw_path = _guest_sample_path(ransomware)
+    gw_path = _guest_sample_path(goodware)
+    shared_dir = str(PureWindowsPath(rw_path).parent)
+    if (
+        str(PureWindowsPath(gw_path).parent).casefold()
+        != str(PureWindowsPath(rw_path).parent).casefold()
+    ):
+        raise SentinelcapError(
+            f"validate pair must share a guest directory: {rw_path} vs {gw_path}"
+        )
+    vm.open_explorer(shared_dir)
+    logger.warning(
+        "Open the VMware console and double-click BOTH samples in '%s' "
+        "(waiting up to %ss for Event 1 of each):\n  ransomware: %s\n  goodware:   %s",
+        shared_dir,
+        cfg.capture.exec_detect_timeout_sec,
+        rw_path,
+        gw_path,
+    )
+    rw_exec, gw_exec = detect_exec_pair(
+        capture, ransomware, goodware, cfg.capture.exec_detect_timeout_sec
+    )
+    logger.info(
+        "Both samples started: ransomware t_exec=%s entity=%s; goodware t_exec=%s entity=%s",
+        format_timestamp(rw_exec.timestamp),
+        rw_exec.entity_id,
+        format_timestamp(gw_exec.timestamp),
+        gw_exec.entity_id,
+    )
+
+    sessions = {
+        "ransomware": ExecuteSession(
+            rw_exec,
+            settle=cfg.capture.settle_sec,
+            quiet=cfg.capture.quiet_window_sec,
+            max_wait=cfg.capture.max_wait_sec,
+        ),
+        "goodware": ExecuteSession(
+            gw_exec,
+            settle=cfg.capture.settle_sec,
+            quiet=cfg.capture.quiet_window_sec,
+            max_wait=cfg.capture.max_wait_sec,
+        ),
+    }
+    for buffered in capture.events:
+        for session in sessions.values():
+            session.observe(buffered)
+    while True:
+        polled = capture.poll_event(timeout=1.0)
+        if polled is not None:
+            for session in sessions.values():
+                session.observe(polled)
+        now = time.monotonic()
+        if all(session.should_stop(now) for session in sessions.values()):
+            break
+    t_end_now = now
+    logger.info(
+        "Stopping pair: ransomware elapsed=%.0fs, goodware elapsed=%.0fs",
+        sessions["ransomware"].elapsed(t_end_now),
+        sessions["goodware"].elapsed(t_end_now),
+    )
+    observed = len(capture.events)
+    capture.poll_for(cfg.kafka.post_capture_drain_sec)
+    windows: dict[str, SessionWindow] = {}
+    for key, session in sessions.items():
+        t_end = session.t_end(t_end_now)
+        for event in capture.events[observed:]:
+            if event.timestamp <= t_end:
+                session.observe(event)
+        windows[key] = SessionWindow(
+            session.t_exec,
+            t_end,
+            process_entity_id=session.root_entity_id,
+            sample_entity_ids=session.entity_ids,
+        )
+    return windows["ransomware"], windows["goodware"]
+
+
 def run_session(
     cfg: SentinelcapConfig,
     entry: ManifestEntry,
@@ -171,7 +289,10 @@ def run_session(
     """Collect one session into ``<run_dir>/<family>/<sample>`` and return that directory.
 
     ``run_dir`` defaults to a new ``<capture.out_dir>/<UTC timestamp>``.
+    ``Mode.VALIDATE`` is only used through ``run_validate_pair`` / ``run_batch``.
     """
+    if mode is Mode.VALIDATE:
+        raise SentinelcapError("validate sessions run as pairs via batch --validate")
     run_dir = run_dir if run_dir is not None else new_run_dir(cfg)
     prepare_session_dir(run_dir, entry.family, entry.sample, force)  # before touching the VM
 
@@ -212,6 +333,68 @@ def run_session(
             snapshot=cfg.vmware.baseline_snapshot,
             force=force,
         )
+    finally:
+        capture.close()
+        if vm_started:
+            vm.stop_hard()
+            time.sleep(VM_STOP_PAUSE_SEC)
+
+
+def run_validate_pair(
+    cfg: SentinelcapConfig,
+    ransomware: ManifestEntry,
+    goodware: ManifestEntry,
+    force: bool = False,
+    run_dir: Path | None = None,
+) -> tuple[Path, Path]:
+    """Collect one ransomware+goodware pair simultaneously from the ``validate`` snapshot."""
+    run_dir = run_dir if run_dir is not None else new_run_dir(cfg)
+    prepare_session_dir(run_dir, ransomware.family, ransomware.sample, force)
+    prepare_session_dir(run_dir, goodware.family, goodware.sample, force)
+
+    vm = VMwareController(cfg.vmware)
+    capture = KafkaCapture(cfg.kafka)
+    vm_started = False
+
+    logger.info("=== validate pair %s + %s ===", ransomware.session_name, goodware.session_name)
+    try:
+        vm.revert_to(cfg.vmware.validate_snapshot)
+        vm.start()
+        vm_started = True
+        vm.wait_tools_ready()
+        time.sleep(cfg.vmware.start_boot_wait_sec)
+
+        capture.start()
+        rw_window, gw_window = _collect_validate_pair(cfg, capture, vm, ransomware, goodware)
+        rw_dir = capture.export_session(
+            mode=Mode.VALIDATE.value,
+            family=ransomware.family,
+            sample=ransomware.sample,
+            label=ransomware.label,
+            t_start=rw_window.t_start,
+            t_end=rw_window.t_end,
+            out_dir=run_dir,
+            session_id=str(uuid.uuid4()),
+            process_entity_id=rw_window.process_entity_id,
+            sample_entity_ids=rw_window.sample_entity_ids,
+            snapshot=cfg.vmware.validate_snapshot,
+            force=force,
+        )
+        gw_dir = capture.export_session(
+            mode=Mode.VALIDATE.value,
+            family=goodware.family,
+            sample=goodware.sample,
+            label=goodware.label,
+            t_start=gw_window.t_start,
+            t_end=gw_window.t_end,
+            out_dir=run_dir,
+            session_id=str(uuid.uuid4()),
+            process_entity_id=gw_window.process_entity_id,
+            sample_entity_ids=gw_window.sample_entity_ids,
+            snapshot=cfg.vmware.validate_snapshot,
+            force=force,
+        )
+        return rw_dir, gw_dir
     finally:
         capture.close()
         if vm_started:
@@ -275,11 +458,36 @@ def run_batch(
 ) -> list[BatchResult]:
     """Collect manifest rows sequentially into one run directory.
 
-    A failed row is recorded and the batch continues.
+    A failed row (or validate pair) is recorded and the batch continues.
+    ``Mode.VALIDATE`` groups rows into ransomware/goodware pairs and runs each
+    pair simultaneously from the ``validate`` snapshot.
     """
     run_dir = new_run_dir(cfg)
     logger.info("Run directory: %s", run_dir)
     results: list[BatchResult] = []
+    if mode is Mode.VALIDATE:
+        pairs = group_validate_pairs(entries)
+        for i, (ransomware, goodware) in enumerate(pairs, start=1):
+            logger.info("--- Pair %d/%d ---", i, len(pairs))
+            try:
+                rw_dir, gw_dir = run_validate_pair(
+                    cfg, ransomware, goodware, force, run_dir=run_dir
+                )
+                results.append(BatchResult(ransomware, session_dir=rw_dir))
+                results.append(BatchResult(goodware, session_dir=gw_dir))
+            except Exception as e:  # one failed pair must not stop the batch
+                logger.error(
+                    "Failed to process pair '%s' + '%s': %s",
+                    ransomware.session_name,
+                    goodware.session_name,
+                    e,
+                )
+                logger.debug("Traceback of the failed pair", exc_info=True)
+                err = str(e)
+                results.append(BatchResult(ransomware, error=err))
+                results.append(BatchResult(goodware, error=err))
+        return results
+
     for i, entry in enumerate(entries, start=1):
         logger.info("--- Session %d/%d ---", i, len(entries))
         try:

@@ -43,6 +43,13 @@ class VMwareConfig(_Strict):
         default="baseline",
         description="Created by `build baseline`; every collection session reverts here.",
     )
+    validate_snapshot: str = Field(
+        default="validate",
+        description=(
+            "Created by `build validate`: every ransomware/goodware pair shares a "
+            "guest folder for stack validation; does not replace baseline."
+        ),
+    )
     guest_user: str = Field(description="Guest OS username used for vmrun -gu/-gp operations.")
     guest_password: str = Field(
         description="Guest OS password. Prefer overriding this via environment variable."
@@ -155,8 +162,11 @@ vmware:
   vmx_path: 'D:\\VMs\\Victim\\Victim.vmx'
   # original: clean Windows + decoy folders, no samples. baseline: created by
   # `sentinelcap build baseline` (running, logged-in VM with samples placed).
+  # validate: created by `sentinelcap build validate` (every ransomware/goodware
+  # pair in a shared guest folder); does not replace baseline.
   original_snapshot: original
   baseline_snapshot: baseline
+  validate_snapshot: validate
   guest_user: Administrator
   guest_password: 'CHANGE_ME'
   # SentinelCap opens this application at the sample directory. The operator

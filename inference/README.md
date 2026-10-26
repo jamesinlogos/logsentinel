@@ -247,10 +247,10 @@ Monitor-only, no online learning: the Global Model changes only with an offline 
 
 Metrics: **F2** (β=2; a missed ransomware is worse than a false alarm) and **MCC** (balanced view on imbalanced classes).
 
-### Results (model `20261020T175915Z`, `artifacts/evaluation.json`)
+### Results (model `20261026T071635Z`, `artifacts/evaluation.json`)
 The model version is a UTC stamp `YYYYMMDDTHHMMSSZ` (`../AGENTS.md` section 11.3).
 
-- **Data:** 122 training and threshold-selection sessions: 50 ransomware, 50 installer goodware, 20 admin-scenario goodware, and two operations goodware sessions from the operator-labelled 49-minute interval in run `20261020T172719Z`. Each session contributes at most 30 labelled scheduled training windows; replay evaluation sees all events and includes early windows. The runs `20261009T033557Z`, `20261009T120629Z` and `20261012T012123Z` hold out the same 15 ransomware samples captured three times (section 9.1 rule 10). One new goodware session records a Sysmon Event 255 `QUEUE` report of dropped source events.
+- **Data:** 122 training and threshold-selection sessions: 50 ransomware, 50 installer goodware, 20 admin-scenario goodware, and two operations goodware sessions from the operator-labelled 49-minute interval in run `20261020T172719Z`. Each session contributes at most 30 labelled scheduled training windows; replay evaluation sees all events and includes early windows. The runs `20261009T033557Z`, `20261009T120629Z`, `20261012T012123Z`, `20261024T081012Z` and `20261026T034309Z` hold out the same 15 ransomware samples captured five times (section 9.1 rule 10). One new goodware session records a Sysmon Event 255 `QUEUE` report of dropped source events.
 - **Method** (`training/evaluate.py`): family-grouped cross-validation (section 9.1 rule 6). Each ransomware family is a fold; goodware sessions are spread over the same 11 folds and each session is scored outside its training fold. Replays use the service's `Pipeline` with scheduled and early windows. A session is detected if at least one gated window reaches the threshold. Best session-level F2, then window-level MCC, then the higher threshold selects **0.60**. Selection uses the same out-of-fold results reported here, so these metrics are optimistic.
 
 | | Recall | Precision | F2 | MCC |
@@ -266,7 +266,7 @@ The window row counts all labelled replay windows, including early windows.
 - **Threshold cost:** 442/824 ransomware windows (0.54) reach 0.60, versus 666/824 (0.81) passing the gate. The two missed training sessions never pass the gate: BlackBasta `17205c43...` and LockBit `032690f1...` (section 4.2).
 - **Concurrent goodware** (rule 9; 50 pairs): 48/48 detectable sessions remain detected with goodware overlaid (48/48 alone). Detected ransomware windows: 528/966 with goodware versus 442/824 alone; mean model score 0.6212 to 0.5532.
 - **Time to first detection** (48 detected cross-validation sessions): median 2.4 s, p90 39.2 s, max 186.7 s in event time, from the first event of the sample's process to the end of its first threshold-reaching window. Upstream and service-loop delays add to this; section 9.2's simulation used the previous model.
-- **Held-out ransomware:** **44/45 detected** across three runs, with the same 15 samples recaptured three times. The missed third-run Makop session never passes the Phase 2 gate. Among 44 detections, median first-detection time is 3.6 s, p90 41.7 s, maximum 68.6 s. First-run WhiteLock is detected at 68.6 s, accepted for this version (section 9.5). These ransomware-only repeats do not measure goodware false alarms or independent sample diversity.
+- **Held-out ransomware:** **74/75 detected** across five runs, with the same 15 samples recaptured five times. The missed third-run Makop session never passes the Phase 2 gate. Among 74 detections, median first-detection time is 3.7 s, p90 42.8 s, maximum 130.6 s. Fourth-run WhiteLock is detected at 130.6 s, accepted for this version (section 9.5). These ransomware-only repeats do not measure goodware false alarms or independent sample diversity.
 - **New operations goodware, direct replay:** the previous-rule control with retraining emitted 8 detections (6 suspicious) in the labelled 49-minute interval; the updated rule and model emit 0. These two sessions participated in training and threshold selection, so this is an in-sample check. The archived local experiment's `comparison.json` and the capture `source-manifest.json` record the comparison and source limitations.
 - **Window-sampling seed:** `training_rows` seeds with `f"{seed}:{session.key}"`; the run name is part of `session.key`, so renaming a run can shift AUC and the threshold (`../AGENTS.md` section 10).
 - **Data still to collect:** an independent ransomware holdout batch, operations goodware outside training and threshold selection, and long normal-operation captures to measure detections per host per day. After each batch, run `make model` (or `make evaluate` for holdout-only additions) and compare with these figures.
@@ -388,7 +388,7 @@ Rules of the loader (`training/sentinelcap_dataset.py`), derived from run 2026-1
    | Mixed, ≤ 30 windows/session | 0.898 / 0.901 / 0.900 | ≤ 0.02 | 0.76 – 0.85 |
 
    Mixing separates the classes worse and raises the confidence of flagged goodware; session-level results do not change. `evaluate` reports the test (`concurrent_goodware` in `evaluation.json`).
-10. **Held-out runs (`--holdout RUN`):** `HOLDOUT` in the `Makefile` = `20261009T033557Z`, `20261009T120629Z` and `20261012T012123Z` (the same 15 ransomware samples captured three times). They are outside training, cross-validation and threshold selection; `evaluate` scores them last (`held_out`), only when the model was trained with the same list. A wrong run name or a training run containing a sample (same hash) of a held-out run stops `train` and `evaluate`; any recapture of held-out samples belongs in `--holdout`.
+10. **Held-out runs (`--holdout RUN`):** `HOLDOUT` in the `Makefile` = `20261009T033557Z`, `20261009T120629Z`, `20261012T012123Z`, `20261024T081012Z` and `20261026T034309Z` (the same 15 ransomware samples captured five times). They are outside training, cross-validation and threshold selection; `evaluate` scores them last (`held_out`), only when the model was trained with the same list. A wrong run name or a training run containing a sample (same hash) of a held-out run stops `train` and `evaluate`; any recapture of held-out samples belongs in `--holdout`.
 
 ### 9.2 Operational reliability
 
@@ -464,7 +464,7 @@ The monitored machine is under `logsentinel.monitored_host.*`, not `host.*` (ECS
 
 ### 9.5 Admin-scenario goodware and held-out runs
 
-**Data.** Twenty `--interactive` goodware sessions in four runs (`20261008T013340Z`, `20261008T050249Z`, `20261008T192247Z`, `20261008T195850Z`; 15.89 hours) cover 15 short admin scenarios and five continuous ones. Two operator-labelled goodware sessions (`20261020T172719Z/goodware/windows-operations-01` and `windows-operations-02`) cover the same 49-minute operations interval on separate hosts. One records a Sysmon Event 255 `QUEUE` report of source telemetry loss. The three held-out runs recapture the same 15 ransomware samples; none enters training or threshold selection.
+**Data.** Twenty `--interactive` goodware sessions in four runs (`20261008T013340Z`, `20261008T050249Z`, `20261008T192247Z`, `20261008T195850Z`; 15.89 hours) cover 15 short admin scenarios and five continuous ones. Two operator-labelled goodware sessions (`20261020T172719Z/goodware/windows-operations-01` and `windows-operations-02`) cover the same 49-minute operations interval on separate hosts. One records a Sysmon Event 255 `QUEUE` report of source telemetry loss. The five held-out runs recapture the same 15 ransomware samples; none enters training or threshold selection.
 
 **Original admin scenarios that trigger a strong indicator** (7 of 20; last column: current model, out-of-fold cross-validation):
 
@@ -481,27 +481,27 @@ The monitored machine is under `logsentinel.monitored_host.*`, not `host.*` (ECS
 
 The earlier comparison of training with and without admin scenarios (threshold 0.55, before `mass_file_replace`) is historical. The current model trains on all 72 goodware sessions. Across 22.03 hours of goodware it emits 25 detections (8 suspicious) from 3 flagged sessions in out-of-fold evaluation (`artifacts/evaluation.json`).
 
-**Held-out ransomware, current model `20261020T175915Z`, threshold 0.60.** Each cell gives maximum confidence / seconds to first detection in runs `20261009T033557Z`, `20261009T120629Z` and `20261012T012123Z`, respectively:
+**Held-out ransomware, current model `20261026T071635Z`, threshold 0.60.** Each cell gives maximum confidence / seconds to first detection in runs `20261009T033557Z`, `20261009T120629Z`, `20261012T012123Z`, `20261024T081012Z` and `20261026T034309Z`, respectively:
 
-| Family | First run | Second run | Third run |
-|---|---|---|---|
-| Akira `369336e9...` | 0.9946 / 0.8 | 0.9946 / 0.6 | 0.9958 / 1.8 |
-| BlackBasta `2413841b...` | 0.9946 / 3.7 | 0.9946 / 2.7 | 0.9946 / 5.7 |
-| BlackMatter `46a9f920...` | 0.9414 / 41.7 | 0.9416 / 42.8 | 0.9484 / 65.4 |
-| BQTLock `425b2f28...` | 0.9521 / 52.6 | 0.9273 / 39.4 | 0.9512 / 40.9 |
-| Conti `248cf7de...` | 0.8036 / 5.1 | 0.8036 / 5.1 | 0.7995 / 5.3 |
-| HelloKitty `af179b09...` | 0.7878 / 2.1 | 0.7869 / 2.1 | 0.7951 / 3.2 |
-| LockBit `105912c9...` | 0.9453 / 1.3 | 0.9143 / 1.6 | 0.9481 / 2.4 |
-| Lynx `b378b7ef...` | 0.8008 / 2.2 | 0.8004 / 2.0 | 0.8035 / 3.8 |
-| Makop `f0a17efd...` | 0.9597 / 15.6 | 0.9597 / 14.1 | missed (no gate) |
-| Medusa `6d000a15...` | 0.9469 / 3.6 | 0.9469 / 2.4 | 0.9873 / 6.7 |
-| Nebula `112a40f1...` | 0.9651 / 1.9 | 0.9652 / 2.0 | 0.9748 / 3.1 |
-| Nitrogen `b5189876...` | 0.8048 / 0.6 | 0.8048 / 0.6 | 0.8048 / 1.5 |
-| Trigona `48877a3a...` | 0.9479 / 15.2 | 0.9479 / 15.4 | 0.9810 / 16.4 |
-| WhiteLock `a501583b...` | 0.6353 / 68.6 | 0.6500 / 16.8 | 0.6642 / 13.0 |
-| Yurei `0303f898...` | 0.8984 / 0.7 | 0.9105 / 0.5 | 0.8929 / 1.0 |
+| Family | First run | Second run | Third run | Fourth run | Fifth run |
+|---|---|---|---|---|---|
+| Akira `369336e9...` | 0.9946 / 0.8 | 0.9946 / 0.6 | 0.9958 / 1.8 | 0.9946 / 1.3 | 0.9946 / 1.6 |
+| BlackBasta `2413841b...` | 0.9946 / 3.7 | 0.9946 / 2.7 | 0.9946 / 5.7 | 0.9946 / 4.1 | 0.9597 / 5.4 |
+| BlackMatter `46a9f920...` | 0.9414 / 41.7 | 0.9416 / 42.8 | 0.9484 / 65.4 | 0.9817 / 69.4 | 0.9523 / 96.4 |
+| BQTLock `425b2f28...` | 0.9521 / 52.6 | 0.9273 / 39.4 | 0.9512 / 40.9 | 0.9820 / 41.9 | 0.9650 / 33.8 |
+| Conti `248cf7de...` | 0.8036 / 5.1 | 0.8036 / 5.1 | 0.7995 / 5.3 | 0.8070 / 5.2 | 0.8004 / 5.2 |
+| HelloKitty `af179b09...` | 0.7878 / 2.1 | 0.7869 / 2.1 | 0.7951 / 3.2 | 0.8088 / 1.0 | 0.8036 / 2.0 |
+| LockBit `105912c9...` | 0.9453 / 1.3 | 0.9143 / 1.6 | 0.9481 / 2.4 | 0.9790 / 1.8 | 0.8001 / 2.8 |
+| Lynx `b378b7ef...` | 0.8008 / 2.2 | 0.8004 / 2.0 | 0.8035 / 3.8 | 0.8035 / 1.0 | 0.8035 / 1.2 |
+| Makop `f0a17efd...` | 0.9597 / 15.6 | 0.9597 / 14.1 | missed (no gate) | 0.9901 / 24.6 | 0.9930 / 27.7 |
+| Medusa `6d000a15...` | 0.9469 / 3.6 | 0.9469 / 2.4 | 0.9873 / 6.7 | 0.9469 / 3.9 | 0.9517 / 4.6 |
+| Nebula `112a40f1...` | 0.9651 / 1.9 | 0.9652 / 2.0 | 0.9748 / 3.1 | 0.9081 / 1.5 | 0.9078 / 3.6 |
+| Nitrogen `b5189876...` | 0.8048 / 0.6 | 0.8048 / 0.6 | 0.8048 / 1.5 | 0.8036 / 0.5 | 0.8036 / 1.4 |
+| Trigona `48877a3a...` | 0.9479 / 15.2 | 0.9479 / 15.4 | 0.9810 / 16.4 | 0.9479 / 16.0 | 0.9479 / 16.6 |
+| WhiteLock `a501583b...` | 0.6353 / 68.6 | 0.6500 / 16.8 | 0.6642 / 13.0 | 0.7877 / 130.6 | 0.6979 / 63.2 |
+| Yurei `0303f898...` | 0.8984 / 0.7 | 0.9105 / 0.5 | 0.8929 / 1.0 | 0.9307 / 0.6 | 0.9168 / 0.7 |
 
-Result: **44/45 detected**. Median first-detection time is 3.6 s, p90 41.7 s, maximum 68.6 s among detections. The third-run Makop miss did not pass the gate. The three runs repeat the same samples, and `mass_file_replace` was designed after seeing an earlier WhiteLock run; a new independent holdout batch remains necessary.
+Result: **74/75 detected**. Median first-detection time is 3.7 s, p90 42.8 s, maximum 130.6 s among detections. The third-run Makop miss did not pass the gate. The five runs repeat the same samples, and `mass_file_replace` was designed after seeing an earlier WhiteLock run; a new independent holdout batch remains necessary.
 
 **New operations goodware.** The prior rule and retrained control emitted 8 detections (6 suspicious) across the two new sessions; the exact file/process/path exceptions and matching new model emit 0. These sessions influenced both training and threshold selection, so this direct replay is an in-sample check. Executable/path masquerading can evade the exception, and source `QUEUE` loss limits the interval's completeness.
 

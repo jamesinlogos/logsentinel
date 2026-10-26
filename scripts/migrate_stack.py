@@ -146,12 +146,34 @@ def stack_is_up(states: dict[str, str]) -> bool:
     )
 
 
+def stack_not_ready_reason(states: dict[str, str]) -> str:
+    """Human-readable list of containers that fail the up-and-healthy check."""
+    bad: list[str] = []
+    for name in HEALTHY_SERVICES:
+        status = states.get(name)
+        if status is None:
+            bad.append(f"{name}: missing")
+        elif "(healthy)" not in status:
+            bad.append(f"{name}: {status}")
+    for name in INIT_SERVICES:
+        status = states.get(name)
+        if status is None:
+            service = name.removeprefix("logsentinel-")
+            bad.append(f"{name}: missing (recreate with: docker compose up {service})")
+        elif not status.startswith("Exited (0)"):
+            bad.append(f"{name}: {status}")
+    return ", ".join(bad) if bad else str(states)
+
+
 def wait_until_up(timeout_sec: float) -> dict[str, str]:
     deadline = time.monotonic() + timeout_sec
     states = service_states()
     while not stack_is_up(states):
         if time.monotonic() > deadline:
-            raise MigrationError(f"the stack is not healthy after {timeout_sec:.0f} s: {states}")
+            raise MigrationError(
+                f"the stack is not healthy after {timeout_sec:.0f} s: "
+                f"{stack_not_ready_reason(states)}"
+            )
         time.sleep(5)
         states = service_states()
     return states
@@ -431,7 +453,8 @@ def export_stack(args: argparse.Namespace) -> int:
     states = service_states()
     if not stack_is_up(states):
         raise MigrationError(
-            f"the stack must be up and healthy to record its counts first: {states}"
+            "the stack must be up and healthy to record its counts first: "
+            f"{stack_not_ready_reason(states)}"
         )
     helper = f"apache/kafka:{env['LOGSENTINEL_KAFKA_IMAGE_TAG']}"
     facts = collect_facts(

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import random
 import re
 from pathlib import Path, PureWindowsPath
 
@@ -14,7 +15,7 @@ from sentinelcap.guest_names import is_safe_name
 from sentinelcap.manifest import Mode, load_manifest
 from sentinelcap.vm import VMwareError
 
-R1, R2, G1 = "1" * 64, "2" * 64, "a" * 64
+R1, R2, G1, G2 = "1" * 64, "2" * 64, "a" * 64, "b" * 64
 DIRS = [
     r"C:\Users\Public\Documents",
     r"C:\Users\Public\Music",
@@ -231,3 +232,100 @@ def test_root_without_directory_stops_before_placing(tmp_path, monkeypatch) -> N
 def test_no_samples_is_an_error(tmp_path) -> None:
     with pytest.raises(ValueError, match="No samples"):
         baseline.discover_samples(tmp_path)
+
+
+G2 = "b" * 64
+
+
+def make_validate_samples(root: Path) -> Path:
+    """Equal ransomware and goodware counts for ``build validate``."""
+    (root / "ransomware" / "LockBit").mkdir(parents=True)
+    (root / "ransomware" / "LockBit" / f"{R1}.zip").write_bytes(b"zip")
+    (root / "ransomware" / "Akira").mkdir()
+    (root / "ransomware" / "Akira" / f"{R2}.zip").write_bytes(b"zip")
+    (root / "goodware").mkdir()
+    (root / "goodware" / f"{G1}.exe").write_bytes(b"exe")
+    (root / "goodware" / f"{G2}.exe").write_bytes(b"exe")
+    return root
+
+
+def run_validate(
+    tmp_path,
+    monkeypatch,
+    vm: FakeVM,
+    seed: int = 3,
+    samples: Path | None = None,
+):
+    monkeypatch.setattr(baseline, "VMwareController", lambda cfg: vm)
+    manifest = tmp_path / "manifest-validate.csv"
+    rows = baseline.build_validate(
+        make_cfg(),
+        samples_dir=samples or make_validate_samples(tmp_path / "samples"),
+        seed=seed,
+        manifest_path=manifest,
+    )
+    return rows, manifest
+
+
+def test_build_validate_pairs_share_folders_and_validate_snapshot(tmp_path, monkeypatch) -> None:
+    vm = FakeVM()
+    rows, manifest = run_validate(tmp_path, monkeypatch, vm, seed=7)
+
+    assert vm.calls[0] == ("revert_to", "original")
+    assert vm.calls[-2] == ("create_snapshot", "validate")
+    assert ("create_snapshot", "baseline") not in vm.calls
+    assert len(rows) == 4
+    assert [r.label for r in rows] == [1, 0, 1, 0]
+    pair_dirs = [PureWindowsPath(rows[i].path).parent for i in range(0, len(rows), 2)]
+    for i in range(0, len(rows), 2):
+        assert PureWindowsPath(rows[i].path).parent == PureWindowsPath(rows[i + 1].path).parent
+        assert rows[i].path != rows[i + 1].path
+    assert len(set(pair_dirs)) == 2  # two pairs, two directories when enough exist
+    for row in rows:
+        assert is_safe_name(PureWindowsPath(row.path).name)
+    entries = load_manifest(manifest, Mode.EXECUTE)
+    assert [(e.sample, e.label) for e in entries] == [(r.sample, r.label) for r in rows]
+    assert not (tmp_path / "manifest.csv").exists()
+
+
+def test_build_validate_same_seed_same_placement(tmp_path, monkeypatch) -> None:
+    rows_a, _ = run_validate(tmp_path / "a", monkeypatch, FakeVM(), seed=11)
+    rows_b, _ = run_validate(tmp_path / "b", monkeypatch, FakeVM(), seed=11)
+    assert rows_a == rows_b
+
+
+def test_build_validate_extract_failure_stops_before_snapshot(tmp_path, monkeypatch) -> None:
+    vm = FakeVM(fail_on_extract=True)
+    with pytest.raises(baseline.SentinelcapError, match="Wrong password"):
+        run_validate(tmp_path, monkeypatch, vm)
+    assert "create_snapshot" not in vm.names()
+    assert not (tmp_path / "manifest-validate.csv").exists()
+
+
+def test_pair_validate_samples_requires_both_classes(tmp_path) -> None:
+    root = tmp_path / "samples"
+    (root / "goodware").mkdir(parents=True)
+    (root / "goodware" / f"{G1}.exe").write_bytes(b"exe")
+    samples = baseline.discover_samples(root)
+    with pytest.raises(ValueError, match="ransomware"):
+        baseline.pair_validate_samples(samples, random.Random(1))
+
+
+def test_pair_validate_samples_requires_equal_counts(tmp_path) -> None:
+    samples = baseline.discover_samples(make_samples(tmp_path / "samples"))
+    with pytest.raises(ValueError, match="same number"):
+        baseline.pair_validate_samples(samples, random.Random(1))
+
+
+def test_pair_validate_samples_seeded_pairing() -> None:
+    samples = [
+        baseline.SampleFile(Path(f"{R1}.zip"), "lockbit", R1, 1),
+        baseline.SampleFile(Path(f"{R2}.zip"), "akira", R2, 1),
+        baseline.SampleFile(Path(f"{G1}.exe"), "goodware", G1, 0),
+        baseline.SampleFile(Path(f"{G2}.exe"), "goodware", G2, 0),
+    ]
+    pairs_a = baseline.pair_validate_samples(samples, random.Random(11))
+    pairs_b = baseline.pair_validate_samples(samples, random.Random(11))
+    assert pairs_a == pairs_b
+    assert len(pairs_a) == 2
+    assert all(rw.label == 1 and gw.label == 0 for rw, gw in pairs_a)

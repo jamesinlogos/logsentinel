@@ -13,7 +13,7 @@ from rich.console import Console
 from rich.table import Table
 
 from sentinelcap import __version__
-from sentinelcap.baseline import build_baseline
+from sentinelcap.baseline import build_baseline, build_validate
 from sentinelcap.config import DEFAULT_CONFIG_TEMPLATE, SentinelcapConfig
 from sentinelcap.logging_utils import configure_logging, get_logger
 from sentinelcap.manifest import Mode, load_manifest, parse_row
@@ -176,12 +176,27 @@ ExecuteOption = typer.Option(
 InteractiveOption = typer.Option(
     False, "--interactive", help="Operator performs a scenario between two Enter presses."
 )
+ValidateOption = typer.Option(
+    False,
+    "--validate",
+    help="Run each ransomware/goodware pair simultaneously from the validate snapshot.",
+)
 
 
-def _resolve_mode(execute: bool, interactive: bool) -> Mode:
+def _resolve_run_mode(execute: bool, interactive: bool) -> Mode:
     if execute == interactive:
         logger.error("Pass exactly one of --execute or --interactive.")
         raise typer.Exit(code=1)
+    return Mode.EXECUTE if execute else Mode.INTERACTIVE
+
+
+def _resolve_batch_mode(execute: bool, interactive: bool, validate: bool) -> Mode:
+    chosen = sum(bool(flag) for flag in (execute, interactive, validate))
+    if chosen != 1:
+        logger.error("Pass exactly one of --execute, --interactive or --validate.")
+        raise typer.Exit(code=1)
+    if validate:
+        return Mode.VALIDATE
     return Mode.EXECUTE if execute else Mode.INTERACTIVE
 
 
@@ -203,7 +218,7 @@ def run(
     config: Path | None = ConfigOption,
 ) -> None:
     """Collect one session into <out_dir>/<UTC timestamp>/<family>/<sample>/."""
-    mode = _resolve_mode(execute, interactive)
+    mode = _resolve_run_mode(execute, interactive)
     cfg = _load_config(config)
     try:
         entry = parse_row({"family": family, "sample": sample, "path": path, "label": label}, mode)
@@ -218,11 +233,16 @@ def batch(
     manifest: Path = typer.Argument(..., help="CSV file with columns: family,sample,path,label."),
     execute: bool = ExecuteOption,
     interactive: bool = InteractiveOption,
+    validate: bool = ValidateOption,
     force: bool = ForceOption,
     config: Path | None = ConfigOption,
 ) -> None:
-    """Collect every manifest row into one <out_dir>/<UTC timestamp>/; exit 1 if any row fails."""
-    mode = _resolve_mode(execute, interactive)
+    """Collect every manifest row into one <out_dir>/<UTC timestamp>/; exit 1 if any row fails.
+
+    With --validate, rows are grouped into ransomware/goodware pairs that share a
+    guest folder and each pair runs simultaneously from the validate snapshot.
+    """
+    mode = _resolve_batch_mode(execute, interactive, validate)
     cfg = _load_config(config)
     try:
         entries = load_manifest(manifest, mode)
@@ -271,6 +291,36 @@ def build_baseline_command(
         raise _fail("Build baseline failed", e) from e
     logger.info(
         "Done: %d sample(s) placed, snapshot '%s' saved.", len(rows), cfg.vmware.baseline_snapshot
+    )
+
+
+@build_app.command("validate")
+def build_validate_command(
+    samples_dir: Path | None = typer.Option(
+        None,
+        "--samples-dir",
+        help="Host directory with ransomware/<Family>/<sha256>.zip and goodware/<sha256>.exe.",
+    ),
+    seed: int | None = typer.Option(
+        None, "--seed", help="Seed for pairing, directory and name choice (reproducible)."
+    ),
+    config: Path | None = ConfigOption,
+) -> None:
+    """Pair every ransomware with a goodware in the same guest folder.
+
+    Needs equal ransomware and goodware counts. Saves the validate snapshot
+    (does not replace baseline) and writes manifest-validate.csv.
+    """
+    cfg = _load_config(config)
+    try:
+        rows = build_validate(cfg, samples_dir=samples_dir, seed=seed)
+    except Exception as e:
+        raise _fail("Build validate failed", e) from e
+    logger.info(
+        "Done: %d sample(s) in %d pair(s), snapshot '%s' saved.",
+        len(rows),
+        len(rows) // 2,
+        cfg.vmware.validate_snapshot,
     )
 
 
