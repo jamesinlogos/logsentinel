@@ -6,7 +6,7 @@ Ransomware monitoring and detection for Windows Server by machine-learning analy
 
 ## Documentation
 
-Exactly seven markdown files:
+Exactly nine markdown files:
 
 | File | Content |
 |---|---|
@@ -17,6 +17,8 @@ Exactly seven markdown files:
 | `notifications/README.md` | Telegram and Gmail notification worker: behaviour, configuration, operation |
 | `sentinelcap/README.md` | CLI capturing labelled Sysmon data through VMware: usage, output format, goodware scenarios |
 | `sentinelcap/AGENTS.md` | Mandatory behaviour and development rules for `sentinelcap` |
+| `sentinelbench/README.md` | Lab monitoring-quality CLI: stack queries, offline evaluation figures, performance probes |
+| `sentinelbench/AGENTS.md` | Rules for developing `sentinelbench` |
 
 ## Quick start
 
@@ -36,6 +38,15 @@ cd .. && docker compose up -d --build inference
 ```
 The model is in `inference/artifacts/` (mounted read-only). A missing or mismatched model or threshold makes the container exit with code 2 and restart: there is no degraded mode. Usage, reliability, evaluation: `inference/README.md`; development rules: `inference/AGENTS.md`.
 
+### sentinelbench
+```bash
+cd sentinelbench
+python -m pip install -e ".[dev]"
+python -m pytest -q
+sentinelbench report --skip-performance --since 24h   # needs a healthy stack
+```
+Queries the running lab and/or `inference/artifacts/evaluation.json`; read-only against Elasticsearch and Kafka (`sentinelbench/README.md`).
+
 ## Repository layout
 
 | Path | Content |
@@ -46,6 +57,7 @@ The model is in `inference/artifacts/` (mounted read-only). A missing or mismatc
 | `sentinelcap/` | Sysmon dataset capture CLI over VMware (`sentinelcap/README.md`) |
 | `inference/` | Detection service: code, test/train/evaluate harness, Dockerfile (`inference/README.md`) |
 | `notifications/` | Telegram and Gmail notification worker: code, tests, Dockerfile (`notifications/README.md`) |
+| `sentinelbench/` | Monitoring-quality CLI over the live stack and offline evaluation (`sentinelbench/README.md`) |
 | `dashboard/` | Kibana dashboards as Dashboard API JSON (section 9.1) |
 | `archives/` | Backups (`archives/backups/`); not part of the product |
 
