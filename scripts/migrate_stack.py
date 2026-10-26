@@ -510,7 +510,9 @@ def export_stack(args: argparse.Namespace) -> int:
                 "facts": facts,
             },
         )
-        partial.rename(out)
+        # Path.rename can raise WinError 5 on Windows while Defender still scans the
+        # large archives; shutil.move falls back to copy+delete and is reliable here.
+        shutil.move(str(partial), str(out))
     except BaseException:
         shutil.rmtree(partial, ignore_errors=True)  # a half-written export must not look like one
         raise
